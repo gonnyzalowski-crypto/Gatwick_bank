@@ -70,11 +70,13 @@ export const TransactionListComponent = ({ accountId, limit = 20 }) => {
   };
 
   const getTypeIcon = (type) => {
-    return type === 'debit' ? '↓' : '↑';
+    const normalizedType = type?.toLowerCase();
+    return normalizedType === 'debit' || normalizedType === 'withdrawal' || normalizedType === 'payment' ? '↓' : '↑';
   };
 
   const getTypeColor = (type) => {
-    return type === 'debit' ? 'text-red-400' : 'text-green-400';
+    const normalizedType = type?.toLowerCase();
+    return normalizedType === 'debit' || normalizedType === 'withdrawal' || normalizedType === 'payment' ? 'text-red-400' : 'text-green-400';
   };
 
   if (loading) {
@@ -132,12 +134,12 @@ export const TransactionListComponent = ({ accountId, limit = 20 }) => {
             {/* Right: Amount and Status */}
             <div className="flex-shrink-0 text-right">
               <p
-                className={`text-lg font-bold ${
-                  transaction.type === 'debit' ? 'text-red-400' : 'text-green-400'
-                }`}
+                className={`text-lg font-bold ${getTypeColor(transaction.type)}`}
               >
-                {transaction.type === 'debit' ? '-' : '+'}
-                {formatCurrency(transaction.amount)}
+                {(transaction.type?.toLowerCase() === 'debit' || 
+                  transaction.type?.toLowerCase() === 'withdrawal' || 
+                  transaction.type?.toLowerCase() === 'payment') ? '-' : '+'}
+                {formatCurrency(Math.abs(transaction.amount))}
               </p>
               <p className={`text-xs capitalize ${getStatusColor(transaction.status)}`}>
                 {transaction.status}

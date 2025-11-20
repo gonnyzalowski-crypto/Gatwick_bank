@@ -86,4 +86,6 @@ dont write any documentation file until we complete fixing the 14 issues and suc
 
 auto continue till you complete.
 
+do not push to gi until you complete fixing all issues
+
 use your thinking capacity to fix it to the right end points.
