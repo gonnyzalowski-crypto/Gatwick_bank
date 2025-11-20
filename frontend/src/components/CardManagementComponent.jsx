@@ -136,7 +136,7 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
 
         <div className="border-t border-blue-500/30 pt-4">
           <p className="text-blue-100 text-xs">Daily Limit</p>
-          <p className="text-2xl font-bold">${card.dailyLimit.toFixed(2)}</p>
+          <p className="text-2xl font-bold">${parseFloat(card.dailyLimit || 0).toFixed(2)}</p>
         </div>
       </div>
 
@@ -173,7 +173,7 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
           </div>
           <div className="flex justify-between items-center pb-2 border-b border-slate-600">
             <span className="text-slate-400">Daily Limit</span>
-            <span className="text-white font-medium">${card.dailyLimit.toFixed(2)}</span>
+            <span className="text-white font-medium">${parseFloat(card.dailyLimit || 0).toFixed(2)}</span>
           </div>
           <div className="flex justify-between items-center pb-2 border-b border-slate-600">
             <span className="text-slate-400">Created</span>

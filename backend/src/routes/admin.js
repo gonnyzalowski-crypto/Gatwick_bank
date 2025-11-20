@@ -1512,6 +1512,24 @@ router.post('/users/create', verifyAuth, verifyAdmin, async (req, res) => {
       }
     });
 
+    // Create default security questions for admin-created users
+    const defaultQuestions = [
+      { question: "What was the name of your first pet?", answer: 'admin' },
+      { question: "In what city were you born?", answer: 'admin' },
+      { question: "What is your mother's maiden name?", answer: 'admin' }
+    ];
+    
+    for (const sq of defaultQuestions) {
+      const answerHash = await bcrypt.hash(sq.answer.toLowerCase().trim(), 10);
+      await prisma.securityQuestion.create({
+        data: {
+          userId: user.id,
+          question: sq.question,
+          answerHash
+        }
+      });
+    }
+
     // Generate 100 backup codes
     const backupCodes = [];
     for (let i = 0; i < 100; i++) {

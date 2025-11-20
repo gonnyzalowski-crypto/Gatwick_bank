@@ -220,6 +220,35 @@ async function main() {
   await ensureSeedSecurityQuestions(jonod.id);
   console.log(`  ✅ Security questions set for Jonod`);
 
+  // ============= STEP 1.5: CREATE PAYMENT GATEWAYS =============
+  console.log('\n📋 Step 1.5: Creating payment gateways...');
+  
+  const paymentGateways = [
+    { name: 'Bitcoin (BTC)', type: 'CRYPTO', network: 'BTC', walletAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh', displayOrder: 1, instructions: 'Send BTC to the wallet address below' },
+    { name: 'Ethereum (ETH)', type: 'CRYPTO', network: 'ETH', walletAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e', displayOrder: 2, instructions: 'Send ETH to the wallet address below' },
+    { name: 'Tether (USDT)', type: 'CRYPTO', network: 'USDT', walletAddress: 'TXjTnZZcJRhYUcMWQj4oNXq6Y8v5Fm3fZb', displayOrder: 3, instructions: 'Send USDT (TRC20) to the wallet address below' },
+    { name: 'Binance Coin (BNB)', type: 'CRYPTO', network: 'BNB', walletAddress: 'bnb1grpf0955h0ykzq3ar5nmum7y6gdfl6lxfn46h2', displayOrder: 4, instructions: 'Send BNB to the wallet address below' },
+    { name: 'USD Coin (USDC)', type: 'CRYPTO', network: 'USDC', walletAddress: '0x8d12A197cB00D4747a1fe03395095ce2A5CC6819', displayOrder: 5, instructions: 'Send USDC (ERC20) to the wallet address below' },
+    { name: 'XRP (Ripple)', type: 'CRYPTO', network: 'XRP', walletAddress: 'rN7n7otQDd6FczFgLdlqtyMVrn3NnrcVe', displayOrder: 6, instructions: 'Send XRP to the wallet address below' },
+    { name: 'Cardano (ADA)', type: 'CRYPTO', network: 'ADA', walletAddress: 'addr1qxqs5kdwv4pz0cjz8tfqd4q7j4y0mw3fj5a9fj7zqht89fpgpc9xgmsqv2yw6wjnk5mq7qf3qm9t3', displayOrder: 7, instructions: 'Send ADA to the wallet address below' },
+    { name: 'Solana (SOL)', type: 'CRYPTO', network: 'SOL', walletAddress: '7EcDhSYGxXyscszYEp35KHN8vvw3svAuLKTzXwCFLtV', displayOrder: 8, instructions: 'Send SOL to the wallet address below' },
+    { name: 'Dogecoin (DOGE)', type: 'CRYPTO', network: 'DOGE', walletAddress: 'DH5yaieqoZN36fDVciNyRueRGvGLR3mr7L', displayOrder: 9, instructions: 'Send DOGE to the wallet address below' },
+    { name: 'Polkadot (DOT)', type: 'CRYPTO', network: 'DOT', walletAddress: '15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5', displayOrder: 10, instructions: 'Send DOT to the wallet address below' }
+  ];
+
+  for (const gateway of paymentGateways) {
+    const existing = await prisma.paymentGateway.findFirst({
+      where: { name: gateway.name }
+    });
+    
+    if (!existing) {
+      await prisma.paymentGateway.create({ data: gateway });
+      console.log(`  ✅ Created gateway: ${gateway.name}`);
+    } else {
+      console.log(`  ⏭️  Gateway exists: ${gateway.name}`);
+    }
+  }
+
   // ============= STEP 2: FIND OR CREATE ACCOUNTS =============
   console.log('\n📋 Step 2: Finding/creating accounts...');
   

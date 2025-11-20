@@ -199,6 +199,7 @@ export const getAccountSummary = async (userId) => {
         id: true,
         accountType: true,
         balance: true,
+        availableBalance: true,
       },
     }),
     prisma.card.findMany({
@@ -233,10 +234,19 @@ export const getAccountSummary = async (userId) => {
     0,
   );
 
+  const availableBalance = accounts.reduce(
+    (sum, acc) => sum + Number(acc.availableBalance || acc.balance),
+    0,
+  );
+
+  const pendingBalance = totalBalance - availableBalance;
+
   const activeCards = cards.filter((c) => c.isActive && !c.isFrozen).length;
 
   const summary = {
     totalBalance: Number(totalBalance.toFixed(2)),
+    availableBalance: Number(availableBalance.toFixed(2)),
+    pendingBalance: Number(pendingBalance.toFixed(2)),
     accountCount: accounts.length,
     totalCards: cards.length,
     activeCards,
