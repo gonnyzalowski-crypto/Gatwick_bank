@@ -20,6 +20,7 @@ import BackupCodesManagement from './admin/BackupCodesManagement';
 import AddNewUser from './admin/AddNewUser';
 import SystemInfo from './admin/SystemInfo';
 import AdminSettings from './admin/AdminSettings';
+import GatewayManagement from './admin/GatewayManagement';
 
 export const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -259,7 +260,18 @@ export const AdminDashboard = () => {
             hasSubmenu
             expanded={expandedMenus.configure}
             onClick={() => toggleMenu('configure')}
-          />
+          >
+            <SubMenuItem 
+              label="Payment Gateways" 
+              active={activeSection === 'payment-gateways'}
+              onClick={() => setActiveSection('payment-gateways')} 
+            />
+            <SubMenuItem 
+              label="System Settings" 
+              active={activeSection === 'tool-settings'}
+              onClick={() => setActiveSection('tool-settings')} 
+            />
+          </MenuItem>
 
           <MenuItem 
             icon={LogOut} 
@@ -297,6 +309,7 @@ export const AdminDashboard = () => {
                   {activeSection === 'transfer-approvals' && 'Transfer Approvals'}
                   {activeSection === 'info' && 'System Information'}
                   {activeSection === 'tool-settings' && 'Admin Settings'}
+                  {activeSection === 'payment-gateways' && 'Payment Gateway Management'}
                   {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'transfer-approvals', 'info', 'tool-settings'].includes(activeSection) && 
                     activeSection.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
                   }
@@ -456,12 +469,15 @@ export const AdminDashboard = () => {
           {/* Transfer Approvals */}
           {activeSection === 'transfer-approvals' && <TransferApprovalsPage />}
 
+          {/* Payment Gateways */}
+          {activeSection === 'payment-gateways' && <GatewayManagement />}
+
           {/* Tools */}
           {activeSection === 'info' && <SystemInfo />}
           {activeSection === 'tool-settings' && <AdminSettings />}
 
           {/* Other sections show placeholder */}
-          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'transfer-approvals', 'info', 'tool-settings'].includes(activeSection) && (
+          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways'].includes(activeSection) && (
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4">

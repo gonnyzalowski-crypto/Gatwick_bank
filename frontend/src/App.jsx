@@ -19,7 +19,7 @@ import SettingsPage from './pages/SettingsPage';
 import AdminDashboard from './pages/AdminDashboard';
 import KYCUploadPage from './pages/KYCUploadPage';
 import TransactionHistoryPage from './pages/TransactionHistoryPage';
-import SupportPage from './pages/SupportPage';
+import SupportPage from './pages/SupportTicketsPage';
 
 export default function App() {
   return (
