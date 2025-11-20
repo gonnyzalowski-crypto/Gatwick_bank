@@ -47,3 +47,12 @@ backend/uploads/
 
 # Mock data (for local development only)
 frontend/src/lib/mockData.js
+
+# Markdown documentation files
+*.md
+!README.md
+COMPLETE_FIX_REPORT.md
+FINAL_SESSION_SUMMARY.md
+FIX_PROGRESS_REPORT.md
+MEGA_FIX_COMPLETION_REPORT.md
+PLAYWRIGHT_TEST_RESULTS.md
