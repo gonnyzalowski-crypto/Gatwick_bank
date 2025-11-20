@@ -2,4 +2,15 @@ https://railway.com/dashboard
 
 https://github.com/gonnyzalowski-crypto/Gatwick_bank
 
+gatwickbank.up.railway.app
+
 use playwright to access my railway and GitHub profiles, to fix all debugging. when you commit wait for 2 minutes give feeback from the railway to be sure it has deployed, if not use the playwright to kno why not deploying, continue fixing till everywthing is wroking
+
+also use playwright to access my gatwick bank project
+
+dont waste token writing mds, only write mds at the end of achieving goals
+
+
+
+
+use thinking feature to achieve this
