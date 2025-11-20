@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/apiClient';
 import TransactionListComponent from './TransactionListComponent';
 
@@ -7,6 +8,7 @@ import TransactionListComponent from './TransactionListComponent';
  * Mobile-first, responsive design with dark theme
  */
 export const AccountDetailsComponent = ({ accountId, onBack }) => {
+  const navigate = useNavigate();
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -228,10 +230,16 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
 
           {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+            <button 
+              onClick={() => navigate('/payments')}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+            >
               Transfer Money
             </button>
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
+            <button 
+              onClick={() => navigate('/cards')}
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+            >
               Add Card
             </button>
           </div>
