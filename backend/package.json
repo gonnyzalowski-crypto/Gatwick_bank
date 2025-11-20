@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "prisma migrate deploy && node src/index.js",
+    "start": "prisma migrate resolve --applied 20251119_add_performance_indexes && prisma migrate deploy && node src/index.js",
     "build": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
