@@ -559,37 +559,6 @@ model Beneficiary {
   @@map("beneficiaries")
 }
 
-// Payment Gateways (Admin-configured)
-model PaymentGateway {
-  id              String    @id @default(cuid())
-  name            String    // "Bitcoin", "Ethereum", "PayPal", "Bank Transfer", etc.
-  type            String    // "CRYPTO" | "PAYPAL" | "BANK" | "CHECK" | "OTHER"
-  isActive        Boolean   @default(true)
-  
-  // For crypto gateways
-  walletAddress   String?   // Blockchain wallet address
-  qrCodePath      String?   // Path to uploaded QR code image
-  network         String?   // "BTC", "ETH", "USDT", "TRC20", etc.
-  
-  // For PayPal/other
-  accountEmail    String?
-  accountId       String?
-  
-  // Display settings
-  displayOrder    Int       @default(0)
-  instructions    String?   @db.Text // Payment instructions for users
-  minAmount       Decimal?  @db.Decimal(15, 2)
-  maxAmount       Decimal?  @db.Decimal(15, 2)
-  processingTime  String?   // "Instant", "1-3 days", etc.
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  @@index([type])
-  @@index([isActive])
-  @@map("payment_gateways")
-}
-
 // Support Tickets
 model SupportTicket {
   id            String   @id @default(cuid())
