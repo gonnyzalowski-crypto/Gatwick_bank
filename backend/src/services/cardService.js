@@ -430,13 +430,14 @@ export const getCardStats = async (userId) => {
   });
 
   const totalCards = cards.length;
-  const activeCards = cards.filter((c) => c.isActive).length;
+  const activeCards = cards.filter((c) => c.isActive && !c.isFrozen).length;
   const frozenCards = cards.filter((c) => c.isFrozen).length;
+  const inactiveCards = cards.filter((c) => !c.isActive).length;
 
   // Simple distribution of daily limits
   let totalLimit = 0;
   for (const c of cards) {
-    totalLimit += Number(c.dailyLimit);
+    totalLimit += Number(c.dailyLimit || 0);
   }
 
   const averageDailyLimit = totalCards > 0 ? totalLimit / totalCards : 0;
@@ -447,6 +448,7 @@ export const getCardStats = async (userId) => {
       totalCards,
       activeCards,
       frozenCards,
+      inactiveCards,
       averageDailyLimit,
     },
   };
