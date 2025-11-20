@@ -13,6 +13,7 @@ import { ExpensesModal } from '../components/ExpensesModal';
 import { SavingsModal } from '../components/SavingsModal';
 import { TransactionHistoryModal } from '../components/TransactionHistoryModal';
 import AccountCreationModal from '../components/modals/AccountCreationModal';
+import { formatDate } from '../utils/dateFormatter';
 import {
   Wallet,
   CreditCard,
@@ -998,7 +999,7 @@ export const DashboardPage = () => {
                         {txn.description}
                       </p>
                       <p className="text-xs text-neutral-500">
-                        {new Date(txn.date).toLocaleDateString('en-US', {
+                        {formatDate(txn.date, {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',
