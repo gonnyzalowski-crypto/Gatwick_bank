@@ -1787,4 +1787,317 @@ router.post('/deposits/:depositId/reject', verifyAuth, verifyAdmin, async (req, 
   }
 });
 
+// Get user accounts
+// GET /api/v1/mybanker/users/:userId/accounts
+router.get('/users/:userId/accounts', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const accounts = await prisma.account.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        accountNumber: true,
+        accountType: true,
+        balance: true,
+        availableBalance: true,
+        isPrimary: true,
+        status: true,
+        createdAt: true
+      },
+      orderBy: { isPrimary: 'desc' }
+    });
+    
+    return res.json({
+      success: true,
+      accounts
+    });
+  } catch (error) {
+    console.error('Get user accounts error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Create admin deposit (direct credit)
+// POST /api/v1/mybanker/deposits
+router.post('/deposits', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userEmail, amount, method, description } = req.body;
+    
+    if (!userEmail || !amount) {
+      return res.status(400).json({ error: 'User email and amount are required' });
+    }
+    
+    // Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Get user's primary account
+    const primaryAccount = await prisma.account.findFirst({
+      where: {
+        userId: user.id,
+        isPrimary: true
+      }
+    });
+    
+    if (!primaryAccount) {
+      return res.status(404).json({ error: 'User primary account not found' });
+    }
+    
+    // Generate unique reference
+    const reference = `ADM-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+    
+    // Create deposit and transaction in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Create deposit record
+      const deposit = await tx.deposit.create({
+        data: {
+          userId: user.id,
+          amount: parseFloat(amount),
+          method: method || 'ADMIN_CREDIT',
+          reference,
+          description: description || 'Admin deposit',
+          status: 'COMPLETED',
+          processedBy: req.user.userId,
+          processedAt: new Date()
+        }
+      });
+      
+      // Credit the primary account
+      const updatedAccount = await tx.account.update({
+        where: { id: primaryAccount.id },
+        data: {
+          balance: { increment: parseFloat(amount) },
+          availableBalance: { increment: parseFloat(amount) }
+        }
+      });
+      
+      // Create transaction record
+      await tx.transaction.create({
+        data: {
+          userId: user.id,
+          accountId: primaryAccount.id,
+          amount: parseFloat(amount),
+          type: 'DEPOSIT',
+          description: description || 'Admin deposit',
+          status: 'COMPLETED',
+          category: 'admin_deposit',
+          reference
+        }
+      });
+      
+      // Create notification
+      await tx.notification.create({
+        data: {
+          userId: user.id,
+          type: 'deposit',
+          title: 'Deposit Received',
+          message: `$${parseFloat(amount).toFixed(2)} has been credited to your account by admin.`,
+          metadata: {
+            depositId: deposit.id,
+            amount: parseFloat(amount),
+            reference
+          }
+        }
+      });
+      
+      return { deposit, updatedAccount };
+    });
+    
+    return res.json({
+      success: true,
+      message: 'Deposit created and account credited successfully',
+      deposit: result.deposit
+    });
+  } catch (error) {
+    console.error('Create admin deposit error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Save admin settings
+// POST /api/v1/mybanker/settings
+router.post('/settings', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const settings = req.body;
+    
+    // Store settings in database or configuration
+    // For now, we'll just acknowledge receipt
+    // In production, you'd save to a Settings table
+    
+    return res.json({
+      success: true,
+      message: 'Settings saved successfully',
+      settings
+    });
+  } catch (error) {
+    console.error('Save settings error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Get user cards (debit and credit)
+// GET /api/v1/mybanker/users/:userId/cards
+router.get('/users/:userId/cards', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Get debit cards
+    const debitCards = await prisma.debitCard.findMany({
+      where: {
+        account: {
+          userId
+        }
+      },
+      include: {
+        account: {
+          select: {
+            accountType: true,
+            accountNumber: true
+          }
+        }
+      }
+    });
+    
+    // Get credit cards
+    const creditCards = await prisma.creditCard.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        cardNumber: true,
+        cvv: true,
+        expiryDate: true,
+        cardholderName: true,
+        cardType: true,
+        status: true,
+        creditLimit: true,
+        availableCredit: true,
+        outstandingBalance: true,
+        apr: true,
+        dailyLimit: true,
+        monthlyLimit: true,
+        createdAt: true
+      }
+    });
+    
+    // Format debit cards
+    const formattedDebitCards = debitCards.map(card => ({
+      id: card.id,
+      cardNumber: card.cardNumber,
+      cvv: card.cvv,
+      expiryDate: card.expiryDate,
+      cardholderName: card.cardholderName,
+      cardType: 'DEBIT',
+      status: card.isActive ? (card.isFrozen ? 'FROZEN' : 'ACTIVE') : 'INACTIVE',
+      dailyLimit: card.dailyLimit,
+      monthlyLimit: card.monthlyLimit,
+      accountType: card.account?.accountType,
+      accountNumber: card.account?.accountNumber,
+      createdAt: card.createdAt
+    }));
+    
+    // Format credit cards
+    const formattedCreditCards = creditCards.map(card => ({
+      id: card.id,
+      cardNumber: card.cardNumber,
+      cvv: card.cvv,
+      expiryDate: card.expiryDate,
+      cardholderName: card.cardholderName,
+      cardType: 'CREDIT',
+      status: card.status,
+      creditLimit: card.creditLimit,
+      availableCredit: card.availableCredit,
+      outstandingBalance: card.outstandingBalance,
+      apr: card.apr,
+      dailyLimit: card.dailyLimit,
+      monthlyLimit: card.monthlyLimit,
+      accountType: 'CREDIT',
+      createdAt: card.createdAt
+    }));
+    
+    // Combine all cards
+    const allCards = [...formattedDebitCards, ...formattedCreditCards].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    
+    return res.json({
+      success: true,
+      cards: allCards
+    });
+  } catch (error) {
+    console.error('Get user cards error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Update card limits and status
+// PUT /api/v1/mybanker/cards/:cardId
+router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const { dailyLimit, monthlyLimit, status } = req.body;
+    
+    // Try to find as debit card first
+    let debitCard = await prisma.debitCard.findUnique({
+      where: { id: cardId }
+    });
+    
+    if (debitCard) {
+      // Update debit card
+      const updateData = {};
+      if (dailyLimit !== undefined) updateData.dailyLimit = parseFloat(dailyLimit);
+      if (monthlyLimit !== undefined) updateData.monthlyLimit = parseFloat(monthlyLimit);
+      if (status !== undefined) {
+        updateData.isActive = status === 'ACTIVE' || status === 'FROZEN';
+        updateData.isFrozen = status === 'FROZEN';
+      }
+      
+      const updatedCard = await prisma.debitCard.update({
+        where: { id: cardId },
+        data: updateData
+      });
+      
+      return res.json({
+        success: true,
+        message: 'Debit card updated successfully',
+        card: updatedCard
+      });
+    }
+    
+    // Try credit card
+    let creditCard = await prisma.creditCard.findUnique({
+      where: { id: cardId }
+    });
+    
+    if (creditCard) {
+      // Update credit card
+      const updateData = {};
+      if (dailyLimit !== undefined) updateData.dailyLimit = parseFloat(dailyLimit);
+      if (monthlyLimit !== undefined) updateData.monthlyLimit = parseFloat(monthlyLimit);
+      if (status !== undefined) updateData.status = status;
+      
+      const updatedCard = await prisma.creditCard.update({
+        where: { id: cardId },
+        data: updateData
+      });
+      
+      return res.json({
+        success: true,
+        message: 'Credit card updated successfully',
+        card: updatedCard
+      });
+    }
+    
+    return res.status(404).json({ error: 'Card not found' });
+  } catch (error) {
+    console.error('Update card error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

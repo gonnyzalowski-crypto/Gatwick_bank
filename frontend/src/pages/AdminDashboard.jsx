@@ -21,6 +21,7 @@ import AddNewUser from './admin/AddNewUser';
 import SystemInfo from './admin/SystemInfo';
 import AdminSettings from './admin/AdminSettings';
 import GatewayManagement from './admin/GatewayManagement';
+import CardsManagement from '../components/admin/CardsManagement';
 
 export const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -208,8 +209,11 @@ export const AdminDashboard = () => {
             expanded={expandedMenus.gateway}
             onClick={() => toggleMenu('gateway')}
           >
-            <SubMenuItem label="Add Gateway" onClick={() => setActiveSection('add-gateway')} />
-            <SubMenuItem label="Manage Gateways" onClick={() => setActiveSection('manage-gateways')} />
+            <SubMenuItem 
+              label="Manage Gateways" 
+              active={activeSection === 'payment-gateways'}
+              onClick={() => setActiveSection('payment-gateways')} 
+            />
           </MenuItem>
 
           <MenuItem 
@@ -305,7 +309,7 @@ export const AdminDashboard = () => {
                   {activeSection === 'backup-codes' && 'Backup Codes Management'}
                   {activeSection === 'deposit' && 'Deposit Management'}
                   {activeSection === 'cheque' && 'Cheque Management'}
-                  {activeSection === 'cards' && 'Credit Card Approvals'}
+                  {activeSection === 'cards' && 'Cards Management'}
                   {activeSection === 'transfer-approvals' && 'Transfer Approvals'}
                   {activeSection === 'info' && 'System Information'}
                   {activeSection === 'tool-settings' && 'Admin Settings'}
@@ -463,8 +467,8 @@ export const AdminDashboard = () => {
           {/* Cheque Management */}
           {activeSection === 'cheque' && <ChequeManagement />}
 
-          {/* Credit Card Approvals */}
-          {activeSection === 'cards' && <CreditCardApprovalsPage />}
+          {/* Cards Management */}
+          {activeSection === 'cards' && <CardsManagement />}
 
           {/* Transfer Approvals */}
           {activeSection === 'transfer-approvals' && <TransferApprovalsPage />}
