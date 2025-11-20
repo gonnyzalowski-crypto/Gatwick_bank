@@ -1605,12 +1605,12 @@ router.get('/deposits', verifyAuth, verifyAdmin, async (req, res) => {
             accountNumber: true
           }
         },
-        account: {
+        gateway: {
           select: {
             id: true,
-            accountNumber: true,
-            accountType: true,
-            balance: true
+            name: true,
+            type: true,
+            network: true
           }
         }
       },
@@ -1637,7 +1637,7 @@ router.post('/deposits/:depositId/approve', verifyAuth, verifyAdmin, async (req,
     
     const deposit = await prisma.deposit.findUnique({
       where: { id: depositId },
-      include: { account: true, user: true }
+      include: { user: true, gateway: true }
     });
     
     if (!deposit) {
@@ -1648,6 +1648,18 @@ router.post('/deposits/:depositId/approve', verifyAuth, verifyAdmin, async (req,
       return res.status(400).json({ error: 'Deposit has already been processed' });
     }
     
+    // Get user's primary account
+    const primaryAccount = await prisma.account.findFirst({
+      where: {
+        userId: deposit.userId,
+        isPrimary: true
+      }
+    });
+    
+    if (!primaryAccount) {
+      return res.status(404).json({ error: 'User primary account not found' });
+    }
+    
     // Update deposit and credit account in transaction
     const result = await prisma.$transaction(async (tx) => {
       // Update deposit status
@@ -1655,15 +1667,15 @@ router.post('/deposits/:depositId/approve', verifyAuth, verifyAdmin, async (req,
         where: { id: depositId },
         data: {
           status: 'COMPLETED',
-          approvedBy: req.user.userId,
-          approvedAt: new Date(),
+          processedBy: req.user.userId,
+          processedAt: new Date(),
           adminNotes: notes
         }
       });
       
-      // Credit the account
+      // Credit the primary account
       const updatedAccount = await tx.account.update({
-        where: { id: deposit.accountId },
+        where: { id: primaryAccount.id },
         data: {
           balance: { increment: deposit.amount },
           availableBalance: { increment: deposit.amount }
@@ -1674,12 +1686,13 @@ router.post('/deposits/:depositId/approve', verifyAuth, verifyAdmin, async (req,
       await tx.transaction.create({
         data: {
           userId: deposit.userId,
-          accountId: deposit.accountId,
+          accountId: primaryAccount.id,
           amount: deposit.amount,
           type: 'DEPOSIT',
           description: deposit.description || 'Deposit approved by admin',
           status: 'COMPLETED',
-          category: 'deposit'
+          category: 'deposit',
+          reference: deposit.reference
         }
       });
       
@@ -1692,7 +1705,8 @@ router.post('/deposits/:depositId/approve', verifyAuth, verifyAdmin, async (req,
           message: `Your deposit of $${deposit.amount.toFixed(2)} has been approved and credited to your account.`,
           metadata: {
             depositId: deposit.id,
-            amount: deposit.amount
+            amount: deposit.amount,
+            reference: deposit.reference
           }
         }
       });
@@ -1740,8 +1754,9 @@ router.post('/deposits/:depositId/reject', verifyAuth, verifyAdmin, async (req, 
       where: { id: depositId },
       data: {
         status: 'REJECTED',
-        approvedBy: req.user.userId,
-        approvedAt: new Date(),
+        processedBy: req.user.userId,
+        processedAt: new Date(),
+        rejectionReason: reason,
         adminNotes: reason
       }
     });

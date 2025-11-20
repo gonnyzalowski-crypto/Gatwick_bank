@@ -1,16 +1,18 @@
 import express from 'express';
 import { verifyAuth } from '../middleware/auth.js';
+import { upload } from '../middleware/upload.js';
+import prisma from '../config/prisma.js';
 import * as paymentService from '../services/paymentService.js';
 
 const paymentsRouter = express.Router();
 
 /**
  * POST /api/v1/payments/deposit
- * Deposit money into an account
+ * Create deposit request (requires admin approval)
  */
-paymentsRouter.post('/deposit', verifyAuth, async (req, res) => {
+paymentsRouter.post('/deposit', verifyAuth, upload.single('paymentProof'), async (req, res) => {
   try {
-    const { accountId, amount, description } = req.body;
+    const { accountId, amount, description, gatewayId } = req.body;
 
     if (!accountId) {
       return res.status(400).json({
@@ -19,29 +21,67 @@ paymentsRouter.post('/deposit', verifyAuth, async (req, res) => {
       });
     }
 
-    if (!amount || amount <= 0) {
+    if (!amount || parseFloat(amount) <= 0) {
       return res.status(400).json({
         success: false,
         message: 'Amount must be greater than 0',
       });
     }
 
-    const result = await paymentService.depositMoney(accountId, req.user.userId, {
-      amount,
-      description: description || 'Deposit',
+    // Verify account belongs to user
+    const account = await prisma.account.findFirst({
+      where: {
+        id: accountId,
+        userId: req.user.userId
+      }
+    });
+
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        message: 'Account not found'
+      });
+    }
+
+    // Generate unique reference
+    const reference = `DEP-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+
+    // Create deposit record
+    const deposit = await prisma.deposit.create({
+      data: {
+        userId: req.user.userId,
+        gatewayId: gatewayId || null,
+        amount: parseFloat(amount),
+        method: gatewayId ? 'CRYPTO' : 'OTHER',
+        reference,
+        description: description || 'Deposit request',
+        paymentProof: req.file ? req.file.path : null,
+        status: 'PENDING'
+      }
+    });
+
+    // Create notification for admins
+    await prisma.notification.create({
+      data: {
+        userId: req.user.userId,
+        type: 'deposit',
+        title: 'Deposit Request Submitted',
+        message: `Your deposit request of $${amount} is pending admin approval.`,
+        metadata: {
+          depositId: deposit.id,
+          reference,
+          amount: parseFloat(amount)
+        }
+      }
     });
 
     return res.status(201).json({
       success: true,
-      transaction: result.transaction,
+      deposit,
+      message: 'Deposit request submitted successfully. Awaiting admin approval.'
     });
   } catch (error) {
     console.error('Error in POST /deposit:', error);
-
-    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
-      return res.status(404).json({ success: false, message: error.message });
-    }
-
     return res.status(500).json({ success: false, message: error.message });
   }
 });
