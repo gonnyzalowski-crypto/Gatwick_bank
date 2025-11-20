@@ -1,0 +1,25 @@
+{
+  "name": "gatwick-bank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Gatwick Bank - Full Stack Banking Application",
+  "main": "backend/src/server.js",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install --workspaces",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "cd backend && npx prisma generate && cd ../frontend && npm run build",
+    "start": "cd backend && node src/server.js",
+    "build:frontend": "npm run build --workspace=frontend",
+    "start:backend": "npm run start --workspace=backend",
+    "prisma:generate": "npm run prisma:generate --workspace=backend"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

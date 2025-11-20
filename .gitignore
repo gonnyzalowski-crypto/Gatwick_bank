@@ -1,0 +1,49 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+package-lock.json
+
+# Env files
+.env
+.env.local
+.env.*.local
+.env.mcp
+
+# Build output
+dist/
+build/
+
+# Vite cache
+.vite/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Prisma dev DB
+dev.db
+
+# Misc
+coverage/
+.cache/
+
+# Ignore large legacy assets if accidentally copied
+zenithpoints/
+public_html/
+
+# Temporary admin files
+mybanker/
+
+# Uploaded files
+backend/uploads/
+
+# Mock data (for local development only)
+frontend/src/lib/mockData.js

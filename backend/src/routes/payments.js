@@ -1,0 +1,369 @@
+import express from 'express';
+import { verifyAuth } from '../middleware/auth.js';
+import * as paymentService from '../services/paymentService.js';
+
+const paymentsRouter = express.Router();
+
+/**
+ * POST /api/v1/payments/deposit
+ * Deposit money into an account
+ */
+paymentsRouter.post('/deposit', verifyAuth, async (req, res) => {
+  try {
+    const { accountId, amount, description } = req.body;
+
+    if (!accountId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account ID is required',
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be greater than 0',
+      });
+    }
+
+    const result = await paymentService.depositMoney(accountId, req.user.userId, {
+      amount,
+      description: description || 'Deposit',
+    });
+
+    return res.status(201).json({
+      success: true,
+      transaction: result.transaction,
+    });
+  } catch (error) {
+    console.error('Error in POST /deposit:', error);
+
+    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/payments/withdrawal
+ * Withdraw money from an account
+ */
+paymentsRouter.post('/withdrawal', verifyAuth, async (req, res) => {
+  try {
+    const { accountId, amount, description } = req.body;
+
+    if (!accountId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account ID is required',
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be greater than 0',
+      });
+    }
+
+    const result = await paymentService.withdrawMoney(accountId, req.user.userId, {
+      amount,
+      description: description || 'Withdrawal',
+    });
+
+    return res.status(201).json({
+      success: true,
+      transaction: result.transaction,
+    });
+  } catch (error) {
+    console.error('Error in POST /withdrawal:', error);
+
+    if (error.message.includes('Insufficient')) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/payments/international-transfer
+ * International transfer via SWIFT/IBAN
+ */
+paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
+  try {
+    const { fromAccountId, recipientName, recipientIBAN, recipientBank, recipientCountry, amount, description } = req.body;
+
+    if (!fromAccountId || !recipientName || !recipientIBAN || !recipientBank || !recipientCountry) {
+      return res.status(400).json({
+        success: false,
+        message: 'All recipient details are required',
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be greater than 0',
+      });
+    }
+
+    const result = await paymentService.internationalTransfer(fromAccountId, req.user.userId, {
+      recipientName,
+      recipientIBAN,
+      recipientBank,
+      recipientCountry,
+      amount,
+      description: description || 'International transfer',
+    });
+
+    return res.status(201).json({
+      success: true,
+      payment: result.payment,
+      transaction: result.transaction,
+    });
+  } catch (error) {
+    console.error('Error in POST /international-transfer:', error);
+
+    if (error.message.includes('Insufficient')) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/payments/transfer
+ * Transfer money between user's own accounts
+ */
+paymentsRouter.post('/transfer', verifyAuth, async (req, res) => {
+  try {
+    const { fromAccountId, toAccountId, amount, description } = req.body;
+
+    if (!fromAccountId || !toAccountId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both source and destination accounts are required',
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be greater than 0',
+      });
+    }
+
+    const result = await paymentService.transferMoney(fromAccountId, toAccountId, req.user.userId, {
+      amount,
+      description,
+    });
+
+    return res.status(201).json({
+      success: true,
+      payment: result.payment,
+      transactions: result.transactions,
+    });
+  } catch (error) {
+    console.error('Error in POST /transfer:', error);
+
+    if (error.message.includes('Insufficient')) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/payments/p2p
+ * Send peer-to-peer payment to another user
+ */
+paymentsRouter.post('/p2p', verifyAuth, async (req, res) => {
+  try {
+    const { fromAccountId, toUserId, amount, description, toAccountId } = req.body;
+
+    if (!fromAccountId || !toUserId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Source account and recipient are required',
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be greater than 0',
+      });
+    }
+
+    const result = await paymentService.sendPeerPayment(
+      fromAccountId,
+      toUserId,
+      req.user.userId,
+      { amount, description, toAccountId },
+    );
+
+    return res.status(201).json({
+      success: true,
+      payment: result.payment,
+      transactions: result.transactions,
+    });
+  } catch (error) {
+    console.error('Error in POST /p2p:', error);
+
+    if (error.message.includes('Insufficient')) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/payments/bill
+ * Pay a bill from an account
+ */
+paymentsRouter.post('/bill', verifyAuth, async (req, res) => {
+  try {
+    const { accountId, billName, amount, reference, description } = req.body;
+
+    if (!accountId || !billName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Account and bill name are required',
+      });
+    }
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Amount must be greater than 0',
+      });
+    }
+
+    const result = await paymentService.payBill(accountId, req.user.userId, {
+      billName,
+      amount,
+      reference,
+      description,
+    });
+
+    return res.status(201).json({
+      success: true,
+      payment: result.payment,
+      transaction: result.transaction,
+    });
+  } catch (error) {
+    console.error('Error in POST /bill:', error);
+
+    if (error.message.includes('Insufficient')) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/payments/account/:accountId
+ * Get payment history for an account
+ */
+paymentsRouter.get('/account/:accountId', verifyAuth, async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 20;
+    const offset = req.query.offset ? parseInt(req.query.offset) : 0;
+
+    const result = await paymentService.getPaymentHistory(
+      req.user.userId,
+      accountId,
+      limit,
+      offset,
+    );
+
+    return res.json({
+      success: true,
+      payments: result.payments,
+      pagination: {
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        hasMore: result.hasMore,
+      },
+    });
+  } catch (error) {
+    console.error('Error in GET /account/:accountId:', error);
+
+    if (error.message.includes('not found') || error.message.includes('unauthorized')) {
+      return res.status(404).json({ success: false, message: error.message });
+    }
+
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/payments/history
+ * Get all payments for user (combined from all accounts)
+ */
+paymentsRouter.get('/history', verifyAuth, async (req, res) => {
+  try {
+    const limit = req.query.limit ? parseInt(req.query.limit) : 20;
+    const offset = req.query.offset ? parseInt(req.query.offset) : 0;
+
+    const result = await paymentService.getUserPayments(
+      req.user.userId,
+      limit,
+      offset,
+    );
+
+    return res.json({
+      success: true,
+      payments: result.payments,
+      pagination: {
+        total: result.total,
+        limit: result.limit,
+        offset: result.offset,
+        hasMore: result.hasMore,
+      },
+    });
+  } catch (error) {
+    console.error('Error in GET /history:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/payments/stats/overview
+ * Get payment statistics for user
+ */
+paymentsRouter.get('/stats/overview', verifyAuth, async (req, res) => {
+  try {
+    const stats = await paymentService.getPaymentStats(req.user.userId);
+    return res.json({ success: true, stats });
+  } catch (error) {
+    console.error('Error in GET /stats/overview:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+export { paymentsRouter };
