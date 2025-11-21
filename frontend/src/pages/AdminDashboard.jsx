@@ -4,7 +4,7 @@ import {
   Users, Wrench, Boxes, Landmark, DollarSign, Settings, LogOut,
   ChevronDown, ChevronRight, CreditCard, Coins, ArrowLeftRight,
   UserPlus, Bell, Menu, X, LayoutDashboard, Shield, Clock, 
-  CheckCircle, TrendingUp, AlertCircle, FileText, Info
+  CheckCircle, TrendingUp, AlertCircle, FileText, Info, MessageSquare
 } from 'lucide-react';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
@@ -22,6 +22,8 @@ import SystemInfo from './admin/SystemInfo';
 import AdminSettings from './admin/AdminSettings';
 import GatewayManagement from './admin/GatewayManagement';
 import CardsManagement from '../components/admin/CardsManagement';
+import { SupportTicketsPage as AdminSupportTickets } from './admin/SupportTicketsPage';
+import NotificationBell from '../components/NotificationBell';
 
 export const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -245,6 +247,13 @@ export const AdminDashboard = () => {
           />
 
           <MenuItem 
+            icon={MessageSquare} 
+            label="Support Tickets" 
+            active={activeSection === 'support-tickets'}
+            onClick={() => setActiveSection('support-tickets')}
+          />
+
+          <MenuItem 
             icon={Shield} 
             label="Audit Logs" 
             active={activeSection === 'audit-logs'}
@@ -322,10 +331,7 @@ export const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-slate-700 rounded-lg transition-colors relative">
-                <Bell className="w-5 h-5 text-slate-300" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+              <NotificationBell isAdmin={true} />
               <div className="flex items-center gap-2 px-3 py-2 bg-slate-700 rounded-lg">
                 <div className="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-bold">A</span>
@@ -457,6 +463,9 @@ export const AdminDashboard = () => {
 
           {/* Audit Logs */}
           {activeSection === 'audit-logs' && <AuditLogs />}
+
+          {/* Support Tickets */}
+          {activeSection === 'support-tickets' && <AdminSupportTickets />}
 
           {/* Backup Codes Management */}
           {activeSection === 'backup-codes' && <BackupCodesManagement />}

@@ -22,6 +22,7 @@ import {
   Home,
 } from 'lucide-react';
 import { Logo } from '../ui/Logo';
+import NotificationBell from '../NotificationBell';
 
 const navItemClasses = ({ isActive }) =>
   [
@@ -255,10 +256,7 @@ const UserDashboardLayout = ({ children }) => {
 
           <div className="flex items-center gap-3">
             {/* Notifications */}
-            <button className="relative p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-red-500 rounded-full" />
-            </button>
+            <NotificationBell isAdmin={false} />
 
             {/* User Menu */}
             <button className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-lg transition-colors">
