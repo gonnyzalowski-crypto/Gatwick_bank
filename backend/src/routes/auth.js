@@ -39,7 +39,23 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ errors: validation.errors });
   }
 
-  const { email, password, firstName, lastName, securityQuestions } = req.body;
+  const { 
+    email, 
+    password, 
+    firstName, 
+    lastName, 
+    securityQuestions,
+    phone,
+    dateOfBirth,
+    address,
+    city,
+    state,
+    zipCode,
+    country,
+    nationality,
+    governmentIdType,
+    governmentIdNumber
+  } = req.body;
 
   try {
     // Validate security questions
@@ -47,8 +63,19 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Must provide exactly 3 security questions' });
     }
 
-    // Register user
-    const result = await registerUser(email, password, firstName, lastName);
+    // Register user with additional data
+    const result = await registerUser(email, password, firstName, lastName, {
+      phone,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+      address,
+      city,
+      state,
+      zipCode,
+      country,
+      nationality,
+      governmentIdType,
+      governmentIdNumber
+    });
     const userId = result.user.id;
 
     // Save security questions

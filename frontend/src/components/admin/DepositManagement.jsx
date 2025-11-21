@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { DollarSign, Plus, Search, Filter, Check, X, Clock, AlertCircle } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
+import { BrandFeedbackModal } from '../modals/BrandFeedbackModal';
 
 export const DepositManagement = () => {
   const [deposits, setDeposits] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
+  const [transfers, setTransfers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [activeTab, setActiveTab] = useState('deposits');
+  const [feedbackModal, setFeedbackModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
   
   const [newDeposit, setNewDeposit] = useState({
     userEmail: '',
@@ -17,44 +22,83 @@ export const DepositManagement = () => {
   });
 
   useEffect(() => {
-    fetchDeposits();
-  }, [filterStatus]);
+    fetchAllPendingTransactions();
+  }, [filterStatus, activeTab]);
 
-  const fetchDeposits = async () => {
+  const fetchAllPendingTransactions = async () => {
     setIsLoading(true);
     try {
-      const response = await apiClient.get(`/mybanker/deposits?status=${filterStatus}`);
-      setDeposits(response.deposits || []);
+      // Fetch deposits
+      const depositsResponse = await apiClient.get(`/mybanker/deposits?status=${filterStatus}`);
+      setDeposits(depositsResponse.deposits || []);
+      
+      // Fetch pending withdrawals (if endpoint exists)
+      try {
+        const withdrawalsResponse = await apiClient.get(`/mybanker/withdrawals?status=PENDING`);
+        setWithdrawals(withdrawalsResponse.withdrawals || []);
+      } catch (err) {
+        console.log('Withdrawals endpoint not available');
+        setWithdrawals([]);
+      }
+      
+      // Fetch pending transfers
+      try {
+        const transfersResponse = await apiClient.get(`/mybanker/transfers?status=PENDING`);
+        setTransfers(transfersResponse.transfers || []);
+      } catch (err) {
+        console.log('Transfers endpoint not available');
+        setTransfers([]);
+      }
     } catch (error) {
-      console.error('Failed to fetch deposits:', error);
+      console.error('Failed to fetch transactions:', error);
     }
     setIsLoading(false);
   };
+
+  const fetchDeposits = fetchAllPendingTransactions;
 
   const handleCreateDeposit = async (e) => {
     e.preventDefault();
     try {
       await apiClient.post('/mybanker/deposits', newDeposit);
-      alert('Deposit created successfully!');
+      setFeedbackModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Deposit Created',
+        message: 'Deposit created successfully!'
+      });
       setShowAddModal(false);
       setNewDeposit({ userEmail: '', amount: '', method: 'ADMIN_CREDIT', description: '' });
       fetchDeposits();
     } catch (error) {
       console.error('Failed to create deposit:', error);
-      alert(error.response?.data?.error || 'Failed to create deposit');
+      setFeedbackModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Creation Failed',
+        message: error.response?.data?.error || 'Failed to create deposit'
+      });
     }
   };
 
   const handleProcessDeposit = async (depositId) => {
-    if (!confirm('Process this deposit?')) return;
-    
     try {
-      await apiClient.post(`/mybanker/deposits/${depositId}/process`);
-      alert('Deposit processed successfully!');
+      await apiClient.post(`/mybanker/deposits/${depositId}/approve`);
+      setFeedbackModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Deposit Approved',
+        message: 'Deposit processed successfully!'
+      });
       fetchDeposits();
     } catch (error) {
       console.error('Failed to process deposit:', error);
-      alert('Failed to process deposit');
+      setFeedbackModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Processing Failed',
+        message: 'Failed to process deposit'
+      });
     }
   };
 
@@ -85,8 +129,8 @@ export const DepositManagement = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Deposit Management</h2>
-          <p className="text-slate-400 text-sm">Manage user deposits and credits</p>
+          <h2 className="text-2xl font-bold text-white">Transaction Management</h2>
+          <p className="text-slate-400 text-sm">Manage deposits, withdrawals, and transfers</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -95,6 +139,42 @@ export const DepositManagement = () => {
           <Plus className="w-5 h-5" />
           New Deposit
         </button>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-slate-800 border border-slate-700 rounded-lg">
+        <div className="flex border-b border-slate-700">
+          <button
+            onClick={() => setActiveTab('deposits')}
+            className={`flex-1 px-6 py-3 font-medium transition-colors ${
+              activeTab === 'deposits'
+                ? 'text-indigo-400 border-b-2 border-indigo-400'
+                : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Deposits ({deposits.filter(d => d.status === 'PENDING').length})
+          </button>
+          <button
+            onClick={() => setActiveTab('withdrawals')}
+            className={`flex-1 px-6 py-3 font-medium transition-colors ${
+              activeTab === 'withdrawals'
+                ? 'text-indigo-400 border-b-2 border-indigo-400'
+                : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Withdrawals ({withdrawals.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('transfers')}
+            className={`flex-1 px-6 py-3 font-medium transition-colors ${
+              activeTab === 'transfers'
+                ? 'text-indigo-400 border-b-2 border-indigo-400'
+                : 'text-slate-400 hover:text-slate-300'
+            }`}
+          >
+            Transfers ({transfers.length})
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -126,14 +206,14 @@ export const DepositManagement = () => {
         </div>
       </div>
 
-      {/* Deposits Table */}
+      {/* Transactions Table */}
       <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
         <table className="w-full">
           <thead className="bg-slate-900 border-b border-slate-700">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">User</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Method</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Method/Type</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Reference</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase">Date</th>
@@ -141,15 +221,15 @@ export const DepositManagement = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700">
-            {filteredDeposits.length === 0 ? (
+            {activeTab === 'deposits' && filteredDeposits.length === 0 && (
               <tr>
                 <td colSpan="7" className="px-6 py-12 text-center">
                   <DollarSign className="w-12 h-12 text-slate-600 mx-auto mb-3" />
                   <p className="text-slate-400">No deposits found</p>
                 </td>
               </tr>
-            ) : (
-              filteredDeposits.map((deposit) => (
+            )}
+            {activeTab === 'deposits' && filteredDeposits.map((deposit) => (
                 <tr key={deposit.id} className="hover:bg-slate-700/50 transition-colors">
                   <td className="px-6 py-4">
                     <div>
@@ -188,7 +268,24 @@ export const DepositManagement = () => {
                     )}
                   </td>
                 </tr>
-              ))
+              ))}
+            
+            {activeTab === 'withdrawals' && withdrawals.length === 0 && (
+              <tr>
+                <td colSpan="7" className="px-6 py-12 text-center">
+                  <DollarSign className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400">No pending withdrawals</p>
+                </td>
+              </tr>
+            )}
+            
+            {activeTab === 'transfers' && transfers.length === 0 && (
+              <tr>
+                <td colSpan="7" className="px-6 py-12 text-center">
+                  <DollarSign className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400">No pending transfers</p>
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -265,6 +362,15 @@ export const DepositManagement = () => {
           </div>
         </div>
       )}
+
+      {/* Feedback Modal */}
+      <BrandFeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
+        type={feedbackModal.type}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+      />
     </div>
   );
 };

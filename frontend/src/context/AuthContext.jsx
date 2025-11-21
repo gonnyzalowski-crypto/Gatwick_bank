@@ -50,11 +50,11 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const register = useCallback(async (email, password, firstName, lastName, securityQuestions) => {
+  const register = useCallback(async (email, password, firstName, lastName, securityQuestions, additionalData = {}) => {
     try {
       setError(null);
 
-      // First create the user account with security questions
+      // First create the user account with security questions and additional data
       await apiClient.post('/auth/register', {
         email,
         password,
@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
         firstName,
         lastName,
         securityQuestions,
+        ...additionalData
       });
 
       // Registration successful - user will need to login with 2FA

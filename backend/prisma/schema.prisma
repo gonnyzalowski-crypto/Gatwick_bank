@@ -43,6 +43,10 @@ model User {
   
   profilePhoto     String?  // Path to uploaded photo
   accountNumber    String?  @unique // 12-digit account number starting with 00
+  routingNumber    String?  @unique // 9-digit routing number format: 604003XXX
+  nationality      String?  // User's nationality
+  governmentIdType String?  // Passport, Driver's License, National ID
+  governmentIdNumber String? // Government ID number
   isAdmin          Boolean  @default(false)
   accountStatus    String   @default("LIMITED") // LIMITED | ACTIVE | SUSPENDED
   kycStatus        String   @default("NOT_SUBMITTED") // NOT_SUBMITTED | PENDING | VERIFIED | REJECTED

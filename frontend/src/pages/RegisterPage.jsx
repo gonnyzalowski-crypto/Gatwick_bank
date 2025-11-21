@@ -9,8 +9,19 @@ export const RegisterPage = () => {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
+    dateOfBirth: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'United States',
+    nationality: '',
+    governmentIdType: '',
+    governmentIdNumber: '',
     password: '',
     confirmPassword: '',
+    agreeToTerms: false
   });
   const [securityQuestions, setSecurityQuestions] = useState([
     { question: '', answer: '' },
@@ -75,12 +86,27 @@ export const RegisterPage = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'Invalid email format';
     }
+    if (!formData.phone.trim()) errors.phone = 'Phone number is required';
+    if (!formData.dateOfBirth) errors.dateOfBirth = 'Date of birth is required';
+    if (!formData.address.trim()) errors.address = 'Address is required';
+    if (!formData.city.trim()) errors.city = 'City is required';
+    if (!formData.state.trim()) errors.state = 'State is required';
+    if (!formData.zipCode.trim()) errors.zipCode = 'Zip code is required';
+    if (!formData.country.trim()) errors.country = 'Country is required';
+    if (!formData.nationality.trim()) errors.nationality = 'Nationality is required';
+    if (!formData.governmentIdType) errors.governmentIdType = 'ID type is required';
+    if (!formData.governmentIdNumber.trim()) errors.governmentIdNumber = 'ID number is required';
     if (!formData.password) errors.password = 'Password is required';
     else if (formData.password.length < 8) {
       errors.password = 'Password must be at least 8 characters';
+    } else if (!/(?=.*[0-9])(?=.*[!@#$%^&*])/.test(formData.password)) {
+      errors.password = 'Password must contain at least 1 number and 1 special character';
     }
     if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = 'Passwords do not match';
+    }
+    if (!formData.agreeToTerms) {
+      errors.agreeToTerms = 'You must agree to the Terms & Conditions';
     }
 
     // Validate security questions
@@ -113,7 +139,19 @@ export const RegisterPage = () => {
       formData.password,
       formData.firstName,
       formData.lastName,
-      securityQuestions
+      securityQuestions,
+      {
+        phone: formData.phone,
+        dateOfBirth: formData.dateOfBirth,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        country: formData.country,
+        nationality: formData.nationality,
+        governmentIdType: formData.governmentIdType,
+        governmentIdNumber: formData.governmentIdNumber
+      }
     );
 
     if (result.success) {
@@ -287,7 +325,7 @@ export const RegisterPage = () => {
             {/* Email */}
             <div>
               <label className="block text-sm font-semibold text-neutral-900 mb-2">
-                Email Address
+                Email Address *
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
@@ -296,6 +334,7 @@ export const RegisterPage = () => {
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
+                  required
                   placeholder="you@example.com"
                   className={`w-full h-14 pl-12 pr-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
                     fieldErrors.email ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
@@ -304,6 +343,216 @@ export const RegisterPage = () => {
               </div>
               {fieldErrors.email && (
                 <p className="text-red-600 text-xs mt-1">{fieldErrors.email}</p>
+              )}
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                Phone Number *
+              </label>
+              <input
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                placeholder="+1 234 567 8900"
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                  fieldErrors.phone ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                }`}
+              />
+              {fieldErrors.phone && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.phone}</p>
+              )}
+            </div>
+
+            {/* Date of Birth */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                Date of Birth *
+              </label>
+              <input
+                name="dateOfBirth"
+                type="date"
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+                required
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                  fieldErrors.dateOfBirth ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                }`}
+              />
+              {fieldErrors.dateOfBirth && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.dateOfBirth}</p>
+              )}
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                Street Address *
+              </label>
+              <input
+                name="address"
+                type="text"
+                value={formData.address}
+                onChange={handleChange}
+                required
+                placeholder="123 Main Street"
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                  fieldErrors.address ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                }`}
+              />
+              {fieldErrors.address && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.address}</p>
+              )}
+            </div>
+
+            {/* City, State, Zip */}
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                  City *
+                </label>
+                <input
+                  name="city"
+                  type="text"
+                  value={formData.city}
+                  onChange={handleChange}
+                  required
+                  placeholder="New York"
+                  className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                    fieldErrors.city ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  }`}
+                />
+                {fieldErrors.city && (
+                  <p className="text-red-600 text-xs mt-1">{fieldErrors.city}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                  State *
+                </label>
+                <input
+                  name="state"
+                  type="text"
+                  value={formData.state}
+                  onChange={handleChange}
+                  required
+                  placeholder="NY"
+                  className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                    fieldErrors.state ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  }`}
+                />
+                {fieldErrors.state && (
+                  <p className="text-red-600 text-xs mt-1">{fieldErrors.state}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                  Zip Code *
+                </label>
+                <input
+                  name="zipCode"
+                  type="text"
+                  value={formData.zipCode}
+                  onChange={handleChange}
+                  required
+                  placeholder="10001"
+                  className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                    fieldErrors.zipCode ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  }`}
+                />
+                {fieldErrors.zipCode && (
+                  <p className="text-red-600 text-xs mt-1">{fieldErrors.zipCode}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Country */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                Country *
+              </label>
+              <input
+                name="country"
+                type="text"
+                value={formData.country}
+                onChange={handleChange}
+                required
+                placeholder="United States"
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                  fieldErrors.country ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                }`}
+              />
+              {fieldErrors.country && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.country}</p>
+              )}
+            </div>
+
+            {/* Nationality */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                Nationality *
+              </label>
+              <input
+                name="nationality"
+                type="text"
+                value={formData.nationality}
+                onChange={handleChange}
+                required
+                placeholder="American"
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                  fieldErrors.nationality ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                }`}
+              />
+              {fieldErrors.nationality && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.nationality}</p>
+              )}
+            </div>
+
+            {/* Government ID Type */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                Government ID Type *
+              </label>
+              <select
+                name="governmentIdType"
+                value={formData.governmentIdType}
+                onChange={handleChange}
+                required
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 transition-all ${
+                  fieldErrors.governmentIdType ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                }`}
+              >
+                <option value="">Select ID Type</option>
+                <option value="Passport">Passport</option>
+                <option value="Driver's License">Driver's License</option>
+                <option value="National ID">National ID</option>
+              </select>
+              {fieldErrors.governmentIdType && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.governmentIdType}</p>
+              )}
+            </div>
+
+            {/* Government ID Number */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                ID Number *
+              </label>
+              <input
+                name="governmentIdNumber"
+                type="text"
+                value={formData.governmentIdNumber}
+                onChange={handleChange}
+                required
+                placeholder="Enter your ID number"
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
+                  fieldErrors.governmentIdNumber ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                }`}
+              />
+              {fieldErrors.governmentIdNumber && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.governmentIdNumber}</p>
               )}
             </div>
 
@@ -424,6 +673,31 @@ export const RegisterPage = () => {
                 </p>
               </div>
             </div>
+
+            {/* Terms and Conditions */}
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                name="agreeToTerms"
+                checked={formData.agreeToTerms}
+                onChange={(e) => setFormData(prev => ({ ...prev, agreeToTerms: e.target.checked }))}
+                className="mt-1 w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+              />
+              <label className="text-sm text-neutral-700">
+                I agree to the{' '}
+                <a href="/terms" className="text-primary-600 hover:text-primary-700 font-medium">
+                  Terms & Conditions
+                </a>
+                {' '}and{' '}
+                <a href="/privacy" className="text-primary-600 hover:text-primary-700 font-medium">
+                  Privacy Policy
+                </a>
+                {' '}*
+              </label>
+            </div>
+            {fieldErrors.agreeToTerms && (
+              <p className="text-red-600 text-xs -mt-3">{fieldErrors.agreeToTerms}</p>
+            )}
 
             {/* Register Button */}
             <button

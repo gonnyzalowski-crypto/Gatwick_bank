@@ -13,6 +13,7 @@ import { ExpensesModal } from '../components/ExpensesModal';
 import { SavingsModal } from '../components/SavingsModal';
 import { TransactionHistoryModal } from '../components/TransactionHistoryModal';
 import AccountCreationModal from '../components/modals/AccountCreationModal';
+import SendMoneyModal from '../components/modals/SendMoneyModal';
 import { formatDate } from '../utils/dateFormatter';
 import {
   Wallet,
@@ -43,6 +44,7 @@ export const DashboardPage = () => {
   const [showSavingsModal, setShowSavingsModal] = useState(false);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+  const [showSendMoneyModal, setShowSendMoneyModal] = useState(false);
 
   const isDevUser =
     user?.id?.startsWith('dev-') || (user?.email && user.email.endsWith('@gatwickbank.test'));
@@ -248,7 +250,7 @@ export const DashboardPage = () => {
                   variant="secondary"
                   size="md"
                   icon={Send}
-                  onClick={() => navigate('/payments')}
+                  onClick={() => setShowSendMoneyModal(true)}
                 >
                   Send Money
                 </ActionButton>
@@ -1084,6 +1086,13 @@ export const DashboardPage = () => {
           // Refresh dashboard data
           window.location.reload();
         }}
+      />
+
+      {/* Send Money Modal */}
+      <SendMoneyModal
+        isOpen={showSendMoneyModal}
+        onClose={() => setShowSendMoneyModal(false)}
+        userAccounts={dashboard?.accounts || []}
       />
     </UserDashboardLayout>
   );

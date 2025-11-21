@@ -10,7 +10,7 @@ const sanitizeUser = (user) => {
   return rest;
 };
 
-export const registerUser = async (email, password, firstName, lastName) => {
+export const registerUser = async (email, password, firstName, lastName, additionalData = {}) => {
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     throw new Error('Email already registered');
@@ -18,29 +18,56 @@ export const registerUser = async (email, password, firstName, lastName) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
+  // Generate routing number
+  const userCount = await prisma.user.count();
+  const routingSequence = (userCount + 1) % 1000; // 001-999
+  const routingNumber = `604003${String(routingSequence).padStart(3, '0')}`;
+
   const user = await prisma.user.create({
     data: {
       email,
       password: hashedPassword,
       firstName,
       lastName,
+      routingNumber,
+      ...additionalData
     },
   });
 
-  const account = await prisma.account.create({
+  // Create Savings account (10 digits starting with 7)
+  const savingsNumber = `7${String(Math.floor(100000000 + Math.random() * 900000000))}`;
+  const savingsAccount = await prisma.account.create({
     data: {
       userId: user.id,
-      accountType: 'checking',
-      accountNumber: `CHK-${user.id.slice(0, 8).toUpperCase()}`,
+      accountType: 'SAVINGS',
+      accountNumber: savingsNumber,
       balance: 0,
+      availableBalance: 0,
       currency: 'USD',
-      isActive: true,
+      status: 'ACTIVE',
+      isPrimary: true
+    },
+  });
+
+  // Create Checking account (11 digits starting with 03)
+  const checkingNumber = `03${String(Math.floor(100000000 + Math.random() * 900000000))}`;
+  const checkingAccount = await prisma.account.create({
+    data: {
+      userId: user.id,
+      accountType: 'CHECKING',
+      accountNumber: checkingNumber,
+      balance: 0,
+      availableBalance: 0,
+      currency: 'USD',
+      status: 'ACTIVE',
+      isPrimary: false
     },
   });
 
   return {
     user: sanitizeUser(user),
-    account,
+    account: savingsAccount,
+    accounts: [savingsAccount, checkingAccount]
   };
 };
 
