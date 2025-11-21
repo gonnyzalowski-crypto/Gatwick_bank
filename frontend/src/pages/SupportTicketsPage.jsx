@@ -27,12 +27,15 @@ const SupportTicketsPage = () => {
   const fetchTickets = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/support-tickets/tickets');
+      console.log('Fetching user support tickets...');
+      const response = await apiClient.get('/support/tickets');
+      console.log('User tickets response:', response);
       if (response.success) {
         setTickets(response.tickets || []);
       }
     } catch (err) {
       console.error('Error fetching tickets:', err);
+      console.error('Error response:', err.response);
     } finally {
       setLoading(false);
     }
@@ -44,12 +47,15 @@ const SupportTicketsPage = () => {
     setError('');
 
     try {
-      const response = await apiClient.post('/support-tickets/tickets', {
+      console.log('Creating support ticket...');
+      const response = await apiClient.post('/support/tickets', {
         subject,
         category,
         priority,
         message: description  // Backend expects 'message' not 'description'
       });
+
+      console.log('Create ticket response:', response);
 
       if (response.success) {
         setSuccess('Support ticket created successfully!');
@@ -63,6 +69,7 @@ const SupportTicketsPage = () => {
       }
     } catch (err) {
       console.error('Error creating ticket:', err);
+      console.error('Error response:', err.response);
       setError(err.response?.data?.error || 'Failed to create ticket. Please try again.');
     } finally {
       setCreating(false);
@@ -75,14 +82,14 @@ const SupportTicketsPage = () => {
 
     setSending(true);
     try {
-      const response = await apiClient.post(`/support-tickets/tickets/${selectedTicket.id}/messages`, {
+      const response = await apiClient.post(`/support/tickets/${selectedTicket.id}/messages`, {
         message: newMessage
       });
 
       if (response.success) {
         setNewMessage('');
         // Refresh ticket
-        const ticketResponse = await apiClient.get(`/support-tickets/tickets/${selectedTicket.id}`);
+        const ticketResponse = await apiClient.get(`/support/tickets/${selectedTicket.id}`);
         if (ticketResponse.success) {
           setSelectedTicket(ticketResponse.ticket);
           // Update in list

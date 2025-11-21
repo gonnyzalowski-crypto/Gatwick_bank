@@ -12,11 +12,23 @@ const generateTicketNumber = () => {
 };
 
 // Middleware to check admin
-const isAdmin = (req, res, next) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ error: 'Admin access required' });
+const isAdmin = async (req, res, next) => {
+  try {
+    // Fetch user from database to check role
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: { role: true }
+    });
+
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    next();
+  } catch (error) {
+    console.error('Admin check error:', error);
+    return res.status(500).json({ error: 'Failed to verify admin status' });
   }
-  next();
 };
 
 // POST /api/v1/support/tickets - Create new ticket (user)

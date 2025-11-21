@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, X, Check, AlertCircle, FileText, CreditCard, DollarSign } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/apiClient';
 
 const NotificationBell = ({ isAdmin = false }) => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -91,6 +93,66 @@ const NotificationBell = ({ isAdmin = false }) => {
     return `${days}d ago`;
   };
 
+  const handleNotificationClick = async (notification) => {
+    // Mark as read
+    if (!notification.isRead) {
+      await markAsRead(notification.id);
+    }
+
+    // Close dropdown
+    setIsOpen(false);
+
+    // Navigate based on notification type
+    if (isAdmin) {
+      // Admin navigation
+      switch (notification.type) {
+        case 'kyc':
+        case 'kyc_approval':
+          navigate('/mybanker?section=kyc-review');
+          break;
+        case 'card':
+        case 'card_approval':
+          navigate('/mybanker?section=cards');
+          break;
+        case 'deposit':
+          navigate('/mybanker?section=deposit');
+          break;
+        case 'withdrawal':
+          navigate('/mybanker?section=withdrawal');
+          break;
+        case 'support':
+        case 'support_ticket':
+          navigate('/mybanker?section=support-tickets');
+          break;
+        default:
+          navigate('/mybanker');
+      }
+    } else {
+      // User navigation
+      switch (notification.type) {
+        case 'kyc':
+        case 'kyc_approval':
+          navigate('/kyc');
+          break;
+        case 'card':
+        case 'card_approval':
+          navigate('/cards');
+          break;
+        case 'deposit':
+        case 'withdrawal':
+        case 'transaction':
+          navigate('/transactions');
+          break;
+        case 'support':
+        case 'support_ticket':
+          navigate('/support-tickets');
+          break;
+        default:
+          navigate('/dashboard');
+      }
+    }
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -136,7 +198,7 @@ const NotificationBell = ({ isAdmin = false }) => {
                     className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer ${
                       !notification.isRead ? 'bg-blue-50/50' : ''
                     }`}
-                    onClick={() => !notification.isRead && markAsRead(notification.id)}
+                    onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex gap-3">
                       <div className="flex-shrink-0 mt-1">

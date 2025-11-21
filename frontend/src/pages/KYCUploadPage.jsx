@@ -190,26 +190,43 @@ export const KYCUploadPage = () => {
         setModal(prev => ({ ...prev, isOpen: false }));
         setIsSubmitting(true);
         try {
-          await apiClient.post('/kyc/submit');
+          console.log('Submitting KYC...');
+          const response = await apiClient.post('/kyc/submit');
+          console.log('KYC submit response:', response);
+          
           setModal({
             isOpen: true,
             type: 'success',
             title: 'KYC Submitted',
             message: 'Your KYC has been submitted successfully! You will be notified once the review is complete.',
-            onConfirm: () => setModal(prev => ({ ...prev, isOpen: false }))
+            onConfirm: () => {
+              setModal(prev => ({ ...prev, isOpen: false }));
+              fetchKYCStatus();
+            }
           });
-          fetchKYCStatus();
         } catch (error) {
-          console.error('Submit failed:', error);
+          console.error('Submit KYC error:', error);
+          console.error('Error response:', error.response);
+          console.error('Error data:', error.response?.data);
+          
+          let errorMessage = 'Failed to submit KYC. Please try again.';
+          
+          if (error.response?.data?.error) {
+            errorMessage = error.response.data.error;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
           setModal({
             isOpen: true,
             type: 'error',
             title: 'Submission Failed',
-            message: error.response?.data?.error || 'Failed to submit KYC. Please try again.',
+            message: errorMessage,
             onConfirm: () => setModal(prev => ({ ...prev, isOpen: false }))
           });
+        } finally {
+          setIsSubmitting(false);
         }
-        setIsSubmitting(false);
       },
       onCancel: () => setModal(prev => ({ ...prev, isOpen: false }))
     });

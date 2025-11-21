@@ -91,20 +91,59 @@ export const SettingsPage = () => {
       return;
     }
 
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(profilePhoto.type)) {
+      setError('Invalid file type. Only JPEG, JPG, PNG, and GIF images are allowed');
+      return;
+    }
+
+    // Validate file size (1MB)
+    const maxSize = 1 * 1024 * 1024;
+    if (profilePhoto.size > maxSize) {
+      setError('File size too large. Maximum size is 1MB');
+      return;
+    }
+
     try {
       setUploadingPhoto(true);
       setError('');
+      setSuccess('');
+      
+      console.log('Uploading profile photo:', profilePhoto.name, profilePhoto.size, profilePhoto.type);
+      
       const formData = new FormData();
       formData.append('profilePhoto', profilePhoto);
 
-      await apiClient.post('/users/profile-photo', formData, {
+      const response = await apiClient.post('/users/profile-photo', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
+      console.log('Profile photo upload response:', response);
+
       setSuccess('Profile photo updated successfully!');
       setProfilePhoto(null);
+      
+      // Refresh user data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to upload photo');
+      console.error('Profile photo upload error:', err);
+      console.error('Error response:', err.response);
+      console.error('Error data:', err.response?.data);
+      
+      let errorMessage = 'Failed to upload photo';
+      
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.details) {
+        errorMessage = `${err.response.data.error}: ${err.response.data.details}`;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setUploadingPhoto(false);
     }
