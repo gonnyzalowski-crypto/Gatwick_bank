@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Shield, CheckCircle2, AlertCircle, Key, RefreshCw } from 'lucide-react';
+import { Lock, Shield, CheckCircle2, AlertCircle, Key, RefreshCw, User, Upload } from 'lucide-react';
 import apiClient from '../lib/apiClient';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import { ActionButton } from '../components/ui/ActionButton';
 import { ErrorState } from '../components/ui/ErrorState';
+import { useAuth } from '../hooks/useAuth';
 
 export const SettingsPage = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('password');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,6 +22,9 @@ export const SettingsPage = () => {
   const [securityQuestion, setSecurityQuestion] = useState(null);
   const [loginPreference, setLoginPreference] = useState('question');
   const [preferenceLoading, setPreferenceLoading] = useState(false);
+  const [profilePhoto, setProfilePhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(user?.profilePhoto || null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     fetchRandomQuestion();
@@ -66,6 +71,43 @@ export const SettingsPage = () => {
     setPasswordData(prev => ({ ...prev, [name]: value }));
     setError('');
     setSuccess('');
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 1024 * 1024) { // 1MB
+        setError('Photo must be less than 1MB');
+        return;
+      }
+      setProfilePhoto(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handlePhotoUpload = async () => {
+    if (!profilePhoto) {
+      setError('Please select a photo');
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      setError('');
+      const formData = new FormData();
+      formData.append('profilePhoto', profilePhoto);
+
+      await apiClient.post('/users/profile-photo', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      setSuccess('Profile photo updated successfully!');
+      setProfilePhoto(null);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to upload photo');
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   const handlePasswordSubmit = async (e) => {
@@ -148,6 +190,17 @@ export const SettingsPage = () => {
               >
                 <Key className="w-4 h-4 inline mr-2" />
                 Login Verification
+              </button>
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === 'profile'
+                    ? 'border-primary-600 text-primary-700'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
+                }`}
+              >
+                <User className="w-4 h-4 inline mr-2" />
+                Profile Photo
               </button>
             </nav>
           </div>
@@ -390,6 +443,94 @@ export const SettingsPage = () => {
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Profile Photo Tab */}
+          {activeTab === 'profile' && (
+            <div className="p-6">
+              <div className="max-w-2xl">
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-neutral-900 mb-2">Profile Photo</h2>
+                  <p className="text-sm text-neutral-600">
+                    Upload a profile photo for your account (Max 1MB)
+                  </p>
+                </div>
+
+                {/* Success Message */}
+                {success && (
+                  <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-emerald-700 text-sm font-medium">{success}</p>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                  </div>
+                )}
+
+                <div className="space-y-6">
+                  {/* Photo Preview */}
+                  <div className="flex items-center gap-6">
+                    <div className="w-32 h-32 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                      {photoPreview ? (
+                        <img src={photoPreview} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <User className="w-16 h-16 text-slate-400" />
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <label className="cursor-pointer">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors">
+                          <Upload className="w-4 h-4" />
+                          Choose Photo
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-xs text-neutral-500 mt-2">
+                        JPG, PNG or GIF. Max size 1MB
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Upload Button */}
+                  {profilePhoto && (
+                    <div className="flex gap-3">
+                      <ActionButton
+                        type="button"
+                        variant="primary"
+                        size="lg"
+                        onClick={handlePhotoUpload}
+                        loading={uploadingPhoto}
+                        disabled={uploadingPhoto}
+                      >
+                        {uploadingPhoto ? 'Uploading...' : 'Upload Photo'}
+                      </ActionButton>
+                      <ActionButton
+                        type="button"
+                        variant="outline"
+                        size="lg"
+                        onClick={() => {
+                          setProfilePhoto(null);
+                          setPhotoPreview(user?.profilePhoto || null);
+                        }}
+                        disabled={uploadingPhoto}
+                      >
+                        Cancel
+                      </ActionButton>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
