@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/apiClient';
-import TransactionListComponent from './TransactionListComponent';
 
 /**
  * AccountDetailsComponent - Shows detailed information about a specific account
@@ -12,26 +11,17 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' or 'transactions'
-  const [paymentHistory, setPaymentHistory] = useState([]);
 
   useEffect(() => {
     const fetchAccountDetails = async () => {
       try {
         setLoading(true);
-        const [accountRes, paymentsRes] = await Promise.all([
-          apiClient.get(`/accounts/${accountId}`),
-          apiClient.get(`/payments/account/${accountId}`),
-        ]);
+        const accountRes = await apiClient.get(`/accounts/${accountId}`);
 
         if (accountRes.success) {
           setAccount(accountRes.account);
         } else {
           setError('Failed to load account details');
-        }
-
-        if (paymentsRes.success) {
-          setPaymentHistory(paymentsRes.payments);
         }
       } catch (err) {
         console.error('Error fetching account details:', err);
@@ -118,43 +108,15 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="flex gap-2 bg-neutral-100 p-1 rounded-xl">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`flex-1 py-2.5 px-4 rounded-lg transition duration-200 font-medium text-sm ${
-            activeTab === 'overview'
-              ? 'bg-white text-neutral-900 shadow-sm'
-              : 'bg-transparent text-neutral-600 hover:text-neutral-900'
-          }`}
-        >
+      {/* Tab Navigation - Only Overview */}
+      <div className="bg-neutral-100 p-1 rounded-xl">
+        <div className="bg-white text-neutral-900 shadow-sm py-2.5 px-4 rounded-lg font-medium text-sm text-center">
           Overview
-        </button>
-        <button
-          onClick={() => setActiveTab('transactions')}
-          className={`flex-1 py-2.5 px-4 rounded-lg transition duration-200 font-medium text-sm ${
-            activeTab === 'transactions'
-              ? 'bg-white text-neutral-900 shadow-sm'
-              : 'bg-transparent text-neutral-600 hover:text-neutral-900'
-          }`}
-        >
-          Transactions
-        </button>
-        <button
-          onClick={() => setActiveTab('payments')}
-          className={`flex-1 py-2.5 px-4 rounded-lg transition duration-200 font-medium text-sm ${
-            activeTab === 'payments'
-              ? 'bg-white text-neutral-900 shadow-sm'
-              : 'bg-transparent text-neutral-600 hover:text-neutral-900'
-          }`}
-        >
-          Payments
-        </button>
+        </div>
       </div>
 
-      {/* Overview Tab */}
-      {activeTab === 'overview' && (
-        <div className="space-y-4">
+      {/* Overview Content */}
+      <div className="space-y-4">
           {/* Account Info */}
           <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4 shadow-sm">
             <h3 className="text-lg font-semibold text-neutral-900">Account Information</h3>
@@ -233,72 +195,7 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
             </button>
           </div>
         </div>
-      )}
-
-      {/* Transactions Tab */}
-      {activeTab === 'transactions' && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-neutral-900">Recent Transactions</h3>
-          <TransactionListComponent accountId={accountId} limit={10} />
-        </div>
-      )}
-
-      {/* Payments Tab */}
-      {activeTab === 'payments' && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-neutral-900">Payment History</h3>
-
-          {paymentHistory && paymentHistory.length > 0 ? (
-            <div className="space-y-3">
-              {paymentHistory.map((payment) => (
-                <div
-                  key={payment.id}
-                  className="bg-white border border-neutral-200 hover:border-neutral-300 rounded-xl p-4 transition duration-200 shadow-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-neutral-900 capitalize">
-                          {payment.type === 'transfer' && '⇔️ Transfer'}
-                          {payment.type === 'p2p' && '👤 P2P Payment'}
-                          {payment.type === 'bill' && '📄 Bill Payment'}
-                          {payment.type === 'refund' && '↩️ Refund'}
-                        </p>
-                        <span
-                          className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                            payment.status === 'completed'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
-                        </span>
-                      </div>
-                      <p className="text-xs text-neutral-600 mt-1 line-clamp-1">{payment.description}</p>
-                    </div>
-                    <div className="text-right ml-4">
-                      <p
-                        className={`text-sm font-bold ${
-                          payment.fromAccountId === accountId ? 'text-red-600' : 'text-green-600'
-                        }`}
-                      >
-                        {payment.fromAccountId === accountId ? '-' : '+'}${payment.amount.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-neutral-500">
-                        {new Date(payment.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white border border-neutral-200 rounded-xl p-8 text-center shadow-sm">
-              <p className="text-neutral-500">No payments for this account</p>
-            </div>
-          )}
-        </div>
-      )}
+      )
     </div>
   );
 };

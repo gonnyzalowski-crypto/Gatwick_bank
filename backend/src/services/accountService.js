@@ -138,10 +138,26 @@ export const getUserAccounts = async (userId) => {
     orderBy: { createdAt: 'desc' },
   });
 
+  // Calculate available and pending balances if not set
+  const updatedAccounts = accounts.map(account => {
+    const balance = Number(account.balance) || 0;
+    const pendingBalance = Number(account.pendingBalance) || 0;
+    const availableBalance = account.availableBalance !== null 
+      ? Number(account.availableBalance) 
+      : balance - pendingBalance;
+
+    return {
+      ...account,
+      balance,
+      availableBalance,
+      pendingBalance
+    };
+  });
+
   return {
     success: true,
-    count: accounts.length,
-    accounts,
+    count: updatedAccounts.length,
+    accounts: updatedAccounts,
   };
 };
 
