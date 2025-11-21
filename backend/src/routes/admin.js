@@ -2371,4 +2371,94 @@ router.delete('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
   }
 });
 
+// Fix missing accounts for users
+// POST /api/v1/mybanker/fix-accounts/:userId
+router.post('/fix-accounts/:userId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    console.log('Fixing accounts for user:', userId);
+    
+    // Check if user exists
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Check existing accounts
+    const existingAccounts = await prisma.account.findMany({
+      where: { userId }
+    });
+    
+    console.log(`User has ${existingAccounts.length} existing accounts`);
+    
+    const createdAccounts = [];
+    
+    // Create Savings account if missing
+    const hasSavings = existingAccounts.some(acc => acc.accountType === 'SAVINGS');
+    if (!hasSavings) {
+      const savingsNumber = `7${String(Math.floor(100000000 + Math.random() * 900000000))}`;
+      const savingsAccount = await prisma.account.create({
+        data: {
+          userId: user.id,
+          accountType: 'SAVINGS',
+          accountNumber: savingsNumber,
+          balance: 0,
+          availableBalance: 0,
+          pendingBalance: 0,
+          currency: 'USD',
+          status: 'ACTIVE',
+          isActive: true,
+          isPrimary: existingAccounts.length === 0 // Primary if first account
+        }
+      });
+      createdAccounts.push(savingsAccount);
+      console.log('Created Savings account:', savingsNumber);
+    }
+    
+    // Create Checking account if missing
+    const hasChecking = existingAccounts.some(acc => acc.accountType === 'CHECKING');
+    if (!hasChecking) {
+      const checkingNumber = `03${String(Math.floor(100000000 + Math.random() * 900000000))}`;
+      const checkingAccount = await prisma.account.create({
+        data: {
+          userId: user.id,
+          accountType: 'CHECKING',
+          accountNumber: checkingNumber,
+          balance: 0,
+          availableBalance: 0,
+          pendingBalance: 0,
+          currency: 'USD',
+          status: 'ACTIVE',
+          isActive: true,
+          isPrimary: false
+        }
+      });
+      createdAccounts.push(checkingAccount);
+      console.log('Created Checking account:', checkingNumber);
+    }
+    
+    if (createdAccounts.length === 0) {
+      return res.json({
+        success: true,
+        message: 'User already has all required accounts',
+        accounts: existingAccounts
+      });
+    }
+    
+    return res.json({
+      success: true,
+      message: `Created ${createdAccounts.length} missing account(s)`,
+      createdAccounts,
+      allAccounts: [...existingAccounts, ...createdAccounts]
+    });
+  } catch (error) {
+    console.error('Fix accounts error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
