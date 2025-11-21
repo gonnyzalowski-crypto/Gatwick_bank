@@ -88,46 +88,124 @@ paymentsRouter.post('/deposit', verifyAuth, upload.single('paymentProof'), async
 
 /**
  * POST /api/v1/payments/withdrawal
- * Withdraw money from an account
+ * Create a withdrawal request (pending admin approval)
  */
 paymentsRouter.post('/withdrawal', verifyAuth, async (req, res) => {
   try {
-    const { accountId, amount, description } = req.body;
+    const { accountId, amount, description, gatewayId, backupCode } = req.body;
 
     if (!accountId) {
       return res.status(400).json({
         success: false,
-        message: 'Account ID is required',
+        error: 'Account ID is required',
       });
     }
 
     if (!amount || amount <= 0) {
       return res.status(400).json({
         success: false,
-        message: 'Amount must be greater than 0',
+        error: 'Amount must be greater than 0',
       });
     }
 
-    const result = await paymentService.withdrawMoney(accountId, req.user.userId, {
-      amount,
-      description: description || 'Withdrawal',
+    if (!backupCode || backupCode.length !== 6) {
+      return res.status(400).json({
+        success: false,
+        error: 'Valid 6-digit backup code is required',
+      });
+    }
+
+    // Verify backup code
+    const validBackupCode = await prisma.backupCode.findFirst({
+      where: {
+        userId: req.user.userId,
+        code: backupCode,
+        isUsed: false
+      }
+    });
+
+    if (!validBackupCode) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid or already used backup code',
+      });
+    }
+
+    // Verify account ownership
+    const account = await prisma.account.findFirst({
+      where: {
+        id: accountId,
+        userId: req.user.userId
+      }
+    });
+
+    if (!account) {
+      return res.status(404).json({
+        success: false,
+        error: 'Account not found or unauthorized',
+      });
+    }
+
+    // Check sufficient balance
+    if (parseFloat(account.balance) < parseFloat(amount)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Insufficient balance',
+      });
+    }
+
+    // Create pending withdrawal request
+    const withdrawal = await prisma.withdrawal.create({
+      data: {
+        userId: req.user.userId,
+        accountId,
+        amount: parseFloat(amount),
+        description: description || 'Withdrawal request',
+        gatewayId,
+        status: 'PENDING',
+        reference: `WTH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+        metadata: {
+          backupCodeUsed: validBackupCode.id
+        }
+      }
+    });
+
+    // Mark backup code as used
+    await prisma.backupCode.update({
+      where: { id: validBackupCode.id },
+      data: { isUsed: true }
+    });
+
+    // Create notification for user
+    await prisma.notification.create({
+      data: {
+        userId: req.user.userId,
+        type: 'withdrawal',
+        title: 'Withdrawal Request Submitted',
+        message: `Your withdrawal request of $${amount} is pending admin approval.`,
+        metadata: {
+          withdrawalId: withdrawal.id,
+          amount: parseFloat(amount)
+        }
+      }
     });
 
     return res.status(201).json({
       success: true,
-      transaction: result.transaction,
+      message: 'Withdrawal request submitted successfully',
+      withdrawal,
     });
   } catch (error) {
     console.error('Error in POST /withdrawal:', error);
 
     if (error.message.includes('Insufficient')) {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({ success: false, error: error.message });
     }
     if (error.message.includes('not found') || error.message.includes('unauthorized')) {
-      return res.status(404).json({ success: false, message: error.message });
+      return res.status(404).json({ success: false, error: error.message });
     }
 
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 

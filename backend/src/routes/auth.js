@@ -505,32 +505,93 @@ router.get('/login-preference', verifyAuth, async (req, res) => {
 // POST /api/v1/users/profile-photo
 router.post('/users/profile-photo', verifyAuth, (req, res) => {
   profilePhotoUpload(req, res, async (err) => {
+    // Handle multer errors with detailed messages
     if (err) {
-      return res.status(400).json({ error: err.message });
+      console.error('Multer upload error:', err);
+      
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ 
+          success: false,
+          error: 'File size too large. Maximum size is 1MB',
+          details: err.message 
+        });
+      }
+      
+      if (err.message.includes('Only image files')) {
+        return res.status(400).json({ 
+          success: false,
+          error: 'Invalid file type. Only JPEG, JPG, PNG, and GIF images are allowed',
+          details: err.message 
+        });
+      }
+      
+      return res.status(400).json({ 
+        success: false,
+        error: 'File upload failed',
+        details: err.message 
+      });
     }
 
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
+      return res.status(400).json({ 
+        success: false,
+        error: 'No file uploaded. Please select an image file' 
+      });
     }
 
     try {
       const userId = req.user.userId;
       const photoPath = `/uploads/profiles/${userId}/${req.file.filename}`;
 
+      // Verify user exists
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          error: 'User not found' 
+        });
+      }
+
       // Update user profile photo in database
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id: userId },
         data: { profilePhoto: photoPath }
       });
 
+      console.log(`Profile photo uploaded successfully for user ${userId}: ${photoPath}`);
+
       return res.json({
         success: true,
         message: 'Profile photo uploaded successfully',
-        photoUrl: photoPath
+        photoUrl: photoPath,
+        user: {
+          id: updatedUser.id,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          email: updatedUser.email,
+          profilePhoto: updatedUser.profilePhoto
+        }
       });
     } catch (error) {
-      console.error('Profile photo upload error:', error);
-      return res.status(500).json({ error: 'Failed to save profile photo' });
+      console.error('Profile photo database error:', error);
+      
+      // Provide specific error messages
+      if (error.code === 'P2025') {
+        return res.status(404).json({ 
+          success: false,
+          error: 'User not found in database',
+          details: error.message 
+        });
+      }
+      
+      return res.status(500).json({ 
+        success: false,
+        error: 'Failed to save profile photo to database',
+        details: error.message 
+      });
     }
   });
 });
