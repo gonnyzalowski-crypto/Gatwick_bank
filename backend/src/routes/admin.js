@@ -2012,7 +2012,6 @@ router.get('/users/:userId/accounts', verifyAuth, verifyAdmin, async (req, res) 
         balance: true,
         availableBalance: true,
         isPrimary: true,
-        status: true,
         isActive: true,
         createdAt: true
       },
@@ -2410,7 +2409,6 @@ router.post('/fix-accounts/:userId', verifyAuth, verifyAdmin, async (req, res) =
           availableBalance: 0,
           pendingBalance: 0,
           currency: 'USD',
-          status: 'ACTIVE',
           isActive: true,
           isPrimary: existingAccounts.length === 0 // Primary if first account
         }
@@ -2432,7 +2430,6 @@ router.post('/fix-accounts/:userId', verifyAuth, verifyAdmin, async (req, res) =
           availableBalance: 0,
           pendingBalance: 0,
           currency: 'USD',
-          status: 'ACTIVE',
           isActive: true,
           isPrimary: false
         }
