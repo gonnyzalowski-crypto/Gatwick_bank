@@ -2001,6 +2001,7 @@ router.post('/withdrawals/:withdrawalId/reject', verifyAuth, verifyAdmin, async 
 router.get('/users/:userId/accounts', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
+    console.log('Fetching accounts for user:', userId);
     
     const accounts = await prisma.account.findMany({
       where: { userId },
@@ -2012,10 +2013,13 @@ router.get('/users/:userId/accounts', verifyAuth, verifyAdmin, async (req, res) 
         availableBalance: true,
         isPrimary: true,
         status: true,
+        isActive: true,
         createdAt: true
       },
       orderBy: { isPrimary: 'desc' }
     });
+    
+    console.log(`Found ${accounts.length} accounts for user ${userId}`);
     
     return res.json({
       success: true,
@@ -2023,7 +2027,8 @@ router.get('/users/:userId/accounts', verifyAuth, verifyAdmin, async (req, res) 
     });
   } catch (error) {
     console.error('Get user accounts error:', error);
-    return res.status(500).json({ error: error.message });
+    console.error('Error details:', error.message);
+    return res.status(500).json({ error: error.message, details: 'Failed to load user accounts' });
   }
 });
 

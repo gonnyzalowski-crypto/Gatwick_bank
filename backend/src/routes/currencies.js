@@ -83,14 +83,35 @@ router.get('/rate/:from/:to', verifyAuth, async (req, res) => {
   }
 });
 
+// Middleware to check admin
+const isAdmin = async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: { role: true }
+    });
+    
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    next();
+  } catch (error) {
+    console.error('Admin check error:', error);
+    return res.status(500).json({ error: 'Failed to verify admin status' });
+  }
+};
+
 // Admin: Create new currency
 // POST /api/v1/currencies
-router.post('/', verifyAuth, async (req, res) => {
+router.post('/', verifyAuth, isAdmin, async (req, res) => {
   try {
+    console.log('Creating currency with data:', req.body);
     const { code, name, symbol, type, exchangeRate } = req.body;
 
     if (!code || !name || !symbol || !type) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      console.error('Missing required fields:', { code, name, symbol, type });
+      return res.status(400).json({ error: 'Missing required fields: code, name, symbol, and type are required' });
     }
 
     // Check if currency already exists
@@ -99,6 +120,7 @@ router.post('/', verifyAuth, async (req, res) => {
     });
 
     if (existing) {
+      console.error('Currency already exists:', code);
       return res.status(400).json({ error: 'Currency already exists' });
     }
 
@@ -115,6 +137,8 @@ router.post('/', verifyAuth, async (req, res) => {
       }
     });
 
+    console.log('Currency created successfully:', currency);
+
     return res.json({
       success: true,
       message: 'Currency created successfully',
@@ -122,13 +146,14 @@ router.post('/', verifyAuth, async (req, res) => {
     });
   } catch (error) {
     console.error('Create currency error:', error);
-    return res.status(500).json({ error: 'Failed to create currency' });
+    console.error('Error details:', error.message);
+    return res.status(500).json({ error: 'Failed to create currency', details: error.message });
   }
 });
 
 // Admin: Update currency
 // PUT /api/v1/currencies/:code
-router.put('/:code', verifyAuth, async (req, res) => {
+router.put('/:code', verifyAuth, isAdmin, async (req, res) => {
   try {
     const { code } = req.params;
     const { name, symbol, exchangeRate, isActive } = req.body;
