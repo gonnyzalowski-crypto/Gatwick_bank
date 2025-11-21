@@ -468,3 +468,103 @@ cardsRouter.get('/all/combined', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+/**
+ * PUT /api/v1/cards/debit/:cardId/change-pin
+ * Change PIN for debit card
+ */
+cardsRouter.put('/debit/:cardId/change-pin', async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const { currentPin, newPin } = req.body;
+
+    if (!currentPin || !newPin) {
+      return res.status(400).json({ error: 'Current PIN and new PIN are required' });
+    }
+
+    if (!/^\d{4}$/.test(newPin)) {
+      return res.status(400).json({ error: 'PIN must be 4 digits' });
+    }
+
+    // Get card and verify ownership
+    const card = await prisma.debitCard.findFirst({
+      where: {
+        id: cardId,
+        userId: req.user.userId
+      }
+    });
+
+    if (!card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    // Verify current PIN
+    if (card.pin !== currentPin) {
+      return res.status(401).json({ error: 'Current PIN is incorrect' });
+    }
+
+    // Update PIN
+    await prisma.debitCard.update({
+      where: { id: cardId },
+      data: { pin: newPin }
+    });
+
+    res.json({
+      success: true,
+      message: 'PIN changed successfully'
+    });
+  } catch (error) {
+    console.error('Error changing debit card PIN:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * PUT /api/v1/cards/credit/:cardId/change-pin
+ * Change PIN for credit card
+ */
+cardsRouter.put('/credit/:cardId/change-pin', async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const { currentPin, newPin } = req.body;
+
+    if (!currentPin || !newPin) {
+      return res.status(400).json({ error: 'Current PIN and new PIN are required' });
+    }
+
+    if (!/^\d{4}$/.test(newPin)) {
+      return res.status(400).json({ error: 'PIN must be 4 digits' });
+    }
+
+    // Get card and verify ownership
+    const card = await prisma.creditCard.findFirst({
+      where: {
+        id: cardId,
+        userId: req.user.userId
+      }
+    });
+
+    if (!card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    // Verify current PIN
+    if (card.pin !== currentPin) {
+      return res.status(401).json({ error: 'Current PIN is incorrect' });
+    }
+
+    // Update PIN
+    await prisma.creditCard.update({
+      where: { id: cardId },
+      data: { pin: newPin }
+    });
+
+    res.json({
+      success: true,
+      message: 'PIN changed successfully'
+    });
+  } catch (error) {
+    console.error('Error changing credit card PIN:', error);
+    res.status(500).json({ error: error.message });
+  }
+});

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { CreditCard, Lock, Unlock, Eye, Snowflake, DollarSign } from 'lucide-react';
+import { CreditCard, Lock, Unlock, Eye, Snowflake, DollarSign, Key } from 'lucide-react';
+import ChangePINModal from '../modals/ChangePINModal';
 
 const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze, onFund }) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [showChangePINModal, setShowChangePINModal] = useState(false);
 
   const getCardGradient = () => {
     if (card.isFrozen) return 'from-slate-600 to-slate-700';
@@ -54,10 +56,16 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
 
           {/* Card Number */}
           <div>
-            <p className="text-2xl font-mono tracking-wider mb-1">
-              {card.cardNumber || '**** **** **** ****'}
-            </p>
-            {type === 'credit' && (
+            {type === 'credit' && card.approvalStatus === 'PENDING' ? (
+              <p className="text-2xl font-mono tracking-wider mb-1">
+                **** **** **** ****
+              </p>
+            ) : (
+              <p className="text-2xl font-mono tracking-wider mb-1">
+                {card.cardNumber || '**** **** **** ****'}
+              </p>
+            )}
+            {type === 'credit' && card.approvalStatus === 'APPROVED' && (
               <div className="flex gap-4 text-xs mt-2">
                 <div>
                   <p className="opacity-70">Available</p>
@@ -131,6 +139,16 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
             Make Payment
           </button>
         )}
+
+        {card.isActive && !card.isFrozen && (type === 'credit' ? card.approvalStatus === 'APPROVED' : true) && (
+          <button
+            onClick={() => setShowChangePINModal(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg transition-colors"
+          >
+            <Key className="w-4 h-4" />
+            Change PIN
+          </button>
+        )}
       </div>
 
       {/* Credit Card Info */}
@@ -142,7 +160,19 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
         </div>
       )}
 
-      {type === 'credit' && card.isActive && (
+      {type === 'credit' && card.approvalStatus === 'PENDING' && (
+        <div className="mt-3 p-3 bg-slate-800 rounded-lg space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-slate-400">APR:</span>
+            <span className="text-white font-semibold">{card.apr || 14}%</span>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">
+            Card details will be visible once approved by admin
+          </p>
+        </div>
+      )}
+
+      {type === 'credit' && card.approvalStatus === 'APPROVED' && card.isActive && (
         <div className="mt-3 p-3 bg-slate-800 rounded-lg space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-400">Credit Limit:</span>
@@ -150,7 +180,7 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">APR:</span>
-            <span className="text-white font-semibold">{card.apr}%</span>
+            <span className="text-white font-semibold">{card.apr || 14}%</span>
           </div>
           {card.minimumPayment > 0 && (
             <div className="flex justify-between">
@@ -160,6 +190,14 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
           )}
         </div>
       )}
+
+      {/* Change PIN Modal */}
+      <ChangePINModal
+        isOpen={showChangePINModal}
+        onClose={() => setShowChangePINModal(false)}
+        card={card}
+        cardType={type}
+      />
     </div>
   );
 };

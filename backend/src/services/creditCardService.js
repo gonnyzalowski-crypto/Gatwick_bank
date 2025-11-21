@@ -68,11 +68,12 @@ export const applyCreditCard = async (userId, requestedLimit, cardHolderName) =>
       creditLimit: requestedLimit,
       availableCredit: 0, // Will be set upon approval
       currentBalance: 0,
-      apr: 0, // Will be set by admin
+      apr: 14, // Default APR 14%, can be adjusted by admin
       status: 'PENDING',
       approvalStatus: 'PENDING',
       isActive: false,
-      isFrozen: false
+      isFrozen: false,
+      pin: '1234' // Default PIN
     }
   });
 

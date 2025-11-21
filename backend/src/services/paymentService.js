@@ -386,28 +386,47 @@ export const getPaymentStats = async (userId) => {
   const since = new Date();
   since.setMonth(since.getMonth() - 1);
 
-  const transactions = await prisma.transaction.findMany({
-    where: {
-      type: 'debit',
-      account: { userId },
-      createdAt: { gte: since },
-    },
-  });
+  // Get all transactions for user's accounts
+  const [sentTransactions, receivedTransactions] = await Promise.all([
+    prisma.transaction.findMany({
+      where: {
+        type: { in: ['DEBIT', 'WITHDRAWAL', 'PAYMENT'] },
+        account: { userId },
+        createdAt: { gte: since },
+      },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        type: { in: ['CREDIT', 'DEPOSIT'] },
+        account: { userId },
+        createdAt: { gte: since },
+      },
+    }),
+  ]);
 
-  let totalSpent = 0;
+  let totalSent = 0;
+  let totalReceived = 0;
   const byCategory = {};
 
-  for (const tx of transactions) {
+  for (const tx of sentTransactions) {
     const amountNum = Number(tx.amount);
-    totalSpent += amountNum;
+    totalSent += amountNum;
     const key = tx.category || 'uncategorized';
     byCategory[key] = (byCategory[key] || 0) + amountNum;
   }
 
+  for (const tx of receivedTransactions) {
+    const amountNum = Number(tx.amount);
+    totalReceived += amountNum;
+  }
+
   return {
     periodDays: 30,
-    totalSpent,
+    totalPayments: sentTransactions.length + receivedTransactions.length,
+    totalSent: totalSent || 0,
+    totalReceived: totalReceived || 0,
+    totalSpent: totalSent,
     byCategory,
-    count: transactions.length,
+    count: sentTransactions.length,
   };
 };

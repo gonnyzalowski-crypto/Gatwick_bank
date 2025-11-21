@@ -66,7 +66,8 @@ export const createDebitCard = async (userId, accountId, cardHolderName) => {
       cardBrand: 'MASTERCARD',
       isActive: true,
       isFrozen: false,
-      dailyLimit: 5000
+      dailyLimit: 5000,
+      pin: '1234' // Default PIN
     }
   });
 
