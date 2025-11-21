@@ -45,10 +45,10 @@ const isAdmin = async (req, res, next) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      select: { role: true }
+      select: { isAdmin: true }
     });
     
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !user.isAdmin) {
       return res.status(403).json({ error: 'Admin access required' });
     }
     
