@@ -25,9 +25,9 @@ const SupportTicketsPage = () => {
   }, []);
 
   const fetchTickets = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await apiClient.get('/support/tickets');
+      const response = await apiClient.get('/support-tickets/tickets');
       if (response.success) {
         setTickets(response.tickets || []);
       }
@@ -44,11 +44,11 @@ const SupportTicketsPage = () => {
     setError('');
 
     try {
-      const response = await apiClient.post('/support/tickets', {
+      const response = await apiClient.post('/support-tickets/tickets', {
         subject,
         category,
         priority,
-        description
+        message: description  // Backend expects 'message' not 'description'
       });
 
       if (response.success) {
@@ -75,14 +75,14 @@ const SupportTicketsPage = () => {
 
     setSending(true);
     try {
-      const response = await apiClient.post(`/support/tickets/${selectedTicket.id}/messages`, {
+      const response = await apiClient.post(`/support-tickets/tickets/${selectedTicket.id}/messages`, {
         message: newMessage
       });
 
       if (response.success) {
         setNewMessage('');
         // Refresh ticket
-        const ticketResponse = await apiClient.get(`/support/tickets/${selectedTicket.id}`);
+        const ticketResponse = await apiClient.get(`/support-tickets/tickets/${selectedTicket.id}`);
         if (ticketResponse.success) {
           setSelectedTicket(ticketResponse.ticket);
           // Update in list
