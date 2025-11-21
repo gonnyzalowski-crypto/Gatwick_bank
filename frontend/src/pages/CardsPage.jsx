@@ -32,14 +32,16 @@ export const CardsPage = () => {
   const [revealError, setRevealError] = useState('');
   const [revealing, setRevealing] = useState(false);
 
-  // Helper function to format card number
-  const formatCardNumber = (encryptedNumber) => {
+  // Helper function to format card number with proper prefix
+  const formatCardNumber = (encryptedNumber, cardType) => {
     try {
       if (!encryptedNumber) return '•••• •••• •••• ••••';
       // Decode base64 card number
       const decoded = atob(encryptedNumber);
       const lastFour = decoded.slice(-4);
-      return `5175 •••• •••• ${lastFour}`;
+      // Use 4062 prefix for debit, 5175 for credit
+      const prefix = cardType === 'CREDIT' ? '5175' : '4062';
+      return `${prefix} •••• •••• ${lastFour}`;
     } catch (error) {
       console.error('Error formatting card number:', error);
       return '•••• •••• •••• ••••';
@@ -250,15 +252,24 @@ export const CardsPage = () => {
           </div>
         )}
 
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowCreateModal(true)}
-            className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-sm font-medium text-white transition-colors"
-          >
-            + Create new card
-          </button>
-        </div>
+        {/* Only show create button if user doesn't have both card types */}
+        {(() => {
+          const hasDebit = cards.some(c => c.cardType === 'DEBIT');
+          const hasCredit = cards.some(c => c.cardType === 'CREDIT');
+          const canCreateCard = !hasDebit || !hasCredit;
+          
+          return canCreateCard ? (
+            <div>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-sm font-medium text-white transition-colors"
+              >
+                + Create new card
+              </button>
+            </div>
+          ) : null;
+        })()}
 
         <Modal
           isOpen={showCreateModal}
@@ -405,10 +416,10 @@ export const CardsPage = () => {
                       )}
                     </div>
 
-                    {/* Card Visual */}
+                    {/* Card Visual - Non-clickable */}
                     <div className="flex items-start gap-4 mb-6">
                       <div 
-                        className={`relative w-72 h-44 rounded-3xl p-6 flex flex-col justify-between text-white shadow-2xl cursor-pointer hover:scale-105 transition-all duration-300 overflow-hidden ${
+                        className={`relative w-72 h-44 rounded-3xl p-6 flex flex-col justify-between text-white shadow-2xl overflow-hidden ${
                           isPending ? 'opacity-60' : ''
                         }`}
                         style={{
@@ -416,7 +427,6 @@ export const CardsPage = () => {
                             ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #7c3aed 100%)'
                             : 'linear-gradient(135deg, #ef4444 0%, #f97316 50%, #ec4899 100%)'
                         }}
-                        onClick={() => !isPending && setSelectedCardId(card.id)}
                       >
                         {/* Decorative Circles */}
                         <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10"></div>
@@ -433,36 +443,20 @@ export const CardsPage = () => {
                           {/* Card Type */}
                           <div className="text-right">
                             <p className="text-xs font-medium text-white/80 mb-1">{isCredit ? 'Credit Card' : 'Debit Card'}</p>
-                            {!isCredit && !isPending && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRevealCard(card);
-                                }}
-                                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
-                                title="Reveal full card details"
-                              >
-                                <Eye className="w-4 h-4" />
-                              </button>
-                            )}
                           </div>
                         </div>
                         
                         {/* Card Number */}
                         <div className="relative z-10">
                           <p className="text-xl font-mono tracking-[0.2em] mb-4 drop-shadow-md">
-                            {formatCardNumber(card.cardNumber)}
+                            {formatCardNumber(card.cardNumber, card.cardType)}
                           </p>
                           
-                          {/* Card Holder & Expiry */}
+                          {/* Card Holder Only - Expiry Hidden */}
                           <div className="flex justify-between items-end">
                             <div>
                               <p className="text-[10px] font-medium text-white/70 mb-1 uppercase tracking-wider">Card Holder</p>
                               <p className="text-sm font-semibold tracking-wide">{card.cardHolderName || 'CARD HOLDER'}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[10px] font-medium text-white/70 mb-1 uppercase tracking-wider">Expires</p>
-                              <p className="text-sm font-semibold tracking-wide">{new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}</p>
                             </div>
                           </div>
                         </div>
@@ -476,16 +470,6 @@ export const CardsPage = () => {
                         </div>
                       </div>
                       
-                      {/* Add New Card Button */}
-                      <button
-                        onClick={() => setShowCreateModal(true)}
-                        className="w-32 h-40 rounded-2xl border-2 border-dashed border-neutral-300 hover:border-primary-400 hover:bg-primary-50/50 flex flex-col items-center justify-center gap-2 transition-all group"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-neutral-100 group-hover:bg-primary-100 flex items-center justify-center transition-colors">
-                          <Plus className="w-6 h-6 text-neutral-400 group-hover:text-primary-600" />
-                        </div>
-                        <p className="text-xs font-medium text-neutral-500 group-hover:text-primary-600">Add Card</p>
-                      </button>
                     </div>
 
                     {/* Card Info Section */}

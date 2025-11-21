@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import apiClient from '../lib/apiClient';
 import AccountDetailsComponent from '../components/AccountDetailsComponent';
+import CryptoAccountPage from './CryptoAccountPage';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import AccountCreationModal from '../components/modals/AccountCreationModal';
 import { RefreshCw } from 'lucide-react';
@@ -70,6 +71,19 @@ export const AccountsPage = () => {
 
   // Show account details if one is selected
   if (selectedAccountId) {
+    const selectedAccount = accounts.find(acc => acc.id === selectedAccountId);
+    
+    // Show crypto account page for crypto wallets
+    if (selectedAccount?.accountType === 'CRYPTO_WALLET') {
+      return (
+        <CryptoAccountPage
+          accountId={selectedAccountId}
+          onBack={() => setSelectedAccountId(null)}
+        />
+      );
+    }
+    
+    // Show regular account details for other accounts
     return (
       <UserDashboardLayout>
         <div className="max-w-6xl mx-auto space-y-6">
