@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { generateCryptoWalletAddress, detectCryptoType } from '../utils/walletGenerator.js';
 
 // Generate 10-digit account number starting with 7
 export const generateAccountNumber = (accountType) => {
@@ -45,7 +46,15 @@ export const calculateBalances = async (accountId) => {
 
 // Create new account
 export const createAccount = async (userId, accountType, accountName) => {
-  const accountNumber = generateAccountNumber(accountType);
+  let accountNumber;
+  
+  // Generate wallet address for crypto accounts, regular account number for others
+  if (accountType === 'CRYPTO_WALLET') {
+    const cryptoType = detectCryptoType(accountName);
+    accountNumber = generateCryptoWalletAddress(cryptoType);
+  } else {
+    accountNumber = generateAccountNumber(accountType);
+  }
   
   const account = await prisma.account.create({
     data: {

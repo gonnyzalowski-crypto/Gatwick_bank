@@ -5,6 +5,8 @@ import apiClient from '../lib/apiClient';
 import AccountDetailsComponent from '../components/AccountDetailsComponent';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import AccountCreationModal from '../components/modals/AccountCreationModal';
+import { RefreshCw } from 'lucide-react';
+import CryptoAccountCard from '../components/CryptoAccountCard';
 
 /**
  * AccountsPage - Shows all user accounts
@@ -119,73 +121,83 @@ export const AccountsPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {accounts.map((account) => (
-              <button
-                type="button"
-                key={account.id}
-                onClick={() => setSelectedAccountId(account.id)}
-                className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:border-blue-300 hover:shadow-md transition-colors text-left"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">
-                      {account.accountType.charAt(0).toUpperCase() + account.accountType.slice(1)} Account
+            {accounts.map((account) =>
+              account.accountType === 'CRYPTO_WALLET' ? (
+                <CryptoAccountCard
+                  key={account.id}
+                  account={account}
+                  onClick={() => setSelectedAccountId(account.id)}
+                  formatCurrency={formatCurrency}
+                  formatDate={formatDate}
+                />
+              ) : (
+                <button
+                  type="button"
+                  key={account.id}
+                  onClick={() => setSelectedAccountId(account.id)}
+                  className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:border-blue-300 hover:shadow-md transition-colors text-left"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">
+                        {account.accountType.charAt(0).toUpperCase() + account.accountType.slice(1)} Account
+                      </p>
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        •••• {account.accountNumber.slice(-4)}
+                      </h3>
+                    </div>
+                    <span
+                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                        account.isActive
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                          : 'bg-slate-50 text-slate-600 border-slate-200'
+                      }`}
+                    >
+                      {account.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                  </div>
+
+                  <div className="mb-4 pb-4 border-b border-slate-100">
+                    <p className="text-xs text-slate-500 mb-1">Current Balance</p>
+                    <p className="text-2xl font-semibold text-slate-900">
+                      {formatCurrency(account.balance)}
                     </p>
-                    <h3 className="text-lg font-semibold text-slate-900">
-                      •••• {account.accountNumber.slice(-4)}
-                    </h3>
-                  </div>
-                  <span
-                    className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
-                      account.isActive
-                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                        : 'bg-slate-50 text-slate-600 border-slate-200'
-                    }`}
-                  >
-                    {account.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-
-                <div className="mb-4 pb-4 border-b border-slate-100">
-                  <p className="text-xs text-slate-500 mb-1">Current Balance</p>
-                  <p className="text-2xl font-semibold text-slate-900">
-                    {formatCurrency(account.balance)}
-                  </p>
-                  <div className="flex gap-4 mt-2">
-                    <div>
-                      <p className="text-[10px] text-slate-400">Available</p>
-                      <p className="text-xs font-medium text-green-600">
-                        {formatCurrency(account.availableBalance || 0)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-400">Pending</p>
-                      <p className="text-xs font-medium text-yellow-600">
-                        {formatCurrency(account.pendingBalance || 0)}
-                      </p>
+                    <div className="flex gap-4 mt-2">
+                      <div>
+                        <p className="text-[10px] text-slate-400">Available</p>
+                        <p className="text-xs font-medium text-green-600">
+                          {formatCurrency(account.availableBalance || 0)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-slate-400">Pending</p>
+                        <p className="text-xs font-medium text-yellow-600">
+                          {formatCurrency(account.pendingBalance || 0)}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-2 text-xs text-slate-500">
-                  <div className="flex justify-between">
-                    <span>Currency</span>
-                    <span className="text-slate-900 font-medium">{account.currency}</span>
+                  <div className="space-y-2 text-xs text-slate-500">
+                    <div className="flex justify-between">
+                      <span>Currency</span>
+                      <span className="text-slate-900 font-medium">{account.currency}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Created</span>
+                      <span className="text-slate-900 font-medium">{formatDate(account.createdAt)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Created</span>
-                    <span className="text-slate-900 font-medium">{formatDate(account.createdAt)}</span>
-                  </div>
-                </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-100">
-                  <p className="text-[11px] text-blue-600 font-medium flex items-center gap-1">
-                    View details
-                    <span aria-hidden>→</span>
-                  </p>
-                </div>
-              </button>
-            ))}
+                  <div className="mt-4 pt-3 border-t border-slate-100">
+                    <p className="text-[11px] text-blue-600 font-medium flex items-center gap-1">
+                      View details
+                      <span aria-hidden>→</span>
+                    </p>
+                  </div>
+                </button>
+              )
+            )}
           </div>
         )}
 

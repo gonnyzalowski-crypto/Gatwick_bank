@@ -23,6 +23,7 @@ import AdminSettings from './admin/AdminSettings';
 import GatewayManagement from './admin/GatewayManagement';
 import CardsManagement from '../components/admin/CardsManagement';
 import { SupportTicketsPage as AdminSupportTickets } from './admin/SupportTicketsPage';
+import CurrencyManagement from './admin/CurrencyManagement';
 import NotificationBell from '../components/NotificationBell';
 
 export const AdminDashboard = () => {
@@ -225,8 +226,9 @@ export const AdminDashboard = () => {
             expanded={expandedMenus.finances}
             onClick={() => toggleMenu('finances')}
           >
-            <SubMenuItem label="Deposit" onClick={() => setActiveSection('deposit')} />
-            <SubMenuItem label="Cheque" onClick={() => setActiveSection('cheque')} />
+            <SubMenuItem label="Deposit" active={activeSection === 'deposit'} onClick={() => setActiveSection('deposit')} />
+            <SubMenuItem label="Withdrawal" active={activeSection === 'withdrawal'} onClick={() => setActiveSection('withdrawal')} />
+            <SubMenuItem label="Cheque" active={activeSection === 'cheque'} onClick={() => setActiveSection('cheque')} />
             <SubMenuItem 
               label="Transactions" 
               active={activeSection === 'transactions'}
@@ -280,6 +282,11 @@ export const AdminDashboard = () => {
               onClick={() => setActiveSection('payment-gateways')} 
             />
             <SubMenuItem 
+              label="Currencies" 
+              active={activeSection === 'currencies'}
+              onClick={() => setActiveSection('currencies')} 
+            />
+            <SubMenuItem 
               label="System Settings" 
               active={activeSection === 'tool-settings'}
               onClick={() => setActiveSection('tool-settings')} 
@@ -317,6 +324,7 @@ export const AdminDashboard = () => {
                   {activeSection === 'audit-logs' && 'Audit Logs'}
                   {activeSection === 'backup-codes' && 'Backup Codes Management'}
                   {activeSection === 'deposit' && 'Deposit Management'}
+                  {activeSection === 'withdrawal' && 'Withdrawal Management'}
                   {activeSection === 'cheque' && 'Cheque Management'}
                   {activeSection === 'cards' && 'Cards Management'}
                   {activeSection === 'transfer-approvals' && 'Transfer Approvals'}
@@ -473,6 +481,9 @@ export const AdminDashboard = () => {
           {/* Deposit Management */}
           {activeSection === 'deposit' && <DepositManagement />}
 
+          {/* Withdrawal Management */}
+          {activeSection === 'withdrawal' && <DepositManagement />}
+
           {/* Cheque Management */}
           {activeSection === 'cheque' && <ChequeManagement />}
 
@@ -485,12 +496,15 @@ export const AdminDashboard = () => {
           {/* Payment Gateways */}
           {activeSection === 'payment-gateways' && <GatewayManagement />}
 
+          {/* Currencies */}
+          {activeSection === 'currencies' && <CurrencyManagement />}
+
           {/* Tools */}
           {activeSection === 'info' && <SystemInfo />}
           {activeSection === 'tool-settings' && <AdminSettings />}
 
           {/* Other sections show placeholder */}
-          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways'].includes(activeSection) && (
+          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'withdrawal', 'cheque', 'cards', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets'].includes(activeSection) && (
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4">

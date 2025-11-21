@@ -183,35 +183,31 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
         
-        <div className="relative bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="relative bg-white border border-neutral-200 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
-          <div className="sticky top-0 bg-slate-800 border-b border-slate-700 p-6 flex items-center justify-between z-10">
-            <h2 className="text-2xl font-bold text-white">Send Money</h2>
+          <div className="sticky top-0 bg-white border-b border-neutral-200 p-6 flex items-center justify-between z-10">
+            <h2 className="text-2xl font-bold text-neutral-900">Send Money</h2>
             <button
               onClick={handleClose}
-              className="p-2 text-slate-400 hover:text-slate-300 hover:bg-slate-700 rounded-full transition-colors"
+              className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-slate-700">
+          <div className="border-b border-neutral-200">
             <div className="flex overflow-x-auto">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => {
-                      setActiveTab(tab.id);
-                      setShowBackupCodeStep(false);
-                      resetForm();
-                    }}
+                    onClick={() => setActiveTab(tab.id)}
                     className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors whitespace-nowrap ${
                       activeTab === tab.id
-                        ? 'text-indigo-400 border-b-2 border-indigo-400'
-                        : 'text-slate-400 hover:text-slate-300'
+                        ? 'text-primary-600 border-b-2 border-primary-600'
+                        : 'text-neutral-500 hover:text-neutral-700'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -228,13 +224,13 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* From Account */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">From Account *</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">From Account *</label>
                   <select
                     name="fromAccount"
                     value={formData.fromAccount}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   >
                     <option value="">Select account</option>
                     {userAccounts?.map(acc => (
@@ -248,13 +244,13 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
                 {/* Internal Transfer Fields */}
                 {activeTab === 'internal' && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">To Account *</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">To Account *</label>
                     <select
                       name="toAccount"
                       value={formData.toAccount}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     >
                       <option value="">Select account</option>
                       {userAccounts?.filter(acc => acc.id !== formData.fromAccount).map(acc => (
@@ -269,7 +265,7 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
                 {/* P2P Transfer Fields */}
                 {activeTab === 'p2p' && (
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Recipient Account Number *</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Recipient Account Number *</label>
                     <input
                       type="text"
                       name="recipientAccountNumber"
@@ -277,7 +273,7 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
                       onChange={handleChange}
                       required
                       placeholder="Enter recipient's account number"
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     />
                   </div>
                 )}
@@ -286,19 +282,19 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
                 {activeTab === 'domestic' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Bank Name *</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Bank Name *</label>
                       <input
                         type="text"
                         name="bankName"
                         value={formData.bankName}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Routing Number *</label>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">Routing Number *</label>
                         <input
                           type="text"
                           name="routingNumber"
@@ -306,30 +302,30 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
                           onChange={handleChange}
                           required
                           placeholder="9 digits"
-                          className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                          className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">Account Number *</label>
+                        <label className="block text-sm font-medium text-neutral-700 mb-2">Account Number *</label>
                         <input
                           type="text"
                           name="recipientAccountNumber"
                           value={formData.recipientAccountNumber}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                          className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Account Holder Name *</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Account Holder Name *</label>
                       <input
                         type="text"
                         name="accountHolderName"
                         value={formData.accountHolderName}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                     </div>
                   </>
@@ -339,36 +335,36 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
                 {activeTab === 'bill' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Biller Name *</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Biller Name *</label>
                       <input
                         type="text"
                         name="billerName"
                         value={formData.billerName}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Biller Account Number *</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Biller Account Number *</label>
                       <input
                         type="text"
                         name="billerAccountNumber"
                         value={formData.billerAccountNumber}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-2">Payment Date *</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">Payment Date *</label>
                       <input
                         type="date"
                         name="paymentDate"
                         value={formData.paymentDate}
                         onChange={handleChange}
                         required
-                        className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                        className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       />
                     </div>
                   </>
@@ -376,7 +372,7 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
 
                 {/* Common Fields */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Amount *</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Amount *</label>
                   <input
                     type="number"
                     name="amount"
@@ -386,19 +382,19 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
                     step="0.01"
                     min="0.01"
                     placeholder="0.00"
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Description</label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
                     rows={3}
                     placeholder="Optional note"
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
 
@@ -422,40 +418,40 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
               </form>
             ) : (
               <div className="space-y-4">
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                  <p className="text-yellow-400 text-sm">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-700 text-sm">
                     For security, please enter one of your 6-digit backup codes to authorize this transaction.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">6-Digit Backup Code *</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">6-Digit Backup Code *</label>
                   <input
                     type="text"
                     value={backupCode}
                     onChange={(e) => setBackupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     placeholder="000000"
                     maxLength={6}
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center text-2xl tracking-widest focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-900 text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono"
                   />
                 </div>
 
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowBackupCodeStep(false)}
-                    className="flex-1 px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
+                    className="flex-1 px-6 py-3 bg-white border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-medium rounded-lg transition-colors"
                   >
                     Back
                   </button>
                   <button
                     onClick={processWithBackupCode}
                     disabled={isLoading || backupCode.length !== 6}
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-medium rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing...
+                        Verifying...
                       </>
                     ) : (
                       'Submit'

@@ -74,7 +74,7 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-lg">
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
         {error}
       </div>
     );
@@ -82,8 +82,8 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
 
   if (!account) {
     return (
-      <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-8 text-center">
-        <p className="text-slate-400">Account not found</p>
+      <div className="bg-white border border-neutral-200 rounded-xl p-8 text-center shadow-sm">
+        <p className="text-neutral-500">Account not found</p>
       </div>
     );
   }
@@ -91,30 +91,27 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-3 mb-6">
         <button
           onClick={onBack}
-          className="text-blue-400 hover:text-blue-300 transition duration-200 flex items-center gap-2"
+          className="text-primary-600 hover:text-primary-700 transition duration-200 flex items-center gap-2 font-medium"
         >
           ← Back
         </button>
-        <h2 className="text-2xl font-bold text-white">
-          {account.accountType.charAt(0).toUpperCase() + account.accountType.slice(1)} Account
-        </h2>
       </div>
 
       {/* Main Balance Card */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-6 text-white shadow-lg">
-        <p className="text-blue-100 text-sm mb-2">Account Balance</p>
-        <h3 className="text-4xl font-bold mb-4">{formatCurrency(account.balance)}</h3>
+      <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 rounded-2xl p-8 text-white shadow-xl">
+        <p className="text-primary-100 text-sm mb-2 font-medium">Account Balance</p>
+        <h3 className="text-5xl font-bold mb-6">{formatCurrency(account.balance)}</h3>
         <div className="flex justify-between items-end">
           <div>
-            <p className="text-xs text-blue-100">Account Number</p>
-            <p className="text-sm font-mono text-white">{maskAccountNumber(account.accountNumber)}</p>
+            <p className="text-xs text-primary-100 mb-1">Account Number</p>
+            <p className="text-base font-mono text-white">{maskAccountNumber(account.accountNumber)}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-blue-100">{account.currency}</p>
-            <p className={`text-sm font-semibold ${account.isActive ? 'text-green-300' : 'text-red-300'}`}>
+            <p className="text-xs text-primary-100 mb-1">{account.currency}</p>
+            <p className={`text-sm font-semibold px-3 py-1 rounded-full ${account.isActive ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
               {account.isActive ? 'Active' : 'Inactive'}
             </p>
           </div>
@@ -122,33 +119,33 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 bg-slate-700/50 p-1 rounded-lg">
+      <div className="flex gap-2 bg-neutral-100 p-1 rounded-xl">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`flex-1 py-2 px-4 rounded transition duration-200 font-semibold ${
+          className={`flex-1 py-2.5 px-4 rounded-lg transition duration-200 font-medium text-sm ${
             activeTab === 'overview'
-              ? 'bg-blue-500 text-white'
-              : 'bg-transparent text-slate-400 hover:text-white'
+              ? 'bg-white text-neutral-900 shadow-sm'
+              : 'bg-transparent text-neutral-600 hover:text-neutral-900'
           }`}
         >
           Overview
         </button>
         <button
           onClick={() => setActiveTab('transactions')}
-          className={`flex-1 py-2 px-4 rounded transition duration-200 font-semibold ${
+          className={`flex-1 py-2.5 px-4 rounded-lg transition duration-200 font-medium text-sm ${
             activeTab === 'transactions'
-              ? 'bg-blue-500 text-white'
-              : 'bg-transparent text-slate-400 hover:text-white'
+              ? 'bg-white text-neutral-900 shadow-sm'
+              : 'bg-transparent text-neutral-600 hover:text-neutral-900'
           }`}
         >
           Transactions
         </button>
         <button
           onClick={() => setActiveTab('payments')}
-          className={`flex-1 py-2 px-4 rounded transition duration-200 font-semibold ${
+          className={`flex-1 py-2.5 px-4 rounded-lg transition duration-200 font-medium text-sm ${
             activeTab === 'payments'
-              ? 'bg-blue-500 text-white'
-              : 'bg-transparent text-slate-400 hover:text-white'
+              ? 'bg-white text-neutral-900 shadow-sm'
+              : 'bg-transparent text-neutral-600 hover:text-neutral-900'
           }`}
         >
           Payments
@@ -159,68 +156,60 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
       {activeTab === 'overview' && (
         <div className="space-y-4">
           {/* Account Info */}
-          <div className="bg-slate-700 border border-slate-600 rounded-lg p-4 space-y-3">
-            <h3 className="text-lg font-bold text-white">Account Information</h3>
+          <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4 shadow-sm">
+            <h3 className="text-lg font-semibold text-neutral-900">Account Information</h3>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center pb-2 border-b border-slate-600">
-                <span className="text-slate-400">Type</span>
-                <span className="text-white font-medium capitalize">{account.accountType}</span>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                <span className="text-neutral-600 text-sm">Type</span>
+                <span className="text-neutral-900 font-medium capitalize">{account.accountType.replace('_', ' ')}</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-slate-600">
-                <span className="text-slate-400">Currency</span>
-                <span className="text-white font-medium">{account.currency}</span>
+              <div className="flex justify-between items-center py-3 border-b border-neutral-100">
+                <span className="text-neutral-600 text-sm">Currency</span>
+                <span className="text-neutral-900 font-medium">{account.currency}</span>
               </div>
-              <div className="flex justify-between items-center pb-2 border-b border-slate-600">
-                <span className="text-slate-400">Status</span>
-                <span className={`font-medium ${account.isActive ? 'text-green-400' : 'text-red-400'}`}>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-neutral-600 text-sm">Status</span>
+                <span className={`font-medium px-3 py-1 rounded-full text-sm ${account.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                   {account.isActive ? 'Active' : 'Inactive'}
                 </span>
-              </div>
-              <div className="flex justify-between items-center pb-2 border-b border-slate-600">
-                <span className="text-slate-400">Created</span>
-                <span className="text-white font-medium">{formatDate(account.createdAt)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-slate-400">Last Updated</span>
-                <span className="text-white font-medium">{formatDate(account.updatedAt)}</span>
               </div>
             </div>
           </div>
 
           {/* Cards Associated */}
           {account.cards && account.cards.length > 0 && (
-            <div className="bg-slate-700 border border-slate-600 rounded-lg p-4 space-y-3">
-              <h3 className="text-lg font-bold text-white">Associated Cards ({account.cards.length})</h3>
+            <div className="bg-white border border-neutral-200 rounded-xl p-6 space-y-4 shadow-sm">
+              <h3 className="text-lg font-semibold text-neutral-900">Associated Cards ({account.cards.length})</h3>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {account.cards.map((card) => (
                   <div
                     key={card.id}
-                    className="flex items-center justify-between bg-slate-600 rounded p-3 hover:bg-slate-500 transition duration-200 cursor-pointer group"
+                    className="flex items-center justify-between bg-neutral-50 rounded-lg p-4 hover:bg-neutral-100 transition duration-200 cursor-pointer group"
                   >
                     <div className="flex-1">
-                      <p className="text-sm font-semibold text-white capitalize">{card.cardType} Card</p>
-                      <p className="text-xs text-slate-300">
+                      <p className="text-sm font-semibold text-neutral-900 capitalize">{card.cardType} Card</p>
+                      <p className="text-xs text-neutral-600">
                         •••• •••• •••• {card.cardNumber.slice(-4)} | Limit: ${card.dailyLimit.toFixed(2)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span
-                        className={`text-xs font-semibold px-2 py-1 rounded ${
+                        className={`text-xs font-semibold px-2 py-1 rounded-full ${
                           card.isActive
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-red-500/20 text-red-400'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
                         }`}
                       >
                         {card.isActive ? 'Active' : 'Inactive'}
                       </span>
                       {card.isFrozen && (
-                        <span className="text-xs font-semibold px-2 py-1 rounded bg-blue-500/20 text-blue-300">
+                        <span className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700">
                           Frozen
                         </span>
                       )}
-                      <span className="text-slate-400 group-hover:text-blue-400 transition duration-200">→</span>
+                      <span className="text-neutral-400 group-hover:text-primary-600 transition duration-200">→</span>
                     </div>
                   </div>
                 ))}
@@ -232,13 +221,13 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={() => navigate('/payments')}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+              className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition duration-200 shadow-sm"
             >
               Transfer Money
             </button>
             <button 
               onClick={() => navigate('/cards')}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200"
+              className="bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-xl transition duration-200 shadow-sm"
             >
               Add Card
             </button>
@@ -249,7 +238,7 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
       {/* Transactions Tab */}
       {activeTab === 'transactions' && (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white">Recent Transactions</h3>
+          <h3 className="text-lg font-semibold text-neutral-900">Recent Transactions</h3>
           <TransactionListComponent accountId={accountId} limit={10} />
         </div>
       )}
@@ -257,45 +246,45 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
       {/* Payments Tab */}
       {activeTab === 'payments' && (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white">Payment History</h3>
+          <h3 className="text-lg font-semibold text-neutral-900">Payment History</h3>
 
           {paymentHistory && paymentHistory.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {paymentHistory.map((payment) => (
                 <div
                   key={payment.id}
-                  className="bg-slate-600 hover:bg-slate-500 rounded-lg p-3 transition duration-200"
+                  className="bg-white border border-neutral-200 hover:border-neutral-300 rounded-xl p-4 transition duration-200 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-white capitalize">
-                          {payment.type === 'transfer' && '↔️ Transfer'}
+                        <p className="text-sm font-semibold text-neutral-900 capitalize">
+                          {payment.type === 'transfer' && '⇔️ Transfer'}
                           {payment.type === 'p2p' && '👤 P2P Payment'}
                           {payment.type === 'bill' && '📄 Bill Payment'}
                           {payment.type === 'refund' && '↩️ Refund'}
                         </p>
                         <span
-                          className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                          className={`text-xs font-semibold px-2 py-1 rounded-full ${
                             payment.status === 'completed'
-                              ? 'bg-green-500/20 text-green-400'
-                              : 'bg-yellow-500/20 text-yellow-400'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-yellow-100 text-yellow-700'
                           }`}
                         >
                           {payment.status.charAt(0).toUpperCase() + payment.status.slice(1)}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-300 mt-1 line-clamp-1">{payment.description}</p>
+                      <p className="text-xs text-neutral-600 mt-1 line-clamp-1">{payment.description}</p>
                     </div>
                     <div className="text-right ml-4">
                       <p
                         className={`text-sm font-bold ${
-                          payment.fromAccountId === accountId ? 'text-red-400' : 'text-green-400'
+                          payment.fromAccountId === accountId ? 'text-red-600' : 'text-green-600'
                         }`}
                       >
                         {payment.fromAccountId === accountId ? '-' : '+'}${payment.amount.toFixed(2)}
                       </p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-neutral-500">
                         {new Date(payment.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -304,8 +293,8 @@ export const AccountDetailsComponent = ({ accountId, onBack }) => {
               ))}
             </div>
           ) : (
-            <div className="bg-slate-700 border border-slate-600 rounded-lg p-6 text-center">
-              <p className="text-slate-400">No payments for this account</p>
+            <div className="bg-white border border-neutral-200 rounded-xl p-8 text-center shadow-sm">
+              <p className="text-neutral-500">No payments for this account</p>
             </div>
           )}
         </div>

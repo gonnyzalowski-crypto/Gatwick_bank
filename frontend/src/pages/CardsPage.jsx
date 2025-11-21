@@ -250,30 +250,6 @@ export const CardsPage = () => {
           </div>
         )}
 
-        {cardStats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-              <p className="text-xs font-medium text-slate-500 mb-1">Total cards</p>
-              <p className="text-2xl font-semibold text-slate-900">{cardStats.totalCards}</p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-              <p className="text-xs font-medium text-slate-500 mb-1">Active</p>
-              <p className="text-2xl font-semibold text-emerald-600">{cardStats.activeCards}</p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-              <p className="text-xs font-medium text-slate-500 mb-1">Frozen</p>
-              <p className="text-2xl font-semibold text-blue-600">{cardStats.frozenCards}</p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-              <p className="text-xs font-medium text-slate-500 mb-1">Inactive</p>
-              <p className="text-2xl font-semibold text-slate-500">{cardStats.inactiveCards}</p>
-            </div>
-          </div>
-        )}
-
         <div>
           <button
             type="button"
@@ -432,57 +408,70 @@ export const CardsPage = () => {
                     {/* Card Visual */}
                     <div className="flex items-start gap-4 mb-6">
                       <div 
-                        className={`relative w-64 h-40 rounded-2xl p-5 flex flex-col justify-between text-white shadow-lg cursor-pointer hover:scale-105 transition-transform ${
+                        className={`relative w-72 h-44 rounded-3xl p-6 flex flex-col justify-between text-white shadow-2xl cursor-pointer hover:scale-105 transition-all duration-300 overflow-hidden ${
                           isPending ? 'opacity-60' : ''
                         }`}
                         style={{
                           background: isCredit 
-                            ? 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)'
-                            : 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+                            ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #7c3aed 100%)'
+                            : 'linear-gradient(135deg, #ef4444 0%, #f97316 50%, #ec4899 100%)'
                         }}
                         onClick={() => !isPending && setSelectedCardId(card.id)}
                       >
-                        {/* Chip */}
-                        <div className="w-12 h-10 rounded-md bg-gradient-to-br from-yellow-200 to-yellow-400 opacity-90"></div>
+                        {/* Decorative Circles */}
+                        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10"></div>
+                        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/10"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-white/5"></div>
                         
-                        {/* Card Number */}
-                        <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <p className="text-lg font-mono tracking-widest">
-                              {formatCardNumber(card.cardNumber)}
-                            </p>
+                        {/* Top Section */}
+                        <div className="relative z-10 flex justify-between items-start">
+                          {/* Chip */}
+                          <div className="w-12 h-10 rounded-lg bg-gradient-to-br from-yellow-200 to-yellow-400 shadow-md flex items-center justify-center">
+                            <div className="w-8 h-6 border border-yellow-600/30 rounded"></div>
+                          </div>
+                          
+                          {/* Card Type */}
+                          <div className="text-right">
+                            <p className="text-xs font-medium text-white/80 mb-1">{isCredit ? 'Credit Card' : 'Debit Card'}</p>
                             {!isCredit && !isPending && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleRevealCard(card);
                                 }}
-                                className="p-1 hover:bg-white/20 rounded transition-colors"
+                                className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                                 title="Reveal full card details"
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
                             )}
                           </div>
+                        </div>
+                        
+                        {/* Card Number */}
+                        <div className="relative z-10">
+                          <p className="text-xl font-mono tracking-[0.2em] mb-4 drop-shadow-md">
+                            {formatCardNumber(card.cardNumber)}
+                          </p>
                           
                           {/* Card Holder & Expiry */}
-                          <div className="flex justify-between items-end text-xs">
+                          <div className="flex justify-between items-end">
                             <div>
-                              <p className="text-white/60 mb-1">Card Holder</p>
-                              <p className="font-semibold">{card.cardHolderName || 'CARD HOLDER'}</p>
+                              <p className="text-[10px] font-medium text-white/70 mb-1 uppercase tracking-wider">Card Holder</p>
+                              <p className="text-sm font-semibold tracking-wide">{card.cardHolderName || 'CARD HOLDER'}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-white/60 mb-1">Expires</p>
-                              <p className="font-semibold">{new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}</p>
+                              <p className="text-[10px] font-medium text-white/70 mb-1 uppercase tracking-wider">Expires</p>
+                              <p className="text-sm font-semibold tracking-wide">{new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' })}</p>
                             </div>
                           </div>
                         </div>
                         
                         {/* Mastercard Logo */}
-                        <div className="absolute bottom-5 right-5">
-                          <div className="flex gap-1">
-                            <div className="w-7 h-7 rounded-full bg-red-500 opacity-80"></div>
-                            <div className="w-7 h-7 rounded-full bg-orange-400 opacity-80 -ml-3"></div>
+                        <div className="absolute bottom-6 right-6 z-10">
+                          <div className="flex items-center gap-0.5">
+                            <div className="w-8 h-8 rounded-full bg-red-500"></div>
+                            <div className="w-8 h-8 rounded-full bg-orange-400 -ml-4"></div>
                           </div>
                         </div>
                       </div>

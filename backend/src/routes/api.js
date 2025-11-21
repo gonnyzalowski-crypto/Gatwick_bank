@@ -16,6 +16,8 @@ import supportRouter from './support.js';
 import gatewaysRouter from './gateways.js';
 import supportTicketsRouter from './supportTickets.js';
 import fixUsersRouter from './fix-users.js';
+import fixAccountsRouter from './fix-accounts.js';
+import currenciesRouter from './currencies.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { getAccountSummary } from '../services/accountService.js';
 
@@ -38,7 +40,9 @@ router.use('/gateways', gatewaysRouter);
 router.use('/support-tickets', supportTicketsRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/kyc', kycRouter);
+router.use('/currencies', currenciesRouter);
 router.use('/', fixUsersRouter); // Temporary fix route
+router.use('/fix-accounts', fixAccountsRouter); // Temporary fix route
 
 /**
  * GET /api/v1/dashboard

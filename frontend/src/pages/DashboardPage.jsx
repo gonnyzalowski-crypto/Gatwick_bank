@@ -292,68 +292,6 @@ export const DashboardPage = () => {
           </div>
         )}
 
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Active Accounts Card */}
-          <div
-            onClick={() => navigate('/accounts')}
-            className="bg-white border border-neutral-200 rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-neutral-300 group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                <Wallet className="w-6 h-6 text-primary-600" />
-              </div>
-              {summary.accountCount > 0 && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50">
-                  <TrendingUp className="w-3 h-3 text-emerald-600" />
-                  <span className="text-xs font-semibold text-emerald-600">12%</span>
-                </div>
-              )}
-            </div>
-            <p className="text-neutral-600 text-sm font-medium mb-1">Active Accounts</p>
-            <p className="text-3xl font-bold text-neutral-900 mb-1">{summary.accountCount || 0}</p>
-            <p className="text-neutral-500 text-xs">vs last month</p>
-          </div>
-
-          {/* Active Cards Card */}
-          <div
-            onClick={() => navigate('/cards')}
-            className="bg-white border border-neutral-200 rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-neutral-300 group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                <CreditCard className="w-6 h-6 text-primary-600" />
-              </div>
-            </div>
-            <p className="text-neutral-600 text-sm font-medium mb-1">Active Cards</p>
-            <p className="text-3xl font-bold text-neutral-900 mb-1">
-              {summary.activeCards || 0} / {summary.totalCards || 0}
-            </p>
-            <p className="text-neutral-500 text-xs">Total cards issued</p>
-          </div>
-
-          {/* Recent Transactions Card */}
-          <div
-            onClick={() => navigate('/transaction-history')}
-            className="bg-white border border-neutral-200 rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-neutral-300 group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                <TrendingUp className="w-6 h-6 text-primary-600" />
-              </div>
-              {summary.recentTransactionCount > 0 && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-50">
-                  <TrendingUp className="w-3 h-3 text-emerald-600" />
-                  <span className="text-xs font-semibold text-emerald-600">8%</span>
-                </div>
-              )}
-            </div>
-            <p className="text-neutral-600 text-sm font-medium mb-1">Recent Transactions</p>
-            <p className="text-3xl font-bold text-neutral-900 mb-1">{summary.recentTransactionCount || 0}</p>
-            <p className="text-neutral-500 text-xs">vs last week</p>
-          </div>
-        </div>
-
         {/* Spending Chart Card */}
         <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-neutral-100">

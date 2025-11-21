@@ -1787,6 +1787,215 @@ router.post('/deposits/:depositId/reject', verifyAuth, verifyAdmin, async (req, 
   }
 });
 
+// ============================================
+// WITHDRAWAL MANAGEMENT ROUTES
+// ============================================
+
+// Get all withdrawals (admin)
+// GET /api/v1/mybanker/withdrawals
+router.get('/withdrawals', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { status } = req.query;
+    
+    const where = {};
+    if (status && status !== 'all') {
+      where.status = status.toUpperCase();
+    }
+    
+    const withdrawals = await prisma.withdrawal.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        account: {
+          select: {
+            id: true,
+            accountNumber: true,
+            accountType: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    return res.json({
+      success: true,
+      withdrawals
+    });
+  } catch (error) {
+    console.error('Get withdrawals error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Approve withdrawal
+// POST /api/v1/mybanker/withdrawals/:withdrawalId/approve
+router.post('/withdrawals/:withdrawalId/approve', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { withdrawalId } = req.params;
+    const { notes } = req.body;
+    
+    const withdrawal = await prisma.withdrawal.findUnique({
+      where: { id: withdrawalId },
+      include: {
+        user: true,
+        account: true
+      }
+    });
+    
+    if (!withdrawal) {
+      return res.status(404).json({ error: 'Withdrawal not found' });
+    }
+    
+    if (withdrawal.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Withdrawal has already been processed' });
+    }
+    
+    // Check if account has sufficient balance
+    if (parseFloat(withdrawal.account.balance) < parseFloat(withdrawal.amount)) {
+      return res.status(400).json({ error: 'Insufficient balance in account' });
+    }
+    
+    // Process withdrawal in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Update withdrawal status
+      const updatedWithdrawal = await tx.withdrawal.update({
+        where: { id: withdrawalId },
+        data: {
+          status: 'COMPLETED',
+          processedBy: req.user.userId,
+          processedAt: new Date(),
+          adminNotes: notes || 'Approved by admin'
+        }
+      });
+      
+      // Deduct from account balance
+      const updatedAccount = await tx.account.update({
+        where: { id: withdrawal.accountId },
+        data: {
+          balance: {
+            decrement: parseFloat(withdrawal.amount)
+          },
+          availableBalance: {
+            decrement: parseFloat(withdrawal.amount)
+          }
+        }
+      });
+      
+      // Create transaction record
+      const transaction = await tx.transaction.create({
+        data: {
+          accountId: withdrawal.accountId,
+          type: 'WITHDRAWAL',
+          amount: parseFloat(withdrawal.amount),
+          description: withdrawal.description || 'Withdrawal',
+          status: 'COMPLETED',
+          reference: `WTH-${Date.now()}`,
+          metadata: {
+            withdrawalId: withdrawal.id,
+            approvedBy: req.user.userId,
+            notes
+          }
+        }
+      });
+      
+      // Create notification
+      await tx.notification.create({
+        data: {
+          userId: withdrawal.userId,
+          type: 'withdrawal',
+          title: 'Withdrawal Approved',
+          message: `Your withdrawal of $${withdrawal.amount.toFixed(2)} has been approved and processed.`,
+          metadata: {
+            withdrawalId: withdrawal.id,
+            amount: withdrawal.amount,
+            transactionId: transaction.id
+          }
+        }
+      });
+      
+      return { updatedWithdrawal, updatedAccount, transaction };
+    });
+    
+    return res.json({
+      success: true,
+      message: 'Withdrawal approved successfully',
+      withdrawal: result.updatedWithdrawal
+    });
+  } catch (error) {
+    console.error('Approve withdrawal error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// Reject withdrawal
+// POST /api/v1/mybanker/withdrawals/:withdrawalId/reject
+router.post('/withdrawals/:withdrawalId/reject', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { withdrawalId } = req.params;
+    const { reason } = req.body;
+    
+    if (!reason) {
+      return res.status(400).json({ error: 'Rejection reason is required' });
+    }
+    
+    const withdrawal = await prisma.withdrawal.findUnique({
+      where: { id: withdrawalId },
+      include: { user: true }
+    });
+    
+    if (!withdrawal) {
+      return res.status(404).json({ error: 'Withdrawal not found' });
+    }
+    
+    if (withdrawal.status !== 'PENDING') {
+      return res.status(400).json({ error: 'Withdrawal has already been processed' });
+    }
+    
+    // Update withdrawal status
+    const updatedWithdrawal = await prisma.withdrawal.update({
+      where: { id: withdrawalId },
+      data: {
+        status: 'REJECTED',
+        processedBy: req.user.userId,
+        processedAt: new Date(),
+        rejectionReason: reason,
+        adminNotes: reason
+      }
+    });
+    
+    // Create notification
+    await prisma.notification.create({
+      data: {
+        userId: withdrawal.userId,
+        type: 'withdrawal',
+        title: 'Withdrawal Rejected',
+        message: `Your withdrawal of $${withdrawal.amount.toFixed(2)} was rejected. Reason: ${reason}`,
+        metadata: {
+          withdrawalId: withdrawal.id,
+          amount: withdrawal.amount,
+          reason
+        }
+      }
+    });
+    
+    return res.json({
+      success: true,
+      message: 'Withdrawal rejected successfully',
+      withdrawal: updatedWithdrawal
+    });
+  } catch (error) {
+    console.error('Reject withdrawal error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // Get user accounts
 // GET /api/v1/mybanker/users/:userId/accounts
 router.get('/users/:userId/accounts', verifyAuth, verifyAdmin, async (req, res) => {

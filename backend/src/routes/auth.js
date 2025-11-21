@@ -19,6 +19,7 @@ import {
 import { logAction } from '../services/auditService.js';
 import { SECURITY_QUESTIONS } from '../constants/securityQuestions.js';
 import { validateRequest, registerSchema, loginSchema } from '../utils/validation.js';
+import { profilePhotoUpload } from '../middleware/profilePhotoUpload.js';
 import fs from 'fs';
 import path from 'path';
 import prisma from '../config/prisma.js';
@@ -498,6 +499,40 @@ router.get('/login-preference', verifyAuth, async (req, res) => {
     console.error('Get login preference error:', error);
     return res.status(500).json({ error: 'Failed to get login preference' });
   }
+});
+
+// Upload profile photo
+// POST /api/v1/users/profile-photo
+router.post('/users/profile-photo', verifyAuth, (req, res) => {
+  profilePhotoUpload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    try {
+      const userId = req.user.userId;
+      const photoPath = `/uploads/profiles/${userId}/${req.file.filename}`;
+
+      // Update user profile photo in database
+      await prisma.user.update({
+        where: { id: userId },
+        data: { profilePhoto: photoPath }
+      });
+
+      return res.json({
+        success: true,
+        message: 'Profile photo uploaded successfully',
+        photoUrl: photoPath
+      });
+    } catch (error) {
+      console.error('Profile photo upload error:', error);
+      return res.status(500).json({ error: 'Failed to save profile photo' });
+    }
+  });
 });
 
 export default router;

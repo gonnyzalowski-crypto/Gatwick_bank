@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import NotificationBell from '../NotificationBell';
+import UserProfileModal from '../modals/UserProfileModal';
 
 const navItemClasses = ({ isActive }) =>
   [
@@ -37,6 +38,7 @@ const UserDashboardLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [paymentsExpanded, setPaymentsExpanded] = useState(false);
   const [transfersExpanded, setTransfersExpanded] = useState(false);
 
@@ -222,7 +224,7 @@ const UserDashboardLayout = ({ children }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-neutral-900 truncate">
-                  {user?.email?.split('@')[0] || 'User'}
+                  {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.email?.split('@')[0] || 'User'}
                 </div>
                 <div className="text-xs text-neutral-500 truncate">{user?.email || 'customer@gatwickbank.test'}</div>
               </div>
@@ -259,7 +261,10 @@ const UserDashboardLayout = ({ children }) => {
             <NotificationBell isAdmin={false} />
 
             {/* User Menu */}
-            <button className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-lg transition-colors">
+            <button 
+              onClick={() => setShowProfileModal(true)}
+              className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            >
               <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xs font-bold">
                 {user?.email?.[0]?.toUpperCase() || 'U'}
               </div>
@@ -279,6 +284,13 @@ const UserDashboardLayout = ({ children }) => {
         {/* Page Content */}
         <main className="flex-1 p-6 lg:p-8 overflow-y-auto bg-neutral-50">{children}</main>
       </div>
+
+      {/* User Profile Modal */}
+      <UserProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        user={user}
+      />
     </div>
   );
 };

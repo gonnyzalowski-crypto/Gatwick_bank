@@ -278,6 +278,7 @@ router.post('/submit', verifyAuth, async (req, res) => {
     });
 
     return res.json({ 
+      success: true,
       message: 'KYC submitted successfully for review',
       status: 'PENDING'
     });

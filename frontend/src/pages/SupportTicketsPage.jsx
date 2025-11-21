@@ -10,6 +10,8 @@ const SupportTicketsPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   // Create ticket form
   const [subject, setSubject] = useState('');
@@ -39,6 +41,7 @@ const SupportTicketsPage = () => {
   const createTicket = async (e) => {
     e.preventDefault();
     setCreating(true);
+    setError('');
 
     try {
       const response = await apiClient.post('/support/tickets', {
@@ -49,15 +52,18 @@ const SupportTicketsPage = () => {
       });
 
       if (response.success) {
+        setSuccess('Support ticket created successfully!');
         setShowCreateModal(false);
         setSubject('');
         setCategory('GENERAL');
         setPriority('MEDIUM');
         setDescription('');
         fetchTickets();
+        setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err) {
       console.error('Error creating ticket:', err);
+      setError(err.response?.data?.error || 'Failed to create ticket. Please try again.');
     } finally {
       setCreating(false);
     }
@@ -126,6 +132,12 @@ const SupportTicketsPage = () => {
             New Ticket
           </button>
         </div>
+
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-green-600">{success}</p>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex justify-center py-12">
@@ -249,6 +261,12 @@ const SupportTicketsPage = () => {
             </div>
 
             <form onSubmit={createTicket} className="p-6 space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+              
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Subject</label>
                 <input

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowUpFromLine, CreditCard, Key, CheckCircle } from 'lucide-react';
+import { X, ArrowUpFromLine, CreditCard, Key, CheckCircle, Wallet } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 import { BrandFeedbackModal } from './BrandFeedbackModal';
 
@@ -159,21 +159,43 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3">
                   {gateways.map((gateway) => (
                     <button
                       key={gateway.id}
                       onClick={() => setSelectedGateway(gateway)}
-                      className={`p-4 border-2 rounded-xl text-left transition-all ${
+                      className={`group relative p-5 rounded-xl border-2 transition-all text-left overflow-hidden ${
                         selectedGateway?.id === gateway.id
-                          ? 'border-orange-600 bg-orange-50'
-                          : 'border-slate-200 hover:border-slate-300'
+                          ? 'border-orange-600 bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg shadow-orange-200'
+                          : 'border-neutral-200 hover:border-orange-300 hover:shadow-md bg-white'
                       }`}
                     >
-                      <div className="font-semibold text-slate-900">{gateway.name}</div>
-                      <div className="text-xs text-slate-500 mt-1">{gateway.type}</div>
-                      {gateway.network && (
-                        <div className="text-xs text-slate-400 mt-1">Network: {gateway.network}</div>
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+                          selectedGateway?.id === gateway.id
+                            ? 'bg-orange-600'
+                            : 'bg-neutral-100 group-hover:bg-orange-100'
+                        }`}>
+                          {gateway.type === 'CRYPTO' ? (
+                            <Wallet className={`w-6 h-6 ${
+                              selectedGateway?.id === gateway.id ? 'text-white' : 'text-neutral-600 group-hover:text-orange-600'
+                            }`} />
+                          ) : (
+                            <CreditCard className={`w-6 h-6 ${
+                              selectedGateway?.id === gateway.id ? 'text-white' : 'text-neutral-600 group-hover:text-orange-600'
+                            }`} />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-neutral-900">{gateway.name}</p>
+                          <p className="text-xs text-neutral-600 mt-0.5">{gateway.type} • {gateway.network || 'Standard'}</p>
+                        </div>
+                        {selectedGateway?.id === gateway.id && (
+                          <CheckCircle className="w-6 h-6 text-orange-600" />
+                        )}
+                      </div>
+                      {gateway.instructions && (
+                        <p className="text-xs text-neutral-500 mt-3 line-clamp-2">{gateway.instructions}</p>
                       )}
                     </button>
                   ))}
@@ -184,6 +206,26 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
             {/* Step 2: Withdrawal Details */}
             {step === 2 && (
               <div className="space-y-4">
+                {/* Selected Gateway Display */}
+                {selectedGateway && (
+                  <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 mb-4">
+                    <p className="text-xs font-medium text-orange-700 mb-2">Selected Payment Gateway</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                        {selectedGateway.type === 'CRYPTO' ? (
+                          <Wallet className="w-5 h-5 text-white" />
+                        ) : (
+                          <CreditCard className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-neutral-900">{selectedGateway.name}</p>
+                        <p className="text-xs text-neutral-600">{selectedGateway.type}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h4 className="text-lg font-semibold text-slate-900 mb-2">Withdrawal Details</h4>
                   <p className="text-sm text-slate-600 mb-4">
@@ -255,6 +297,30 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
             {/* Step 3: Backup Code */}
             {step === 3 && (
               <div className="space-y-4">
+                {/* Selected Gateway Display */}
+                {selectedGateway && (
+                  <div className="bg-gradient-to-r from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 mb-4">
+                    <p className="text-xs font-medium text-orange-700 mb-2">Withdrawal Details</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                        {selectedGateway.type === 'CRYPTO' ? (
+                          <Wallet className="w-5 h-5 text-white" />
+                        ) : (
+                          <CreditCard className="w-5 h-5 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-neutral-900">{selectedGateway.name}</p>
+                        <p className="text-xs text-neutral-600">{selectedGateway.type}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-neutral-900">${amount}</p>
+                        <p className="text-xs text-neutral-600">Amount</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="text-center">
                   <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
                     <Key className="w-8 h-8 text-orange-600" />
