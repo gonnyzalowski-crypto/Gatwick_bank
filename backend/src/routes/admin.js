@@ -2319,4 +2319,51 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
   }
 });
 
+// Delete card (debit or credit)
+// DELETE /api/v1/mybanker/cards/:cardId
+router.delete('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    
+    // Try to find as debit card first
+    let debitCard = await prisma.debitCard.findUnique({
+      where: { id: cardId }
+    });
+    
+    if (debitCard) {
+      // Delete debit card
+      await prisma.debitCard.delete({
+        where: { id: cardId }
+      });
+      
+      return res.json({
+        success: true,
+        message: 'Debit card deleted successfully'
+      });
+    }
+    
+    // Try credit card
+    let creditCard = await prisma.creditCard.findUnique({
+      where: { id: cardId }
+    });
+    
+    if (creditCard) {
+      // Delete credit card
+      await prisma.creditCard.delete({
+        where: { id: cardId }
+      });
+      
+      return res.json({
+        success: true,
+        message: 'Credit card deleted successfully'
+      });
+    }
+    
+    return res.status(404).json({ error: 'Card not found' });
+  } catch (error) {
+    console.error('Delete card error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

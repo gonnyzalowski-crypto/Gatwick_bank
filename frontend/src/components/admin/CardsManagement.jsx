@@ -37,10 +37,15 @@ export const CardsManagement = () => {
   const fetchUserCards = async (userId) => {
     try {
       setCardsLoading(true);
+      console.log('Fetching cards for user:', userId);
       const response = await apiClient.get(`/mybanker/users/${userId}/cards`);
+      console.log('User cards response:', response);
+      console.log('Cards array:', response.cards);
       setUserCards(response.cards || []);
     } catch (error) {
       console.error('Failed to fetch user cards:', error);
+      console.error('Error response:', error.response);
+      console.error('Error data:', error.response?.data);
       setUserCards([]);
     } finally {
       setCardsLoading(false);
@@ -103,6 +108,37 @@ export const CardsManagement = () => {
 
   const getCardTypeColor = (type) => {
     return type === 'CREDIT' ? 'text-purple-400' : 'text-blue-400';
+  };
+
+  const formatCardNumber = (encryptedNumber, cardType) => {
+    try {
+      if (!encryptedNumber) return '•••• •••• •••• ••••';
+      const decoded = atob(encryptedNumber);
+      const digitsOnly = decoded.replace(/\D/g, '');
+      let lastFour = digitsOnly.slice(-4);
+      if (lastFour.length < 4) {
+        lastFour = Math.floor(1000 + Math.random() * 9000).toString();
+      }
+      const prefix = cardType === 'CREDIT' ? '5175' : '4062';
+      return `${prefix} •••• •••• ${lastFour}`;
+    } catch (error) {
+      return '•••• •••• •••• ••••';
+    }
+  };
+
+  const handleDeleteCard = async (cardId, cardType) => {
+    if (!window.confirm('Are you sure you want to delete this card? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await apiClient.delete(`/mybanker/cards/${cardId}`);
+      alert('Card deleted successfully');
+      fetchUserCards(selectedUser.id);
+    } catch (error) {
+      console.error('Failed to delete card:', error);
+      alert('Failed to delete card');
+    }
   };
 
   const getStatusBadge = (status) => {
@@ -206,7 +242,10 @@ export const CardsManagement = () => {
                       <CreditCard className={`w-6 h-6 ${getCardTypeColor(card.cardType)}`} />
                       <div>
                         <p className="font-semibold text-white">
-                          {card.cardType} Card - {card.cardNumber}
+                          {card.cardType} Card
+                        </p>
+                        <p className="text-sm text-slate-300 font-mono">
+                          {formatCardNumber(card.cardNumber, card.cardType)}
                         </p>
                         <p className="text-xs text-slate-400">
                           {card.accountType} Account
@@ -233,33 +272,40 @@ export const CardsManagement = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => handleEditCard(card)}
                       className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors text-sm"
                     >
                       <Edit className="w-4 h-4" />
-                      Edit Limits
+                      Edit Details
                     </button>
                     <button
                       onClick={() => handleToggleCardStatus(card.id, card.status)}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm ${
                         card.status === 'ACTIVE'
-                          ? 'bg-red-600 hover:bg-red-700 text-white'
+                          ? 'bg-orange-600 hover:bg-orange-700 text-white'
                           : 'bg-green-600 hover:bg-green-700 text-white'
                       }`}
                     >
                       {card.status === 'ACTIVE' ? (
                         <>
                           <X className="w-4 h-4" />
-                          Freeze Card
+                          Freeze
                         </>
                       ) : (
                         <>
                           <Check className="w-4 h-4" />
-                          Activate Card
+                          Activate
                         </>
                       )}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCard(card.id, card.cardType)}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors text-sm"
+                    >
+                      <X className="w-4 h-4" />
+                      Delete
                     </button>
                   </div>
                 </div>

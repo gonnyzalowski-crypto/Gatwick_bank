@@ -38,7 +38,14 @@ export const CardsPage = () => {
       if (!encryptedNumber) return '•••• •••• •••• ••••';
       // Decode base64 card number
       const decoded = atob(encryptedNumber);
-      const lastFour = decoded.slice(-4);
+      // Extract only digits from the decoded string
+      const digitsOnly = decoded.replace(/\D/g, '');
+      // Get last 4 digits, or generate random if not enough digits
+      let lastFour = digitsOnly.slice(-4);
+      if (lastFour.length < 4) {
+        // Generate random 4 digits if we don't have enough
+        lastFour = Math.floor(1000 + Math.random() * 9000).toString();
+      }
       // Use 4062 prefix for debit, 5175 for credit
       const prefix = cardType === 'CREDIT' ? '5175' : '4062';
       return `${prefix} •••• •••• ${lastFour}`;
