@@ -11,6 +11,8 @@ export const CardsManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingCard, setEditingCard] = useState(null);
   const [formData, setFormData] = useState({
+    cardNumber: '',
+    expiryDate: '',
     dailyLimit: '',
     monthlyLimit: '',
     status: ''
@@ -52,7 +54,17 @@ export const CardsManagement = () => {
 
   const handleEditCard = (card) => {
     setEditingCard(card);
+    // Decode card number for editing
+    let decodedCardNumber = '';
+    try {
+      decodedCardNumber = atob(card.cardNumber);
+    } catch (e) {
+      decodedCardNumber = card.cardNumber;
+    }
+    
     setFormData({
+      cardNumber: decodedCardNumber,
+      expiryDate: card.expiryDate ? new Date(card.expiryDate).toISOString().split('T')[0] : '',
       dailyLimit: card.dailyLimit || '',
       monthlyLimit: card.monthlyLimit || '',
       status: card.status || 'ACTIVE'
@@ -260,9 +272,36 @@ export const CardsManagement = () => {
       {/* Edit Card Modal */}
       {editingCard && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-white mb-4">Edit Card Limits</h3>
+          <div className="bg-slate-800 border border-slate-700 rounded-lg max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-white mb-4">Edit Card Details</h3>
             <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Card Number (16 digits)
+                </label>
+                <input
+                  type="text"
+                  maxLength="16"
+                  value={formData.cardNumber}
+                  onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value.replace(/\D/g, '') })}
+                  placeholder="1234567890123456"
+                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500 font-mono"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Current: {editingCard.cardType === 'CREDIT' ? '5175' : '4062'} •••• •••• {formData.cardNumber.slice(-4)}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Expiry Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.expiryDate}
+                  onChange={(e) => setFormData({ ...formData, expiryDate: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Daily Limit ($)

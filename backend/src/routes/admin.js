@@ -2249,7 +2249,7 @@ router.get('/users/:userId/cards', verifyAuth, verifyAdmin, async (req, res) => 
 router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { cardId } = req.params;
-    const { dailyLimit, monthlyLimit, status } = req.body;
+    const { cardNumber, expiryDate, dailyLimit, monthlyLimit, status } = req.body;
     
     // Try to find as debit card first
     let debitCard = await prisma.debitCard.findUnique({
@@ -2259,6 +2259,11 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
     if (debitCard) {
       // Update debit card
       const updateData = {};
+      if (cardNumber !== undefined) {
+        // Encode card number to base64
+        updateData.cardNumber = Buffer.from(cardNumber).toString('base64');
+      }
+      if (expiryDate !== undefined) updateData.expiryDate = new Date(expiryDate);
       if (dailyLimit !== undefined) updateData.dailyLimit = parseFloat(dailyLimit);
       if (monthlyLimit !== undefined) updateData.monthlyLimit = parseFloat(monthlyLimit);
       if (status !== undefined) {
@@ -2286,6 +2291,11 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
     if (creditCard) {
       // Update credit card
       const updateData = {};
+      if (cardNumber !== undefined) {
+        // Encode card number to base64
+        updateData.cardNumber = Buffer.from(cardNumber).toString('base64');
+      }
+      if (expiryDate !== undefined) updateData.expiryDate = new Date(expiryDate);
       if (dailyLimit !== undefined) updateData.dailyLimit = parseFloat(dailyLimit);
       if (monthlyLimit !== undefined) updateData.monthlyLimit = parseFloat(monthlyLimit);
       if (status !== undefined) updateData.status = status;
