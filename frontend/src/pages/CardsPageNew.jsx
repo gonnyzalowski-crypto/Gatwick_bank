@@ -6,6 +6,7 @@ import CardDisplay from '../components/cards/CardDisplay';
 import CardCreationModal from '../components/modals/CardCreationModal';
 import BackupCodeModal from '../components/modals/BackupCodeModal';
 import CreditCardFundingModal from '../components/modals/CreditCardFundingModal';
+import CardDetailsModal from '../components/modals/CardDetailsModal';
 import { CreditCard, Plus, Loader2 } from 'lucide-react';
 
 export const CardsPage = () => {
@@ -19,6 +20,7 @@ export const CardsPage = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showBackupCodeModal, setShowBackupCodeModal] = useState(false);
   const [showFundingModal, setShowFundingModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [selectedCardType, setSelectedCardType] = useState('debit');
 
@@ -49,7 +51,7 @@ export const CardsPage = () => {
   const handleViewDetails = (card, type) => {
     setSelectedCard(card);
     setSelectedCardType(type);
-    setShowBackupCodeModal(true);
+    setShowDetailsModal(true);
   };
 
   const handleFreeze = async (card, type) => {
@@ -221,6 +223,16 @@ export const CardsPage = () => {
           setShowFundingModal(false);
           fetchCards();
         }}
+      />
+
+      <CardDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false);
+          setSelectedCard(null);
+        }}
+        card={selectedCard}
+        cardType={selectedCardType}
       />
     </UserDashboardLayout>
   );

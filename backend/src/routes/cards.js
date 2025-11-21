@@ -568,3 +568,93 @@ cardsRouter.put('/credit/:cardId/change-pin', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+/**
+ * GET /api/v1/cards/debit/:cardId/transactions
+ * Get transactions for debit card
+ */
+cardsRouter.get('/debit/:cardId/transactions', async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // Get card and verify ownership
+    const card = await prisma.debitCard.findFirst({
+      where: {
+        id: cardId,
+        userId: req.user.userId
+      },
+      include: {
+        account: true
+      }
+    });
+
+    if (!card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    // Get transactions for the linked account
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        accountId: card.accountId
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit
+    });
+
+    res.json({
+      success: true,
+      transactions
+    });
+  } catch (error) {
+    console.error('Error fetching debit card transactions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/cards/credit/:cardId/transactions
+ * Get transactions for credit card
+ */
+cardsRouter.get('/credit/:cardId/transactions', async (req, res) => {
+  try {
+    const { cardId } = req.params;
+    const limit = parseInt(req.query.limit) || 5;
+
+    // Get card and verify ownership
+    const card = await prisma.creditCard.findFirst({
+      where: {
+        id: cardId,
+        userId: req.user.userId
+      }
+    });
+
+    if (!card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    // Get credit card transactions (purchases, payments, etc.)
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        OR: [
+          { description: { contains: card.cardNumber.slice(-4) } },
+          { reference: { contains: cardId } }
+        ]
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit
+    });
+
+    res.json({
+      success: true,
+      transactions
+    });
+  } catch (error) {
+    console.error('Error fetching credit card transactions:', error);
+    res.status(500).json({ error: error.message });
+  }
+});

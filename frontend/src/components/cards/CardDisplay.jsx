@@ -32,10 +32,9 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
 
   return (
     <div className="relative">
-      {/* Card */}
+      {/* Card - Standard Credit Card Ratio 1.586:1 (85.6mm x 53.98mm) */}
       <div 
-        className={`relative w-full aspect-[1.586/1] rounded-2xl bg-gradient-to-br ${getCardGradient()} p-6 text-white shadow-2xl cursor-pointer transition-transform hover:scale-105`}
-        onClick={() => setIsFlipped(!isFlipped)}
+        className={`relative w-full aspect-[1.586/1] rounded-2xl bg-gradient-to-br ${getCardGradient()} p-6 text-white shadow-2xl overflow-hidden`}
       >
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
@@ -43,8 +42,17 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-1/2 -translate-x-1/2" />
         </div>
 
+        {/* Magnetic Stripe */}
+        <div className="absolute top-12 left-0 right-0 h-10 bg-black/40" />
+
+        {/* Bank Logo */}
+        <div className="absolute top-4 right-6">
+          <div className="text-xs font-bold tracking-wider opacity-90">GATWICK</div>
+          <div className="text-[10px] opacity-70">BANK</div>
+        </div>
+
         {/* Card Content */}
-        <div className="relative h-full flex flex-col justify-between">
+        <div className="relative h-full flex flex-col justify-between z-10">
           {/* Top Row */}
           <div className="flex items-start justify-between">
             <div>
@@ -94,8 +102,14 @@ const CardDisplay = ({ card, type = 'debit', onViewDetails, onFreeze, onUnfreeze
           </div>
         </div>
 
-        {/* Chip */}
-        <div className="absolute top-16 left-6 w-12 h-10 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-lg opacity-80" />
+        {/* EMV Chip */}
+        <div className="absolute top-[4.5rem] left-6 w-12 h-10 bg-gradient-to-br from-yellow-200 to-yellow-400 rounded-md opacity-90 shadow-lg">
+          <div className="grid grid-cols-3 gap-[2px] p-1 h-full">
+            {[...Array(9)].map((_, i) => (
+              <div key={i} className="bg-yellow-600/30 rounded-sm" />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Actions */}
