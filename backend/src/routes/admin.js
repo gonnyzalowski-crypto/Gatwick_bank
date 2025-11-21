@@ -2299,8 +2299,8 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
         updateData.cardNumber = Buffer.from(cardNumber).toString('base64');
       }
       if (expiryDate !== undefined) updateData.expiryDate = new Date(expiryDate);
-      if (dailyLimit !== undefined) updateData.dailyLimit = parseFloat(dailyLimit);
-      if (monthlyLimit !== undefined) updateData.monthlyLimit = parseFloat(monthlyLimit);
+      // Credit cards use creditLimit, not dailyLimit/monthlyLimit
+      if (dailyLimit !== undefined) updateData.creditLimit = parseFloat(dailyLimit);
       if (status !== undefined) updateData.status = status;
       
       const updatedCard = await prisma.creditCard.update({
