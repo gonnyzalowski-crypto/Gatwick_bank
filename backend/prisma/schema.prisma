@@ -603,3 +603,22 @@ model SupportMessage {
   @@index([senderId])
   @@map("support_messages")
 }
+
+// Currency Management
+model Currency {
+  id            String   @id @default(cuid())
+  code          String   @unique // "USD", "BTC", "ETH", etc.
+  name          String   // "US Dollar", "Bitcoin", "Ethereum"
+  symbol        String   // "$", "₿", "Ξ"
+  type          String   // "FIAT" | "CRYPTO"
+  exchangeRate  Decimal  @default(1.0) @db.Decimal(20, 8) // Rate to USD
+  isBase        Boolean  @default(false) // USD is base currency
+  isActive      Boolean  @default(true)
+  lastUpdated   DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([code])
+  @@index([isActive])
+  @@map("currencies")
+}

@@ -71,12 +71,10 @@ router.get('/', verifyAuth, async (req, res) => {
         type: true,
         network: true,
         walletAddress: true,
-        qrCodePath: true,
+        qrCodeUrl: true,
         instructions: true,
-        minAmount: true,
-        maxAmount: true,
-        processingTime: true,
-        displayOrder: true
+        displayOrder: true,
+        isActive: true
       }
     });
 
