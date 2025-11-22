@@ -32,7 +32,7 @@ const config = {
   corsOrigin: getCorsOrigin(),
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key',
-    expiresIn: process.env.JWT_EXPIRE || '7d',
+    expiresIn: process.env.JWT_EXPIRE || '30d', // Increased from 7d to 30d for longer sessions
   },
   redis: {
     url: process.env.REDIS_URL || 'redis://localhost:6379',

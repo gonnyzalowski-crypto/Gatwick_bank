@@ -148,12 +148,12 @@ router.post('/login', async (req, res) => {
       const accessToken = jwt.sign(
         { userId: user.id, email: user.email },
         process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '1h' }
+        { expiresIn: '30d' } // Increased from 1h to 30d
       );
       const refreshToken = jwt.sign(
         { userId: user.id },
         process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '7d' }
+        { expiresIn: '30d' } // Increased from 7d to 30d
       );
 
       await logAction(user.id, 'LOGIN_SUCCESS', req.ip, req.get('user-agent'));
@@ -233,7 +233,7 @@ router.post('/login/verify', async (req, res) => {
       httpOnly: true,
       secure: config.nodeEnv === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // Increased from 7 days to 30 days
     });
 
     // Log successful login
