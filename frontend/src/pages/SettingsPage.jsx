@@ -115,7 +115,7 @@ export const SettingsPage = () => {
       const formData = new FormData();
       formData.append('profilePhoto', profilePhoto);
 
-      const response = await apiClient.post('/users/profile-photo', formData, {
+      const response = await apiClient.post('/auth/users/profile-photo', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
