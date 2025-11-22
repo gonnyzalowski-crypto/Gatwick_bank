@@ -12,11 +12,19 @@ class ApiClient {
 
   async request(path, options = {}) {
     const url = `${this.baseURL}${path}`;
+    
+    // Don't set Content-Type for FormData - browser will set it with boundary
+    const isFormData = options.body instanceof FormData;
     const headers = {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...this.getAuthHeaders(),
       ...(options.headers || {}),
     };
+    
+    // Remove Content-Type from headers if it's FormData
+    if (isFormData && headers['Content-Type'] === 'multipart/form-data') {
+      delete headers['Content-Type'];
+    }
 
     const config = {
       credentials: 'include',
@@ -64,7 +72,7 @@ class ApiClient {
     return this.request(path, {
       ...options,
       method: 'POST',
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     });
   }
 
@@ -72,7 +80,7 @@ class ApiClient {
     return this.request(path, {
       ...options,
       method: 'PUT',
-      body: JSON.stringify(body),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     });
   }
 
