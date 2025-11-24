@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Mail, Phone, MapPin } from 'lucide-react';
 import { InfoModal } from '../modals/InfoModal';
-import { modalContent } from '../../data/modalContent';
+import { modalContent } from '../../data/modalContent.jsx';
 
 export const Footer = () => {
   const [activeModal, setActiveModal] = useState(null);
