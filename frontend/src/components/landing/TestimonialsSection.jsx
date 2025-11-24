@@ -45,7 +45,7 @@ export const TestimonialsSection = () => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Loved by <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">Thousands</span> Worldwide
+            Loved by <span className="bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">Thousands</span> Worldwide
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             See what our customers have to say about their experience
@@ -72,7 +72,7 @@ export const TestimonialsSection = () => {
 
               {/* Author */}
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-700 to-purple-900 rounded-full flex items-center justify-center text-white font-bold">
                   {testimonial.avatar}
                 </div>
                 <div>

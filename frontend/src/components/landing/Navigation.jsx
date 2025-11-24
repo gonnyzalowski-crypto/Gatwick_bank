@@ -22,34 +22,34 @@ export const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-700 to-purple-900 rounded-xl flex items-center justify-center shadow-lg">
               <Building2 className="w-6 h-6 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">
               Gatwick Bank
             </span>
           </Link>
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+            <a href="#features" className="text-gray-700 hover:text-purple-800 font-medium transition-colors">
               Features
             </a>
-            <a href="#security" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+            <a href="#security" className="text-gray-700 hover:text-purple-800 font-medium transition-colors">
               Security
             </a>
-            <a href="#testimonials" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+            <a href="#testimonials" className="text-gray-700 hover:text-purple-800 font-medium transition-colors">
               Reviews
             </a>
-            <a href="#compare" className="text-gray-700 hover:text-purple-600 font-medium transition-colors">
+            <a href="#compare" className="text-gray-700 hover:text-purple-800 font-medium transition-colors">
               Compare
             </a>
-            <Link to="/login" className="text-purple-600 hover:text-purple-700 font-medium transition-colors">
+            <Link to="/login" className="text-purple-700 hover:text-purple-800 font-medium transition-colors">
               Sign In
             </Link>
             <Link 
               to="/register" 
-              className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
+              className="px-6 py-2.5 bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
             >
               Get Started
             </Link>
@@ -72,40 +72,40 @@ export const Navigation = () => {
             <a 
               href="#features" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-gray-700 hover:text-purple-600 font-medium transition-colors"
+              className="block text-gray-700 hover:text-purple-800 font-medium transition-colors"
             >
               Features
             </a>
             <a 
               href="#security" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-gray-700 hover:text-purple-600 font-medium transition-colors"
+              className="block text-gray-700 hover:text-purple-800 font-medium transition-colors"
             >
               Security
             </a>
             <a 
               href="#testimonials" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-gray-700 hover:text-purple-600 font-medium transition-colors"
+              className="block text-gray-700 hover:text-purple-800 font-medium transition-colors"
             >
               Reviews
             </a>
             <a 
               href="#compare" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block text-gray-700 hover:text-purple-600 font-medium transition-colors"
+              className="block text-gray-700 hover:text-purple-800 font-medium transition-colors"
             >
               Compare
             </a>
             <Link 
               to="/login" 
-              className="block text-purple-600 hover:text-purple-700 font-medium transition-colors"
+              className="block text-purple-700 hover:text-purple-800 font-medium transition-colors"
             >
               Sign In
             </Link>
             <Link 
               to="/register" 
-              className="block text-center px-6 py-2.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold"
+              className="block text-center px-6 py-2.5 bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-xl font-semibold"
             >
               Get Started
             </Link>

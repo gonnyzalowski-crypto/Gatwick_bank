@@ -7,25 +7,25 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
       icon: <Shield className="w-6 h-6" />,
       title: 'Bank-Grade Security',
       description: 'Military-grade 256-bit encryption protects every transaction',
-      gradient: 'from-purple-500 to-purple-700'
+      gradient: 'from-purple-700 to-purple-900'
     },
     {
       icon: <Zap className="w-6 h-6" />,
       title: 'Instant Transfers',
       description: 'Send money globally in seconds, not days',
-      gradient: 'from-blue-500 to-purple-600'
+      gradient: 'from-blue-600 to-purple-800'
     },
     {
       icon: <CreditCard className="w-6 h-6" />,
       title: 'Smart Cards',
       description: 'Virtual and physical cards with real-time controls',
-      gradient: 'from-purple-600 to-pink-500'
+      gradient: 'from-purple-700 to-purple-900'
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
       title: 'Financial Insights',
       description: 'AI-powered analytics to optimize your finances',
-      gradient: 'from-indigo-500 to-purple-600'
+      gradient: 'from-purple-800 to-blue-700'
     }
   ];
 
@@ -45,7 +45,7 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Everything You Need in <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">One Platform</span>
+            Everything You Need in <span className="bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">One Platform</span>
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Powerful features designed for modern banking needs
@@ -61,7 +61,7 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
                 onClick={() => setActiveFeature(index)}
                 className={`group cursor-pointer p-6 rounded-2xl transition-all duration-300 ${
                   activeFeature === index
-                    ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-2xl scale-105'
+                    ? 'bg-gradient-to-r from-purple-700 to-purple-800 text-white shadow-2xl scale-105'
                     : 'bg-white border-2 border-purple-100 hover:border-purple-300 hover:shadow-lg'
                 }`}
               >

@@ -28,7 +28,7 @@ export const ComparisonSection = () => {
       <div className="max-w-5xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Why Choose <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">Gatwick Bank</span>?
+            Why Choose <span className="bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">Gatwick Bank</span>?
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             See how we compare to traditional banks
@@ -37,7 +37,7 @@ export const ComparisonSection = () => {
 
         <div className="bg-white rounded-3xl shadow-2xl border border-purple-100 overflow-hidden">
           {/* Table Header */}
-          <div className="grid grid-cols-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6">
+          <div className="grid grid-cols-3 bg-gradient-to-r from-purple-700 to-purple-900 text-white p-6">
             <div className="font-bold text-lg">Feature</div>
             <div className="font-bold text-lg text-center">Traditional Banks</div>
             <div className="font-bold text-lg text-center">Gatwick Bank</div>
@@ -71,7 +71,7 @@ export const ComparisonSection = () => {
         <div className="text-center mt-8">
           <Link 
             to="/register"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200"
           >
             Start Your Journey Today
             <ArrowRight className="w-5 h-5" />

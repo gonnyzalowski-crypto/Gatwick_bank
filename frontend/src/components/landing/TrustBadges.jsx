@@ -30,7 +30,7 @@ export const TrustBadges = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Your Security is Our <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">Priority</span>
+            Your Security is Our <span className="bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">Priority</span>
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Bank-grade security measures protect your money and data 24/7
@@ -43,7 +43,7 @@ export const TrustBadges = () => {
               key={index} 
               className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-purple-100 hover:border-purple-300 hover:-translate-y-1"
             >
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center text-purple-600 mb-4 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center text-purple-700 mb-4 group-hover:scale-110 transition-transform">
                 {item.icon}
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
