@@ -75,6 +75,7 @@ model User {
   beneficiaries     Beneficiary[]
   cardTransactions  CardTransaction[]
   supportTickets    SupportTicket[]
+  withdrawals       Withdrawal[]
   
   @@map("users")
 }
@@ -103,6 +104,7 @@ model Account {
   debitCards  DebitCard[]
   transferRequests TransferRequest[]
   creditCardFundings CreditCardFunding[]
+  withdrawals Withdrawal[]
   
   @@map("accounts")
 }
@@ -330,6 +332,7 @@ model PaymentGateway {
   updatedAt       DateTime  @updatedAt
   
   deposits        Deposit[]
+  withdrawals     Withdrawal[]
   
   @@index([type])
   @@index([isActive])
@@ -602,6 +605,33 @@ model SupportMessage {
   @@index([ticketId])
   @@index([senderId])
   @@map("support_messages")
+}
+
+// Withdrawal Management
+model Withdrawal {
+  id            String   @id @default(cuid())
+  userId        String
+  accountId     String
+  amount        Decimal  @db.Decimal(15, 2)
+  description   String?
+  gatewayId     String?
+  status        String   @default("PENDING") // PENDING, COMPLETED, REJECTED, CANCELLED
+  reference     String   @unique
+  metadata      Json?
+  processedBy   String?
+  processedAt   DateTime?
+  rejectionReason String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  gateway       PaymentGateway? @relation(fields: [gatewayId], references: [id])
+  
+  @@index([userId])
+  @@index([accountId])
+  @@index([status])
+  @@map("withdrawals")
 }
 
 // Currency Management
