@@ -1,5 +1,6 @@
 import { verifyToken } from '../utils/jwt.js';
 import redis from '../config/redis.js';
+import prisma from '../config/prisma.js';
 
 /**
  * Middleware to verify JWT token from Authorization header or cookies
@@ -72,5 +73,27 @@ export const optionalAuth = async (req, res, next) => {
   } catch (error) {
     console.error('Optional auth error:', error);
     next();
+  }
+};
+
+/**
+ * Middleware to verify admin access
+ * Must be used after verifyAuth middleware
+ */
+export const isAdmin = async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+      select: { isAdmin: true }
+    });
+
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    next();
+  } catch (error) {
+    console.error('Admin verification error:', error);
+    return res.status(500).json({ error: 'Authorization failed' });
   }
 };
