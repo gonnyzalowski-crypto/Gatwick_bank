@@ -17,7 +17,7 @@ export const HeroSection = () => {
         <img 
           src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" 
           alt="Modern city buildings"
-          className="w-full h-full object-cover opacity-100"
+          className="w-full h-full object-cover opacity-90"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-white/80 via-white/80 to-purple-50/80"></div>
