@@ -144,7 +144,7 @@ export const BankerLoginPage = () => {
         <div className="w-full max-w-md">
           {/* Logo for mobile */}
           <div className="lg:hidden mb-8 text-center">
-            <Building2 className="w-12 h-12 mx-auto mb-4 text-primary-600" />
+            <Building2 className="w-12 h-12 mx-auto mb-4 text-purple-700" />
             <h1 className="text-2xl font-bold text-neutral-900">Banker Portal</h1>
           </div>
 
@@ -237,7 +237,7 @@ export const BankerLoginPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    className="w-full h-14 bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-900 hover:to-primary-800 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <>
@@ -254,7 +254,7 @@ export const BankerLoginPage = () => {
                 </form>
 
                 <div className="mt-6 text-center">
-                  <Link to="/login" className="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                  <Link to="/login" className="text-sm text-purple-700 hover:text-purple-900 font-medium">
                     ← Back to Customer Login
                   </Link>
                 </div>
@@ -285,7 +285,7 @@ export const BankerLoginPage = () => {
                     onClick={() => setVerificationMethod('question')}
                     className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                       verificationMethod === 'question'
-                        ? 'bg-primary-600 text-white shadow-md'
+                        ? 'bg-purple-700 text-white shadow-md'
                         : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                     }`}
                   >
@@ -297,7 +297,7 @@ export const BankerLoginPage = () => {
                     onClick={() => setVerificationMethod('backup')}
                     className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                       verificationMethod === 'backup'
-                        ? 'bg-primary-600 text-white shadow-md'
+                        ? 'bg-purple-700 text-white shadow-md'
                         : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
                     }`}
                   >
@@ -328,7 +328,7 @@ export const BankerLoginPage = () => {
                             background: 'rgba(255, 255, 255, 0.85)',
                             border: '1.5px solid rgba(139, 92, 246, 0.2)'
                           }}
-                          className="w-full h-12 px-4 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all focus:border-primary-600 focus:ring-4 focus:ring-primary-100 focus:outline-none"
+                          className="w-full h-12 px-4 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all focus:border-purple-700 focus:ring-4 focus:ring-purple-100 focus:outline-none"
                           placeholder="Enter your answer"
                         />
                       </div>
@@ -347,7 +347,7 @@ export const BankerLoginPage = () => {
                           background: 'rgba(255, 255, 255, 0.85)',
                           border: '1.5px solid rgba(139, 92, 246, 0.2)'
                         }}
-                        className="w-full h-12 px-4 rounded-xl text-neutral-900 placeholder-neutral-400 font-mono transition-all focus:border-primary-600 focus:ring-4 focus:ring-primary-100 focus:outline-none"
+                        className="w-full h-12 px-4 rounded-xl text-neutral-900 placeholder-neutral-400 font-mono transition-all focus:border-purple-700 focus:ring-4 focus:ring-purple-100 focus:outline-none"
                         placeholder="XXXX-XXXX-XXXX"
                       />
                       <p className="text-xs text-neutral-500 mt-2">
@@ -359,7 +359,7 @@ export const BankerLoginPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    className="w-full h-14 bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-900 hover:to-primary-800 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <>

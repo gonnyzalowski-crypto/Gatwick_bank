@@ -182,13 +182,13 @@ export const LoginPage = () => {
               background: 'rgba(255, 255, 255, 0.72)',
               backdropFilter: 'blur(16px)',
               WebkitBackdropFilter: 'blur(16px)',
-              border: '1px solid rgba(139, 92, 246, 0.18)',
-              boxShadow: '0 20px 40px rgba(139, 92, 246, 0.12)'
+              border: '1px solid rgba(124, 58, 237, 0.18)',
+              boxShadow: '0 20px 40px rgba(124, 58, 237, 0.12)'
             }}
           >
             {/* Logo - Top Center */}
             <div className="flex flex-col items-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                 <Building2 className="w-10 h-10 text-white" strokeWidth={2} />
               </div>
               <h1 className="text-2xl font-bold text-neutral-900">Gatwick Bank</h1>
@@ -229,8 +229,8 @@ export const LoginPage = () => {
                         placeholder="you@example.com"
                         style={{
                           background: 'rgba(255, 255, 255, 0.85)',
-                          border: emailFocused ? '1.5px solid #8B5CF6' : '1.5px solid rgba(139, 92, 246, 0.2)',
-                          boxShadow: emailFocused ? '0 0 0 4px rgba(139, 92, 246, 0.15)' : 'none'
+                          border: emailFocused ? '1.5px solid #7C3AED' : '1.5px solid rgba(124, 58, 237, 0.2)',
+                          boxShadow: emailFocused ? '0 0 0 4px rgba(124, 58, 237, 0.15)' : 'none'
                         }}
                         className="w-full h-14 pl-12 pr-4 rounded-2xl text-neutral-900 placeholder-neutral-400 transition-all"
                         required
@@ -255,8 +255,8 @@ export const LoginPage = () => {
                         placeholder="Enter your password"
                         style={{
                           background: 'rgba(255, 255, 255, 0.85)',
-                          border: passwordFocused ? '1.5px solid #8B5CF6' : '1.5px solid rgba(139, 92, 246, 0.2)',
-                          boxShadow: passwordFocused ? '0 0 0 4px rgba(139, 92, 246, 0.15)' : 'none'
+                          border: passwordFocused ? '1.5px solid #7C3AED' : '1.5px solid rgba(124, 58, 237, 0.2)',
+                          boxShadow: passwordFocused ? '0 0 0 4px rgba(124, 58, 237, 0.15)' : 'none'
                         }}
                         className="w-full h-14 pl-12 pr-12 rounded-2xl text-neutral-900 placeholder-neutral-400 transition-all"
                         required
@@ -270,7 +270,7 @@ export const LoginPage = () => {
                       </button>
                     </div>
                     <div className="mt-2 text-right">
-                      <a href="#" className="text-sm font-semibold text-primary-600 hover:text-primary-700">
+                      <a href="#" className="text-sm font-semibold text-purple-700 hover:text-purple-800">
                         Forgot password?
                       </a>
                     </div>
@@ -280,7 +280,7 @@ export const LoginPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full h-14 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    className="w-full h-14 bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                   >
                     {isLoading ? (
                       <>
@@ -317,7 +317,7 @@ export const LoginPage = () => {
                   <div className="text-center pt-4">
                     <p className="text-neutral-600 text-sm">
                       Don't have an account?{' '}
-                      <a href="/register" className="text-primary-600 font-semibold hover:text-primary-700">
+                      <a href="/register" className="text-purple-700 font-semibold hover:text-purple-800">
                         Create one here
                       </a>
                     </p>
@@ -330,35 +330,38 @@ export const LoginPage = () => {
               <div className="mb-8">
                 <button
                   onClick={() => setStep(1)}
-                  className="text-indigo-600 dark:text-indigo-400 text-sm font-medium mb-4 hover:underline"
+                  className="text-purple-700 hover:text-purple-800 text-sm font-medium mb-4 hover:underline"
                 >
                   ← Back to login
                 </button>
-                <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Verify Your Identity</h2>
-                <p className="text-slate-600 dark:text-slate-400">Choose a verification method</p>
+                <h2 className="text-3xl font-bold text-neutral-900 mb-2">Verify Your Identity</h2>
+                <p className="text-neutral-600">Choose a verification method</p>
               </div>
 
               <form onSubmit={handleStep2Submit} className="space-y-5">
                 {error && (
-                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-                    <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+                  <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                    </div>
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
                   </div>
                 )}
 
                 {verificationMethod === 'question' ? (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      <label className="block text-sm font-semibold text-neutral-900 mb-2">
                         <Shield className="w-4 h-4 inline mr-2" />
                         Security Question
                       </label>
-                      <div className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white">
+                      <div className="w-full px-4 py-3 bg-purple-50 border border-purple-200 rounded-xl text-neutral-900 font-medium">
                         {randomQuestion?.question || 'Loading question...'}
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      <label className="block text-sm font-semibold text-neutral-900 mb-2">
                         Your Answer
                       </label>
                       <input
@@ -366,19 +369,19 @@ export const LoginPage = () => {
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
                         placeholder="Enter your answer"
-                        className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white placeholder-slate-400"
+                        className="w-full h-14 px-4 bg-white border-2 border-purple-200 focus:border-purple-700 focus:ring-4 focus:ring-purple-100 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all"
                         required
                       />
                     </div>
                   </>
                 ) : (
                   <div>
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-                      <p className="text-blue-700 dark:text-blue-400 text-sm font-medium">
+                    <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4">
+                      <p className="text-purple-800 text-sm font-medium">
                         📧 Check your email for your authentication code
                       </p>
                     </div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-900 mb-2">
                       <Shield className="w-4 h-4 inline mr-2" />
                       Enter Backup Code
                     </label>
@@ -388,10 +391,10 @@ export const LoginPage = () => {
                       onChange={(e) => setBackupCode(e.target.value)}
                       placeholder="6-digit code"
                       maxLength={6}
-                      className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-indigo-500 text-slate-900 dark:text-white placeholder-slate-400 text-center text-2xl tracking-widest font-mono"
+                      className="w-full h-16 px-4 bg-white border-2 border-purple-200 focus:border-purple-700 focus:ring-4 focus:ring-purple-100 rounded-xl text-neutral-900 placeholder-neutral-400 text-center text-2xl tracking-widest font-mono transition-all"
                       required
                     />
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                    <p className="text-xs text-neutral-500 mt-2">
                       Enter one of your backup codes from the PDF sent by admin
                     </p>
                   </div>
@@ -400,9 +403,19 @@ export const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 text-white font-semibold py-3 rounded-lg transition duration-200"
+                  className="w-full h-14 bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-800 hover:to-purple-950 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
-                  {isLoading ? 'Verifying...' : 'Verify & Sign In'}
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Verifying...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Verify & Sign In</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
+                  )}
                 </button>
               </form>
             </>

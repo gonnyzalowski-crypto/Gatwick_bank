@@ -261,7 +261,7 @@ export const RegisterPage = () => {
           >
             {/* Logo - Top Center */}
             <div className="flex flex-col items-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-700 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                 <Building2 className="w-10 h-10 text-white" strokeWidth={2} />
               </div>
               <h1 className="text-2xl font-bold text-neutral-900">Gatwick Bank</h1>
@@ -294,7 +294,7 @@ export const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="John"
                   className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.firstName ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.firstName ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
                 {fieldErrors.firstName && (
@@ -313,7 +313,7 @@ export const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="Doe"
                   className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.lastName ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.lastName ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
                 {fieldErrors.lastName && (
@@ -337,7 +337,7 @@ export const RegisterPage = () => {
                   required
                   placeholder="you@example.com"
                   className={`w-full h-14 pl-12 pr-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.email ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.email ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
               </div>
@@ -359,7 +359,7 @@ export const RegisterPage = () => {
                 required
                 placeholder="+1 234 567 8900"
                 className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                  fieldErrors.phone ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  fieldErrors.phone ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                 }`}
               />
               {fieldErrors.phone && (
@@ -379,7 +379,7 @@ export const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                  fieldErrors.dateOfBirth ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  fieldErrors.dateOfBirth ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                 }`}
               />
               {fieldErrors.dateOfBirth && (
@@ -400,7 +400,7 @@ export const RegisterPage = () => {
                 required
                 placeholder="123 Main Street"
                 className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                  fieldErrors.address ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  fieldErrors.address ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                 }`}
               />
               {fieldErrors.address && (
@@ -422,7 +422,7 @@ export const RegisterPage = () => {
                   required
                   placeholder="New York"
                   className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.city ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.city ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
                 {fieldErrors.city && (
@@ -441,7 +441,7 @@ export const RegisterPage = () => {
                   required
                   placeholder="NY"
                   className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.state ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.state ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
                 {fieldErrors.state && (
@@ -460,7 +460,7 @@ export const RegisterPage = () => {
                   required
                   placeholder="10001"
                   className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.zipCode ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.zipCode ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
                 {fieldErrors.zipCode && (
@@ -482,7 +482,7 @@ export const RegisterPage = () => {
                 required
                 placeholder="United States"
                 className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                  fieldErrors.country ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  fieldErrors.country ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                 }`}
               />
               {fieldErrors.country && (
@@ -503,7 +503,7 @@ export const RegisterPage = () => {
                 required
                 placeholder="American"
                 className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                  fieldErrors.nationality ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  fieldErrors.nationality ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                 }`}
               />
               {fieldErrors.nationality && (
@@ -522,7 +522,7 @@ export const RegisterPage = () => {
                 onChange={handleChange}
                 required
                 className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 transition-all ${
-                  fieldErrors.governmentIdType ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  fieldErrors.governmentIdType ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                 }`}
               >
                 <option value="">Select ID Type</option>
@@ -548,7 +548,7 @@ export const RegisterPage = () => {
                 required
                 placeholder="Enter your ID number"
                 className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                  fieldErrors.governmentIdNumber ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                  fieldErrors.governmentIdNumber ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                 }`}
               />
               {fieldErrors.governmentIdNumber && (
@@ -570,7 +570,7 @@ export const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="••••••••"
                   className={`w-full h-14 pl-12 pr-12 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.password ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.password ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
                 <button
@@ -601,7 +601,7 @@ export const RegisterPage = () => {
                   onChange={handleChange}
                   placeholder="••••••••"
                   className={`w-full h-14 pl-12 pr-12 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
-                    fieldErrors.confirmPassword ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-primary-600 focus:ring-4 focus:ring-primary-100'
+                    fieldErrors.confirmPassword ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}
                 />
                 <button
@@ -620,7 +620,7 @@ export const RegisterPage = () => {
             {/* Security Questions Section */}
             <div className="border-t border-neutral-200 pt-5 mt-6">
               <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-5 h-5 text-primary-600" />
+                <Shield className="w-5 h-5 text-purple-700" />
                 <h3 className="text-lg font-semibold text-neutral-900">Security Questions</h3>
               </div>
               <p className="text-sm text-neutral-600 mb-4">
@@ -639,7 +639,7 @@ export const RegisterPage = () => {
                       background: 'rgba(255, 255, 255, 0.85)',
                       border: fieldErrors[`sq${index}`] ? '1.5px solid #ef4444' : '1.5px solid rgba(139, 92, 246, 0.2)'
                     }}
-                    className="w-full h-12 px-4 rounded-xl text-neutral-900 mb-3 transition-all focus:border-primary-600 focus:ring-4 focus:ring-primary-100 focus:outline-none"
+                    className="w-full h-12 px-4 rounded-xl text-neutral-900 mb-3 transition-all focus:border-purple-700 focus:ring-4 focus:ring-purple-100 focus:outline-none"
                   >
                     <option value="">Select a question...</option>
                     {getAvailableQuestionsForIndex(index).map((q) => (
@@ -659,7 +659,7 @@ export const RegisterPage = () => {
                       background: 'rgba(255, 255, 255, 0.85)',
                       border: fieldErrors[`sq${index}answer`] ? '1.5px solid #ef4444' : '1.5px solid rgba(139, 92, 246, 0.2)'
                     }}
-                    className="w-full h-12 px-4 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all focus:border-primary-600 focus:ring-4 focus:ring-primary-100 focus:outline-none"
+                    className="w-full h-12 px-4 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all focus:border-purple-700 focus:ring-4 focus:ring-purple-100 focus:outline-none"
                   />
                   {fieldErrors[`sq${index}answer`] && (
                     <p className="text-red-600 text-xs mt-1">{fieldErrors[`sq${index}answer`]}</p>
@@ -681,15 +681,15 @@ export const RegisterPage = () => {
                 name="agreeToTerms"
                 checked={formData.agreeToTerms}
                 onChange={(e) => setFormData(prev => ({ ...prev, agreeToTerms: e.target.checked }))}
-                className="mt-1 w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+                className="mt-1 w-4 h-4 text-purple-700 border-neutral-300 rounded focus:ring-primary-500"
               />
               <label className="text-sm text-neutral-700">
                 I agree to the{' '}
-                <a href="/terms" className="text-primary-600 hover:text-primary-700 font-medium">
+                <a href="/terms" className="text-purple-700 hover:text-purple-900 font-medium">
                   Terms & Conditions
                 </a>
                 {' '}and{' '}
-                <a href="/privacy" className="text-primary-600 hover:text-primary-700 font-medium">
+                <a href="/privacy" className="text-purple-700 hover:text-purple-900 font-medium">
                   Privacy Policy
                 </a>
                 {' '}*
@@ -703,7 +703,7 @@ export const RegisterPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-14 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              className="w-full h-14 bg-gradient-to-r from-purple-700 to-purple-900 hover:from-purple-900 hover:to-primary-800 disabled:from-neutral-300 disabled:to-neutral-400 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -718,7 +718,7 @@ export const RegisterPage = () => {
             <div className="text-center pt-2">
               <p className="text-neutral-600 text-sm">
                 Already have an account?{' '}
-                <a href="/login" className="text-primary-600 font-semibold hover:text-primary-700">
+                <a href="/login" className="text-purple-700 font-semibold hover:text-purple-900">
                   Sign in here
                 </a>
               </p>
