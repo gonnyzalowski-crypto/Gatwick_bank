@@ -15,7 +15,7 @@ async function createBackupCode() {
     }
     
     // Create a simple backup code
-    const code = '123456';
+    const code = '789012';
     const codeHash = await bcrypt.hash(code, 10);
     
     const backupCode = await prisma.backupCode.create({
