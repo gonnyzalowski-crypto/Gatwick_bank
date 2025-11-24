@@ -40,7 +40,7 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
         <img 
           src="/features.jpg" 
           alt="Features background"
-          className="w-full h-full object-cover opacity-[0.79]"
+          className="w-full h-full object-cover opacity-50"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-white/98 via-white/95 to-white/98"></div>
