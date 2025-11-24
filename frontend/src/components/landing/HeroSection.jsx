@@ -11,8 +11,19 @@ export const HeroSection = () => {
   ];
 
   return (
-    <section className="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <section className="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" 
+          alt="City skyline"
+          className="w-full h-full object-cover opacity-10"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8 animate-fade-in">

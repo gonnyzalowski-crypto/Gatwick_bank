@@ -30,8 +30,19 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
   ];
 
   return (
-    <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-      <div className="max-w-7xl mx-auto">
+    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=1920&q=80" 
+          alt="Abstract purple and blue lights"
+          className="w-full h-full object-cover opacity-5"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/98 via-white/95 to-white/98"></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             Everything You Need in <span className="bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">One Platform</span>
