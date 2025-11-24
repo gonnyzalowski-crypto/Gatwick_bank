@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Building2, Mail, Phone, MapPin } from 'lucide-react';
 import { InfoModal } from '../modals/InfoModal';
 import { modalContent } from '../../data/modalContent.jsx';
+import { productsCompanyModals } from '../../data/productsCompanyModals.jsx';
 
 export const Footer = () => {
   const [activeModal, setActiveModal] = useState(null);
@@ -40,11 +41,11 @@ export const Footer = () => {
           <div>
             <h3 className="text-white font-bold mb-4">Products</h3>
             <ul className="space-y-3">
-              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Personal Banking</Link></li>
-              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Business Banking</Link></li>
-              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Crypto Wallets</Link></li>
-              <li><Link to="/cards" className="hover:text-purple-400 transition-colors">Credit Cards</Link></li>
-              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Loans & Financing</Link></li>
+              <li><button onClick={() => openModal('personalBanking')} className="hover:text-purple-400 transition-colors text-left">Personal Banking</button></li>
+              <li><button onClick={() => openModal('businessBanking')} className="hover:text-purple-400 transition-colors text-left">Business Banking</button></li>
+              <li><button onClick={() => openModal('cryptoWallets')} className="hover:text-purple-400 transition-colors text-left">Crypto Wallets</button></li>
+              <li><button onClick={() => openModal('creditCards')} className="hover:text-purple-400 transition-colors text-left">Credit Cards</button></li>
+              <li><button onClick={() => openModal('loansFinancing')} className="hover:text-purple-400 transition-colors text-left">Loans & Financing</button></li>
             </ul>
           </div>
 
@@ -52,11 +53,11 @@ export const Footer = () => {
           <div>
             <h3 className="text-white font-bold mb-4">Company</h3>
             <ul className="space-y-3">
-              <li><a href="#about" className="hover:text-purple-400 transition-colors">About Us</a></li>
-              <li><a href="#careers" className="hover:text-purple-400 transition-colors">Careers</a></li>
-              <li><a href="#press" className="hover:text-purple-400 transition-colors">Press & Media</a></li>
-              <li><a href="#blog" className="hover:text-purple-400 transition-colors">Blog & Resources</a></li>
-              <li><a href="#partners" className="hover:text-purple-400 transition-colors">Partner Program</a></li>
+              <li><button onClick={() => openModal('aboutUs')} className="hover:text-purple-400 transition-colors text-left">About Us</button></li>
+              <li><button onClick={() => openModal('careers')} className="hover:text-purple-400 transition-colors text-left">Careers</button></li>
+              <li><button onClick={() => openModal('pressMedia')} className="hover:text-purple-400 transition-colors text-left">Press & Media</button></li>
+              <li><button onClick={() => openModal('blogResources')} className="hover:text-purple-400 transition-colors text-left">Blog & Resources</button></li>
+              <li><button onClick={() => openModal('partnerProgram')} className="hover:text-purple-400 transition-colors text-left">Partner Program</button></li>
             </ul>
           </div>
 
@@ -109,8 +110,8 @@ export const Footer = () => {
         <InfoModal
           isOpen={!!activeModal}
           onClose={closeModal}
-          title={modalContent[activeModal]?.title}
-          content={modalContent[activeModal]?.content}
+          title={modalContent[activeModal]?.title || productsCompanyModals[activeModal]?.title}
+          content={modalContent[activeModal]?.content || productsCompanyModals[activeModal]?.content}
         />
       )}
     </footer>
