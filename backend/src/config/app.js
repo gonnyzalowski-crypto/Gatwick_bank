@@ -38,6 +38,10 @@ const config = {
     url: process.env.REDIS_URL || 'redis://localhost:6379',
   },
   logLevel: process.env.LOG_LEVEL || 'info',
+  // Email configuration
+  sendgridApiKey: process.env.SENDGRID_API_KEY,
+  fromEmail: process.env.FROM_EMAIL || 'noreply@gatwickbank.com',
+  frontendUrl: process.env.FRONTEND_URL || 'https://gatwickbank.up.railway.app',
 };
 
 export default config;
