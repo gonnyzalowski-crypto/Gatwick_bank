@@ -7,25 +7,29 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
       icon: <Shield className="w-6 h-6" />,
       title: 'Bank-Grade Security',
       description: 'Military-grade 256-bit encryption protects every transaction',
-      gradient: 'from-purple-700 to-purple-900'
+      gradient: 'from-purple-700 to-purple-900',
+      image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80'
     },
     {
       icon: <Zap className="w-6 h-6" />,
       title: 'Instant Transfers',
       description: 'Send money globally in seconds, not days',
-      gradient: 'from-blue-600 to-purple-800'
+      gradient: 'from-blue-600 to-purple-800',
+      image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=800&q=80'
     },
     {
       icon: <CreditCard className="w-6 h-6" />,
       title: 'Smart Cards',
       description: 'Virtual and physical cards with real-time controls',
-      gradient: 'from-purple-700 to-purple-900'
+      gradient: 'from-purple-700 to-purple-900',
+      image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&q=80'
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
       title: 'Financial Insights',
       description: 'AI-powered analytics to optimize your finances',
-      gradient: 'from-purple-800 to-blue-700'
+      gradient: 'from-purple-800 to-blue-700',
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80'
     }
   ];
 
@@ -36,7 +40,7 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
         <img 
           src="/features.jpg" 
           alt="Features background"
-          className="w-full h-full object-cover opacity-50"
+          className="w-full h-full object-cover opacity-[0.79]"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-white/98 via-white/95 to-white/98"></div>
@@ -93,15 +97,25 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
           {/* Feature Visualization */}
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-3xl blur-3xl"></div>
-            <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-purple-100">
-              <div className="aspect-square bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl flex items-center justify-center">
-                <div className={`w-32 h-32 bg-gradient-to-br ${features[activeFeature].gradient} rounded-full flex items-center justify-center text-white shadow-2xl animate-pulse`}>
-                  <div className="scale-150">
+            <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden shadow-2xl border border-purple-100">
+              {/* Feature Image */}
+              <div className="relative aspect-square overflow-hidden">
+                <img 
+                  src={features[activeFeature].image}
+                  alt={features[activeFeature].title}
+                  className="w-full h-full object-cover transition-all duration-500"
+                  loading="lazy"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${features[activeFeature].gradient} opacity-20`}></div>
+              </div>
+              
+              {/* Feature Info */}
+              <div className="p-8 text-center">
+                <div className={`inline-flex w-16 h-16 bg-gradient-to-br ${features[activeFeature].gradient} rounded-2xl items-center justify-center text-white shadow-lg mb-4`}>
+                  <div className="scale-125">
                     {features[activeFeature].icon}
                   </div>
                 </div>
-              </div>
-              <div className="mt-6 text-center">
                 <h4 className="text-2xl font-bold text-gray-900 mb-2">
                   {features[activeFeature].title}
                 </h4>

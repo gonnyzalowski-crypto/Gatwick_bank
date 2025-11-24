@@ -17,7 +17,7 @@ export const HeroSection = () => {
         <img 
           src="/hero.jpg" 
           alt="Hero background"
-          className="w-full h-full object-cover opacity-80"
+          className="w-full h-full object-cover opacity-100"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-blue-600/25"></div>
