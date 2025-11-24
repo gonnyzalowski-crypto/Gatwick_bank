@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Mail, Phone, MapPin } from 'lucide-react';
+import { InfoModal } from '../modals/InfoModal';
+import { modalContent } from '../../data/modalContent';
 
 export const Footer = () => {
+  const [activeModal, setActiveModal] = useState(null);
+
+  const openModal = (modalKey) => {
+    setActiveModal(modalKey);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+  };
+
   return (
     <footer className="bg-gray-900 text-gray-300 py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
@@ -82,15 +94,25 @@ export const Footer = () => {
               © 2025 Gatwick Bank. All rights reserved.
             </p>
             <div className="flex flex-wrap gap-6 text-sm">
-              <a href="#privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
-              <a href="#terms" className="hover:text-purple-400 transition-colors">Terms of Service</a>
-              <a href="#cookies" className="hover:text-purple-400 transition-colors">Cookie Policy</a>
-              <a href="#security" className="hover:text-purple-400 transition-colors">Security</a>
-              <a href="#accessibility" className="hover:text-purple-400 transition-colors">Accessibility</a>
+              <button onClick={() => openModal('privacy')} className="hover:text-purple-400 transition-colors">Privacy Policy</button>
+              <button onClick={() => openModal('terms')} className="hover:text-purple-400 transition-colors">Terms of Service</button>
+              <button onClick={() => openModal('cookies')} className="hover:text-purple-400 transition-colors">Cookie Policy</button>
+              <button onClick={() => openModal('security')} className="hover:text-purple-400 transition-colors">Security</button>
+              <button onClick={() => openModal('accessibility')} className="hover:text-purple-400 transition-colors">Accessibility</button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      {activeModal && (
+        <InfoModal
+          isOpen={!!activeModal}
+          onClose={closeModal}
+          title={modalContent[activeModal]?.title}
+          content={modalContent[activeModal]?.content}
+        />
+      )}
     </footer>
   );
 };
