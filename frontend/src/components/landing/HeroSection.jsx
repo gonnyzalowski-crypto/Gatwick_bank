@@ -20,7 +20,7 @@ export const HeroSection = () => {
           className="w-full h-full object-cover opacity-100"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-purple-50/95"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 via-white/30 to-purple-50/40"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
