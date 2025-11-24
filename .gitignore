@@ -42,8 +42,13 @@ public_html/
 # Temporary admin files
 mybanker/
 
-# Uploaded files
-backend/uploads/
+# Uploads
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Backups
+backend/backups/*
+!backend/backups/.gitkeep
 
 # Mock data (for local development only)
 frontend/src/lib/mockData.js

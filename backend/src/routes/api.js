@@ -21,6 +21,7 @@ import currenciesRouter from './currencies.js';
 import { chequesRouter } from './cheques.js';
 import { loansRouter } from './loans.js';
 import { beneficiariesRouter } from './beneficiaries.js';
+import backupRouter from './backup.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { getAccountSummary } from '../services/accountService.js';
 
@@ -47,6 +48,7 @@ router.use('/currencies', currenciesRouter);
 router.use('/cheques', chequesRouter);
 router.use('/loans', loansRouter);
 router.use('/beneficiaries', beneficiariesRouter);
+router.use('/backup', backupRouter);
 router.use('/', fixUsersRouter); // Temporary fix route
 router.use('/fix-accounts', fixAccountsRouter); // Temporary fix route
 

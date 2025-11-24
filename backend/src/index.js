@@ -11,6 +11,7 @@ import redis from './config/redis.js';
 import apiRouter from './routes/api.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { generalLimiter } from './middleware/rateLimiter.js';
+import { scheduleAutomaticBackups } from './services/backupService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -94,6 +95,11 @@ const server = app.listen(config.port, () => {
   console.log(`✅ API listening on port ${config.port}`);
   console.log(`📦 Environment: ${config.nodeEnv}`);
   console.log(`🔗 API endpoints available at http://localhost:${config.port}/api/v1`);
+  
+  // Schedule automatic backups (every 24 hours in production)
+  if (config.nodeEnv === 'production') {
+    scheduleAutomaticBackups(24); // 24 hours
+  }
 });
 
 // Graceful shutdown
