@@ -17,7 +17,8 @@ export const ChequeManagement = () => {
   const fetchCheques = async () => {
     setIsLoading(true);
     try {
-      const response = await apiClient.get(`/mybanker/cheques?status=${filterStatus}`);
+      const params = filterStatus !== 'all' ? `?status=${filterStatus}` : '';
+      const response = await apiClient.get(`/cheques/admin/all${params}`);
       setCheques(response.cheques || []);
     } catch (error) {
       console.error('Failed to fetch cheques:', error);
@@ -33,12 +34,12 @@ export const ChequeManagement = () => {
       message: 'Are you sure you want to clear this cheque? This action cannot be undone.',
       onConfirm: async () => {
         try {
-          await apiClient.post(`/mybanker/cheques/${chequeId}/clear`);
+          await apiClient.post(`/cheques/admin/${chequeId}/clear`);
           setModal({ isOpen: true, type: 'success', title: 'Success', message: 'Cheque cleared successfully!', onConfirm: null });
           fetchCheques();
         } catch (error) {
           console.error('Failed to clear cheque:', error);
-          setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to clear cheque. Please try again.', onConfirm: null });
+          setModal({ isOpen: true, type: 'error', title: 'Error', message: error.response?.data?.message || 'Failed to clear cheque. Please try again.', onConfirm: null });
         }
       }
     });
@@ -52,12 +53,12 @@ export const ChequeManagement = () => {
       message: 'Are you sure you want to bounce this cheque? This will notify the user.',
       onConfirm: async () => {
         try {
-          await apiClient.post(`/mybanker/cheques/${chequeId}/bounce`);
+          await apiClient.post(`/cheques/admin/${chequeId}/bounce`, { reason: 'Insufficient funds' });
           setModal({ isOpen: true, type: 'success', title: 'Success', message: 'Cheque bounced successfully!', onConfirm: null });
           fetchCheques();
         } catch (error) {
           console.error('Failed to bounce cheque:', error);
-          setModal({ isOpen: true, type: 'error', title: 'Error', message: 'Failed to bounce cheque. Please try again.', onConfirm: null });
+          setModal({ isOpen: true, type: 'error', title: 'Error', message: error.response?.data?.message || 'Failed to bounce cheque. Please try again.', onConfirm: null });
         }
       }
     });

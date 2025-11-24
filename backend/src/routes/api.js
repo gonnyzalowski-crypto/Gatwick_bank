@@ -18,6 +18,7 @@ import supportTicketsRouter from './supportTickets.js';
 import fixUsersRouter from './fix-users.js';
 import fixAccountsRouter from './fix-accounts.js';
 import currenciesRouter from './currencies.js';
+import { chequesRouter } from './cheques.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { getAccountSummary } from '../services/accountService.js';
 
@@ -41,6 +42,7 @@ router.use('/support-tickets', supportTicketsRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/kyc', kycRouter);
 router.use('/currencies', currenciesRouter);
+router.use('/cheques', chequesRouter);
 router.use('/', fixUsersRouter); // Temporary fix route
 router.use('/fix-accounts', fixAccountsRouter); // Temporary fix route
 
