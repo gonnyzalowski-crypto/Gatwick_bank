@@ -99,57 +99,273 @@ export const generateBatchInvoice = async (userId, paymentIds) => {
   return invoice;
 };
 
-// Generate simple HTML representation of an invoice
+// Generate professional HTML representation of an invoice
 export const generateInvoiceHTML = (invoice) => {
   const { customer, items, total, currency, id, issuedAt } = invoice;
 
   const rows = items
     .map(
-      (item) => `
+      (item, index) => `
         <tr>
-          <td>${item.description}</td>
-          <td style="text-align:right;">${item.amount.toFixed(2)} ${currency}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${index + 1}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${item.description}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.category || 'General'}</td>
+          <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">${currency === 'USD' ? '$' : currency}${item.amount.toFixed(2)}</td>
         </tr>`
     )
     .join('');
 
+  const invoiceDate = new Date(issuedAt).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return `<!DOCTYPE html>
-  <html>
+  <html lang="en">
     <head>
       <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Invoice ${id}</title>
       <style>
-        body { font-family: Arial, sans-serif; padding: 24px; }
-        h1 { margin-bottom: 4px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-        th, td { padding: 8px; border-bottom: 1px solid #ddd; }
-        tfoot td { font-weight: bold; }
-        .meta { margin-top: 8px; color: #555; }
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: #f9fafb;
+          padding: 40px 20px;
+          color: #1f2937;
+        }
+        
+        .invoice-container {
+          max-width: 800px;
+          margin: 0 auto;
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        }
+        
+        .invoice-header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 40px;
+        }
+        
+        .bank-name {
+          font-size: 32px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+        
+        .bank-tagline {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+        
+        .invoice-body {
+          padding: 40px;
+        }
+        
+        .invoice-meta {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 40px;
+          padding-bottom: 20px;
+          border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .invoice-info h2 {
+          font-size: 24px;
+          color: #667eea;
+          margin-bottom: 8px;
+        }
+        
+        .invoice-number {
+          font-size: 14px;
+          color: #6b7280;
+          margin-bottom: 4px;
+        }
+        
+        .invoice-date {
+          font-size: 14px;
+          color: #6b7280;
+        }
+        
+        .customer-info h3 {
+          font-size: 14px;
+          color: #6b7280;
+          margin-bottom: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .customer-name {
+          font-size: 18px;
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+        
+        .customer-email {
+          font-size: 14px;
+          color: #6b7280;
+        }
+        
+        .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 30px;
+        }
+        
+        .items-table thead {
+          background: #f9fafb;
+        }
+        
+        .items-table th {
+          padding: 12px;
+          text-align: left;
+          font-size: 12px;
+          font-weight: 600;
+          color: #6b7280;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .items-table th:last-child {
+          text-align: right;
+        }
+        
+        .items-table tbody tr:last-child td {
+          border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .total-section {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 20px;
+        }
+        
+        .total-box {
+          background: #f9fafb;
+          padding: 20px 30px;
+          border-radius: 8px;
+          min-width: 300px;
+        }
+        
+        .total-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          font-size: 14px;
+          color: #6b7280;
+        }
+        
+        .total-final {
+          display: flex;
+          justify-content: space-between;
+          padding-top: 12px;
+          border-top: 2px solid #e5e7eb;
+          font-size: 20px;
+          font-weight: bold;
+          color: #1f2937;
+        }
+        
+        .invoice-footer {
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #e5e7eb;
+          text-align: center;
+          color: #6b7280;
+          font-size: 12px;
+        }
+        
+        .footer-note {
+          margin-bottom: 8px;
+        }
+        
+        @media print {
+          body {
+            background: white;
+            padding: 0;
+          }
+          
+          .invoice-container {
+            box-shadow: none;
+            border-radius: 0;
+          }
+        }
       </style>
     </head>
     <body>
-      <h1>Invoice ${id}</h1>
-      <div class="meta">
-        <div>Date: ${new Date(issuedAt).toLocaleString()}</div>
-        <div>Customer: ${customer.firstName} ${customer.lastName} (${customer.email})</div>
+      <div class="invoice-container">
+        <div class="invoice-header">
+          <div class="bank-name">🏦 GATWICK BANK</div>
+          <div class="bank-tagline">Your Trusted Financial Partner</div>
+        </div>
+        
+        <div class="invoice-body">
+          <div class="invoice-meta">
+            <div class="invoice-info">
+              <h2>INVOICE</h2>
+              <div class="invoice-number">Invoice #: ${id}</div>
+              <div class="invoice-date">Date: ${invoiceDate}</div>
+            </div>
+            
+            <div class="customer-info">
+              <h3>Billed To</h3>
+              <div class="customer-name">${customer.firstName} ${customer.lastName}</div>
+              <div class="customer-email">${customer.email}</div>
+            </div>
+          </div>
+          
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">#</th>
+                <th>Description</th>
+                <th style="width: 150px; text-align: center;">Category</th>
+                <th style="width: 120px; text-align: right;">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+          
+          <div class="total-section">
+            <div class="total-box">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>${currency === 'USD' ? '$' : currency}${total.toFixed(2)}</span>
+              </div>
+              <div class="total-row">
+                <span>Tax (0%):</span>
+                <span>${currency === 'USD' ? '$' : currency}0.00</span>
+              </div>
+              <div class="total-final">
+                <span>Total:</span>
+                <span>${currency === 'USD' ? '$' : currency}${total.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="invoice-footer">
+            <div class="footer-note">Thank you for banking with Gatwick Bank</div>
+            <div>123 Financial District, New York, NY 10004 | Tel: (555) 123-4567</div>
+            <div>support@gatwickbank.com | www.gatwickbank.com</div>
+          </div>
+        </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Description</th>
-            <th style="text-align:right;">Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td>Total</td>
-            <td style="text-align:right;">${total.toFixed(2)} ${currency}</td>
-          </tr>
-        </tfoot>
-      </table>
+      
+      <script>
+        // Auto-print functionality (optional)
+        // window.onload = function() { window.print(); };
+      </script>
     </body>
   </html>`;
 };
