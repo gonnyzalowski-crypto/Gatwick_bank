@@ -1,4 +1,5 @@
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import { verifyAuth } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 import prisma from '../config/prisma.js';
@@ -115,14 +116,22 @@ paymentsRouter.post('/withdrawal', verifyAuth, async (req, res) => {
       });
     }
 
-    // Verify backup code
-    const validBackupCode = await prisma.backupCode.findFirst({
+    // Verify backup code - need to check all unused codes and compare hashes
+    const backupCodes = await prisma.backupCode.findMany({
       where: {
         userId: req.user.userId,
-        code: backupCode,
-        isUsed: false
+        used: false
       }
     });
+
+    let validBackupCode = null;
+    for (const code of backupCodes) {
+      const isValid = await bcrypt.compare(backupCode, code.codeHash);
+      if (isValid) {
+        validBackupCode = code;
+        break;
+      }
+    }
 
     if (!validBackupCode) {
       return res.status(400).json({
@@ -173,7 +182,11 @@ paymentsRouter.post('/withdrawal', verifyAuth, async (req, res) => {
     // Mark backup code as used
     await prisma.backupCode.update({
       where: { id: validBackupCode.id },
-      data: { isUsed: true }
+      data: { 
+        used: true,
+        usedAt: new Date(),
+        usedFor: 'WITHDRAWAL'
+      }
     });
 
     // Create notification for user
