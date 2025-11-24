@@ -2,6 +2,7 @@ import express from 'express';
 import config from '../config/app.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { authLimiter, registerLimiter, passwordResetLimiter } from '../middleware/rateLimiter.js';
+import { checkAccountLockout, recordFailedAttempt, clearLoginAttempts } from '../middleware/accountLockout.js';
 import {
   registerUser,
   loginUser,
@@ -112,7 +113,7 @@ router.post('/register', registerLimiter, async (req, res) => {
 
 // Step 1: Verify email and password
 // POST /api/v1/auth/login
-router.post('/login', authLimiter, async (req, res) => {
+router.post('/login', authLimiter, checkAccountLockout, async (req, res) => {
   const validation = validateRequest(loginSchema, req.body);
   if (!validation.valid) {
     return res.status(400).json({ errors: validation.errors });
@@ -123,13 +124,18 @@ router.post('/login', authLimiter, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      recordFailedAttempt(email);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     const bcrypt = (await import('bcryptjs')).default;
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      const attemptResult = recordFailedAttempt(email);
+      return res.status(401).json({ 
+        error: 'Invalid email or password',
+        attemptsRemaining: attemptResult.attemptsRemaining
+      });
     }
 
     // Get user's security questions
@@ -158,6 +164,9 @@ router.post('/login', authLimiter, async (req, res) => {
       );
 
       await logAction(user.id, 'LOGIN_SUCCESS', req.ip, req.get('user-agent'));
+      
+      // Clear login attempts on successful login
+      clearLoginAttempts(email);
 
       return res.json({
         accessToken,
@@ -241,6 +250,9 @@ router.post('/login/verify', async (req, res) => {
     await logAction(userId, 'LOGIN_SUCCESS', req.ip, req.get('user-agent'), {
       method
     });
+    
+    // Clear login attempts on successful verification
+    clearLoginAttempts(user.email);
 
     const { password: _, ...sanitizedUser } = user;
 
