@@ -34,9 +34,9 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=1920&q=80" 
-          alt="Abstract purple and blue lights"
-          className="w-full h-full object-cover opacity-5"
+          src="/features.jpg" 
+          alt="Features background"
+          className="w-full h-full object-cover opacity-50"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-white/98 via-white/95 to-white/98"></div>

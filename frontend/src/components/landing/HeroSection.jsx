@@ -12,14 +12,15 @@ export const HeroSection = () => {
 
   return (
     <section className="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Image with Gradient Overlay */}
+      {/* Background Image with Blue Tint and Gradient Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80" 
-          alt="Purple gradient background"
-          className="w-full h-full object-cover opacity-15"
+          src="/hero.jpg" 
+          alt="Hero background"
+          className="w-full h-full object-cover opacity-80"
           loading="lazy"
         />
+        <div className="absolute inset-0 bg-blue-600/25"></div>
         <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-purple-50/80 to-white/90"></div>
       </div>
 
