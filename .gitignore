@@ -53,6 +53,9 @@ backend/backups/*
 # Mock data (for local development only)
 frontend/src/lib/mockData.js
 
+# Old landing page (replaced with LandingPageV2)
+frontend/src/pages/LandingPage.jsx
+
 # Markdown documentation files
 *.md
 !README.md

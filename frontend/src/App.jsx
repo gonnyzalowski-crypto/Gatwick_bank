@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
-import LandingPage from './pages/LandingPage';
+import { LandingPageV2 } from './pages/LandingPageV2';
 import LoginPage from './pages/LoginPage';
 import BankerLoginPage from './pages/BankerLoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -27,7 +27,7 @@ export default function App() {
       <AuthProvider>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<LandingPageV2 />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/banker-login" element={<BankerLoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
