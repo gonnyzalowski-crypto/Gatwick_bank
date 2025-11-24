@@ -196,7 +196,7 @@ export const DashboardPage = () => {
     <UserDashboardLayout>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Hero Section - Total Balance */}
-        <div className="bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 rounded-2xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-purple-700 via-purple-800 to-primary-800 rounded-2xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -207,7 +207,7 @@ export const DashboardPage = () => {
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <p className="text-primary-100 text-sm font-medium uppercase tracking-wide">
+                  <p className="text-purple-100 text-sm font-medium uppercase tracking-wide">
                     Total Balance
                   </p>
                   <div className="group relative">
@@ -218,7 +218,7 @@ export const DashboardPage = () => {
                       <p className="font-semibold mb-2">Balance Types:</p>
                       <p className="mb-1"><span className="text-green-400">Available:</span> Spendable money</p>
                       <p className="mb-1"><span className="text-yellow-400">Pending:</span> Transactions clearing</p>
-                      <p><span className="text-blue-400">Current:</span> Available + Pending</p>
+                      <p><span className="text-purple-400">Current:</span> Available + Pending</p>
                     </div>
                   </div>
                 </div>
@@ -227,19 +227,19 @@ export const DashboardPage = () => {
                 </h1>
                 <div className="flex gap-4 mb-2">
                   <div>
-                    <p className="text-primary-100/70 text-xs">Available</p>
+                    <p className="text-purple-100/70 text-xs">Available</p>
                     <p className="text-green-300 text-sm font-semibold">
                       {formatCurrency(summary.availableBalance || summary.totalBalance || 0)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-primary-100/70 text-xs">Pending</p>
+                    <p className="text-purple-100/70 text-xs">Pending</p>
                     <p className="text-yellow-300 text-sm font-semibold">
                       {formatCurrency(summary.pendingBalance || 0)}
                     </p>
                   </div>
                 </div>
-                <p className="text-primary-100 text-sm">
+                <p className="text-purple-100 text-sm">
                   Across {summary.accountCount || 0} accounts • Last updated just now
                 </p>
               </div>
@@ -300,8 +300,8 @@ export const DashboardPage = () => {
                 <h2 className="text-lg font-semibold text-neutral-900">Monthly Spending</h2>
                 <p className="text-sm text-neutral-500 mt-0.5">Your spending trends over the last 12 months</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-primary-600" />
+              <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-purple-700" />
               </div>
             </div>
           </div>
@@ -331,7 +331,7 @@ export const DashboardPage = () => {
                     <div className="w-full relative flex items-end justify-center gap-1.5" style={{ height: 'calc(100% - 28px)' }}>
                       {/* Income bar (Thin Primary) */}
                       <div
-                        className="rounded-t-md transition-all duration-300 ease-out cursor-pointer relative overflow-hidden group bg-primary-600 hover:bg-primary-700"
+                        className="rounded-t-md transition-all duration-300 ease-out cursor-pointer relative overflow-hidden group bg-purple-700 hover:bg-purple-800"
                         style={{
                           width: '6px',
                           height: `${(data.income / maxValue) * 100}%`,
@@ -393,7 +393,7 @@ export const DashboardPage = () => {
             {/* Legend */}
             <div className="flex items-center justify-center gap-6 mt-6 pb-2">
               <div className="flex items-center gap-2">
-                <div className="w-1.5 h-3 rounded bg-primary-600"></div>
+                <div className="w-1.5 h-3 rounded bg-purple-700"></div>
                 <span className="text-xs font-medium text-neutral-600">Income</span>
               </div>
               <div className="flex items-center gap-2">
@@ -443,8 +443,8 @@ export const DashboardPage = () => {
                   <h3 className="text-base font-semibold text-neutral-900">Income Trend</h3>
                   <p className="text-xs text-neutral-500 mt-0.5">Monthly income growth</p>
                 </div>
-                <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">
-                  <LineChart className="w-5 h-5 text-primary-600" />
+                <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+                  <LineChart className="w-5 h-5 text-purple-700" />
                 </div>
               </div>
             </div>
@@ -863,7 +863,7 @@ export const DashboardPage = () => {
 
             {/* View All Button */}
             <div className="mt-6 text-center">
-              <button className="text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors">
+              <button className="text-sm font-semibold text-purple-700 hover:text-purple-800 transition-colors">
                 View all 50+ markets →
               </button>
             </div>
@@ -991,8 +991,8 @@ export const DashboardPage = () => {
             className="bg-white border border-neutral-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group"
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                <Plus className="w-6 h-6 text-primary-600" />
+              <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                <Plus className="w-6 h-6 text-purple-700" />
               </div>
             </div>
             <h3 className="text-lg font-semibold text-neutral-900 mb-2">Open New Account</h3>
@@ -1003,8 +1003,8 @@ export const DashboardPage = () => {
 
           <div className="bg-white border border-neutral-200 rounded-xl p-6 hover:shadow-lg transition-shadow cursor-pointer group">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                <CreditCard className="w-6 h-6 text-primary-600" />
+              <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center group-hover:bg-purple-100 transition-colors">
+                <CreditCard className="w-6 h-6 text-purple-700" />
               </div>
             </div>
             <h3 className="text-lg font-semibold text-neutral-900 mb-2">Request New Card</h3>
