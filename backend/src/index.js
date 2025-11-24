@@ -10,6 +10,7 @@ import prisma from './config/prisma.js';
 import redis from './config/redis.js';
 import apiRouter from './routes/api.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { generalLimiter } from './middleware/rateLimiter.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,9 @@ app.use(cookieParser());
 
 // Logging middleware
 app.use(morgan('dev'));
+
+// Rate limiting middleware (apply to all routes)
+app.use('/api', generalLimiter);
 
 // Health check endpoint (before any other routes)
 app.get('/healthz', (req, res) => {

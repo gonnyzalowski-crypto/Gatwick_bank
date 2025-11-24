@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import { verifyAuth } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
+import { transactionLimiter, uploadLimiter } from '../middleware/rateLimiter.js';
 import prisma from '../config/prisma.js';
 import * as paymentService from '../services/paymentService.js';
 import { validateSWIFT, validateIBAN, validateRecipientName, validateBankName } from '../utils/bankValidation.js';
@@ -12,7 +13,7 @@ const paymentsRouter = express.Router();
  * POST /api/v1/payments/deposit
  * Create deposit request (requires admin approval)
  */
-paymentsRouter.post('/deposit', verifyAuth, upload.single('paymentProof'), async (req, res) => {
+paymentsRouter.post('/deposit', uploadLimiter, verifyAuth, upload.single('paymentProof'), async (req, res) => {
   try {
     const { accountId, amount, description, gatewayId } = req.body;
 
@@ -92,7 +93,7 @@ paymentsRouter.post('/deposit', verifyAuth, upload.single('paymentProof'), async
  * POST /api/v1/payments/withdrawal
  * Create a withdrawal request (pending admin approval)
  */
-paymentsRouter.post('/withdrawal', verifyAuth, async (req, res) => {
+paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, async (req, res) => {
   try {
     const { accountId, amount, description, gatewayId, backupCode } = req.body;
 

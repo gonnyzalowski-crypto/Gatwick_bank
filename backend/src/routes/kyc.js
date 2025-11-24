@@ -2,6 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { verifyAuth } from '../middleware/auth.js';
 import { uploadKYCDocuments } from '../middleware/kycUpload.js';
+import { uploadLimiter } from '../middleware/rateLimiter.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -67,7 +68,7 @@ router.get('/status', verifyAuth, async (req, res) => {
 
 // Upload KYC documents
 // POST /api/v1/kyc/upload
-router.post('/upload', verifyAuth, uploadKYCDocuments, async (req, res) => {
+router.post('/upload', uploadLimiter, verifyAuth, uploadKYCDocuments, async (req, res) => {
   try {
     const userId = req.user.userId;
     const { category, documentType, description } = req.body;

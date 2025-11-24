@@ -1,6 +1,7 @@
 import express from 'express';
 import config from '../config/app.js';
 import { verifyAuth } from '../middleware/auth.js';
+import { authLimiter, registerLimiter, passwordResetLimiter } from '../middleware/rateLimiter.js';
 import {
   registerUser,
   loginUser,
@@ -34,7 +35,7 @@ router.get('/security-questions', (req, res) => {
 
 // Register a new user with security questions
 // POST /api/v1/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   const validation = validateRequest(registerSchema, req.body);
   if (!validation.valid) {
     return res.status(400).json({ errors: validation.errors });
@@ -111,7 +112,7 @@ router.post('/register', async (req, res) => {
 
 // Step 1: Verify email and password
 // POST /api/v1/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   const validation = validateRequest(loginSchema, req.body);
   if (!validation.valid) {
     return res.status(400).json({ errors: validation.errors });
@@ -346,7 +347,7 @@ router.post('/refresh', async (req, res) => {
 
 // Change password with security question verification
 // POST /api/v1/auth/change-password
-router.post('/change-password', verifyAuth, async (req, res) => {
+router.post('/change-password', passwordResetLimiter, verifyAuth, async (req, res) => {
   try {
     const { currentPassword, newPassword, questionId, answer } = req.body;
     const userId = req.user.userId;
