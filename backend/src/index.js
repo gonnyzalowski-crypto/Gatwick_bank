@@ -71,13 +71,23 @@ app.use('/api', apiRouter);
 // Serve static files from frontend build (production only)
 if (config.nodeEnv === 'production') {
   const frontendDistPath = path.join(__dirname, '../../frontend/dist');
-  app.use(express.static(frontendDistPath));
+  
+  // Serve static files, but skip API and uploads routes
+  app.use(express.static(frontendDistPath, {
+    index: false, // Don't serve index.html automatically
+    setHeaders: (res, path) => {
+      // Don't cache HTML files
+      if (path.endsWith('.html')) {
+        res.setHeader('Cache-Control', 'no-cache');
+      }
+    }
+  }));
   
   // Serve index.html for all non-API, non-uploads routes (SPA support)
-  app.get('*', (req, res) => {
+  app.get('*', (req, res, next) => {
     // Don't serve index.html for API or uploads routes
-    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
-      return res.status(404).json({ error: 'Route not found' });
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads') || req.path.startsWith('/healthz')) {
+      return next(); // Pass to next handler (will be 404)
     }
     res.sendFile(path.join(frontendDistPath, 'index.html'));
   });
@@ -96,10 +106,11 @@ const server = app.listen(config.port, () => {
   console.log(`📦 Environment: ${config.nodeEnv}`);
   console.log(`🔗 API endpoints available at http://localhost:${config.port}/api/v1`);
   
-  // Schedule automatic backups (every 24 hours in production)
-  if (config.nodeEnv === 'production') {
-    scheduleAutomaticBackups(24); // 24 hours
-  }
+  // Note: Automatic backups disabled in Railway (pg_dump not available)
+  // Use Railway's built-in database backups instead
+  // if (config.nodeEnv === 'production') {
+  //   scheduleAutomaticBackups(24); // 24 hours
+  // }
 });
 
 // Graceful shutdown
