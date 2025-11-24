@@ -4,6 +4,7 @@ import { verifyAuth } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 import prisma from '../config/prisma.js';
 import * as paymentService from '../services/paymentService.js';
+import { validateSWIFT, validateIBAN, validateRecipientName, validateBankName } from '../utils/bankValidation.js';
 
 const paymentsRouter = express.Router();
 
@@ -228,34 +229,63 @@ paymentsRouter.post('/withdrawal', verifyAuth, async (req, res) => {
  */
 paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
   try {
-    const { fromAccountId, recipientName, recipientIBAN, recipientBank, recipientCountry, amount, description } = req.body;
+    const { fromAccountId, recipientName, recipientIBAN, recipientSWIFT, recipientBank, recipientCountry, amount, description } = req.body;
 
-    if (!fromAccountId || !recipientName || !recipientIBAN || !recipientBank || !recipientCountry) {
-      return res.status(400).json({
-        success: false,
-        message: 'All recipient details are required',
-      });
+    // Validate required fields
+    if (!fromAccountId) {
+      return res.status(400).json({ success: false, message: 'Source account is required' });
     }
 
-    if (!amount || amount <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Amount must be greater than 0',
-      });
+    if (!amount || parseFloat(amount) <= 0) {
+      return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
+    }
+
+    // Validate recipient name
+    const nameValidation = validateRecipientName(recipientName);
+    if (!nameValidation.valid) {
+      return res.status(400).json({ success: false, message: nameValidation.error });
+    }
+
+    // Validate IBAN
+    const ibanValidation = validateIBAN(recipientIBAN);
+    if (!ibanValidation.valid) {
+      return res.status(400).json({ success: false, message: ibanValidation.error });
+    }
+
+    // Validate SWIFT (optional but recommended)
+    let swiftValidation = null;
+    if (recipientSWIFT) {
+      swiftValidation = validateSWIFT(recipientSWIFT);
+      if (!swiftValidation.valid) {
+        return res.status(400).json({ success: false, message: swiftValidation.error });
+      }
+    }
+
+    // Validate bank name
+    const bankValidation = validateBankName(recipientBank);
+    if (!bankValidation.valid) {
+      return res.status(400).json({ success: false, message: bankValidation.error });
+    }
+
+    // Validate country
+    if (!recipientCountry || recipientCountry.trim().length < 2) {
+      return res.status(400).json({ success: false, message: 'Recipient country is required' });
     }
 
     const result = await paymentService.internationalTransfer(fromAccountId, req.user.userId, {
-      recipientName,
-      recipientIBAN,
-      recipientBank,
-      recipientCountry,
-      amount,
+      recipientName: nameValidation.formatted,
+      recipientIBAN: ibanValidation.formatted,
+      recipientSWIFT: swiftValidation ? swiftValidation.formatted : null,
+      recipientBank: bankValidation.formatted,
+      recipientCountry: recipientCountry.trim(),
+      amount: parseFloat(amount),
       description: description || 'International transfer',
     });
 
     return res.status(201).json({
       success: true,
-      payment: result.payment,
+      message: 'International transfer initiated successfully',
+      transfer: result.transfer,
       transaction: result.transaction,
     });
   } catch (error) {
