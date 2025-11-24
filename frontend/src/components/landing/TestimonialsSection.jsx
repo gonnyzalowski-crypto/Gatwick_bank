@@ -34,11 +34,12 @@ export const TestimonialsSection = () => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1706885093476-b1e54a6b6c0f?w=1920&q=80" 
-          alt="Abstract dotted background"
-          className="w-full h-full object-cover opacity-5"
+          src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=1920&q=80" 
+          alt="Abstract purple rounded shapes"
+          className="w-full h-full object-cover opacity-12"
           loading="lazy"
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-purple-50/90 via-white/85 to-white/90"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">

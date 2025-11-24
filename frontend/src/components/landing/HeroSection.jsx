@@ -12,15 +12,15 @@ export const HeroSection = () => {
 
   return (
     <section className="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Image with Overlay */}
+      {/* Background Image with Gradient Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" 
-          alt="City skyline"
-          className="w-full h-full object-cover opacity-10"
+          src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80" 
+          alt="Purple gradient background"
+          className="w-full h-full object-cover opacity-15"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-purple-50/80 to-white/90"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -84,13 +84,13 @@ export const HeroSection = () => {
 };
 
 const DashboardPreview = () => (
-  <div className="relative">
+  <div className="relative max-w-md mx-auto lg:max-w-lg">
     {/* Decorative Elements */}
-    <div className="absolute -top-10 -right-10 w-72 h-72 bg-gradient-to-br from-purple-400/30 to-blue-400/30 rounded-full blur-3xl"></div>
-    <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
+    <div className="absolute -top-10 -right-10 w-64 h-64 bg-gradient-to-br from-purple-400/30 to-blue-400/30 rounded-full blur-3xl"></div>
+    <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-gradient-to-tr from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
     
     {/* Dashboard Mockup */}
-    <div className="relative z-10 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-purple-100 overflow-hidden">
+    <div className="relative z-10 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-purple-100 overflow-hidden transform scale-90 lg:scale-95">
       {/* Browser Chrome */}
       <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-4 py-3 flex items-center gap-2">
         <div className="flex gap-2">
