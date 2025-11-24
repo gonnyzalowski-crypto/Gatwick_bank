@@ -57,6 +57,10 @@ FIX_PROGRESS_REPORT.md
 MEGA_FIX_COMPLETION_REPORT.md
 PLAYWRIGHT_TEST_RESULTS.md
 
+# Achievement and status files
+ACHIEVEMENT_LOG.json
+MVP_COMPLETION_PLAN.md
+
 # Prompts and development files
 prompts/
 new
