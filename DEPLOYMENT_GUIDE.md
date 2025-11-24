@@ -1,4 +1,6 @@
-# Railway Deployment Guide
+# Railway# Gatwick Bank - Complete Deployment Guide
+**Last Updated:** November 24, 2025  
+**Version:** 2.0 (Day 3 - MVP Launch)
 
 ## Problem Fixed
 
