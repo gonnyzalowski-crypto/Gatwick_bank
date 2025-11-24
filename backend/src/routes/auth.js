@@ -3,6 +3,7 @@ import config from '../config/app.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { authLimiter, registerLimiter, passwordResetLimiter } from '../middleware/rateLimiter.js';
 import { checkAccountLockout, recordFailedAttempt, clearLoginAttempts } from '../middleware/accountLockout.js';
+import { sendEmailVerificationCode, verifyEmailCode } from '../services/emailAuthService.js';
 import {
   registerUser,
   loginUser,
@@ -186,8 +187,10 @@ router.post('/login', authLimiter, checkAccountLockout, async (req, res) => {
     return res.json({
       requiresVerification: true,
       userId: user.id,
+      email: user.email,
       securityQuestions: questions,
-      loginPreference: user.loginPreference || 'question'
+      verificationMethods: ['email', 'security_question', 'backup_code'],
+      loginPreference: user.loginPreference || 'email'
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -195,10 +198,46 @@ router.post('/login', authLimiter, checkAccountLockout, async (req, res) => {
   }
 });
 
-// Step 2: Verify security question OR backup code
+// Request email verification code
+// POST /api/v1/auth/login/send-email-code
+router.post('/login/send-email-code', async (req, res) => {
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const result = await sendEmailVerificationCode(user);
+
+    if (!result.success) {
+      return res.status(500).json({ 
+        error: 'Failed to send verification code. Please try another method.' 
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Verification code sent to your email',
+      expiresAt: result.expiresAt,
+      email: result.email.replace(/(.{2})(.*)(@.*)/, '$1***$3') // Mask email
+    });
+  } catch (error) {
+    console.error('Send email code error:', error);
+    return res.status(500).json({ error: 'Failed to send verification code' });
+  }
+});
+
+// Step 2: Verify security question, backup code, OR email code
 // POST /api/v1/auth/login/verify
 router.post('/login/verify', async (req, res) => {
-  const { userId, method, questionId, answer, backupCode } = req.body;
+  const { userId, method, questionId, answer, backupCode, emailCode } = req.body;
 
   if (!userId) {
     return res.status(400).json({ error: 'User ID is required' });
@@ -206,8 +245,23 @@ router.post('/login/verify', async (req, res) => {
 
   try {
     let verified = false;
+    let verificationResult = null;
 
-    if (method === 'security_question') {
+    if (method === 'email') {
+      if (!emailCode) {
+        return res.status(400).json({ error: 'Email verification code is required' });
+      }
+      console.log(`📧 Verifying email code for user ${userId}`);
+      verificationResult = verifyEmailCode(userId, emailCode);
+      verified = verificationResult.valid;
+      
+      if (!verified) {
+        return res.status(401).json({ 
+          error: verificationResult.error,
+          attemptsRemaining: verificationResult.attemptsRemaining
+        });
+      }
+    } else if (method === 'security_question') {
       if (!questionId || !answer) {
         return res.status(400).json({ error: 'Question ID and answer are required' });
       }

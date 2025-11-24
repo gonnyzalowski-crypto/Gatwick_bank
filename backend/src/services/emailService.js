@@ -14,7 +14,7 @@ const FROM_NAME = 'Gatwick Bank';
 /**
  * Send email using SendGrid
  */
-const sendEmail = async (to, subject, html, text = null) => {
+export const sendEmail = async (to, subject, html, text = null) => {
   if (!config.sendgridApiKey) {
     console.log('📧 Email would be sent (SendGrid not configured):');
     console.log(`   To: ${to}`);
