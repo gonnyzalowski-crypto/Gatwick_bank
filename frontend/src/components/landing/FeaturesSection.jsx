@@ -34,17 +34,7 @@ export const FeaturesSection = ({ activeFeature, setActiveFeature }) => {
   ];
 
   return (
-    <section id="features" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="/features.jpg" 
-          alt="Features background"
-          className="w-full h-full object-cover opacity-50"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/98 via-white/95 to-white/98"></div>
-      </div>
+    <section id="features" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-purple-50/30 to-white overflow-hidden">
 
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">

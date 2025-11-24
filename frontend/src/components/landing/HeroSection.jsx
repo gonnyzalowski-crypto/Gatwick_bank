@@ -11,17 +11,16 @@ export const HeroSection = () => {
   ];
 
   return (
-    <section className="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Background Image with Blue Tint and Gradient Overlay */}
+    <section className="relative pt-20 pb-32 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-purple-50/30 via-white to-blue-50/20">
+      {/* Background Image with Light Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="/hero.jpg" 
-          alt="Hero background"
-          className="w-full h-full object-cover opacity-100"
+          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1920&q=80" 
+          alt="Modern city buildings"
+          className="w-full h-full object-cover opacity-50"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-blue-600/25"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-white/90 via-purple-50/80 to-white/90"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-purple-50/95"></div>
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">

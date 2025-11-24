@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Mail, Phone, MapPin, Twitter, Linkedin, Github } from 'lucide-react';
+import { Building2, Mail, Phone, MapPin } from 'lucide-react';
 
 export const Footer = () => {
   return (
@@ -18,28 +18,21 @@ export const Footer = () => {
             <p className="text-gray-400 mb-6">
               Modern banking for the digital age. Secure, fast, and designed for you.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="#" className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-purple-600 transition-colors">
-                <Github className="w-5 h-5" />
-              </a>
-            </div>
+            <p className="text-sm text-gray-500">
+              FDIC Insured • Equal Housing Lender<br />
+              Member FDIC • NMLS #123456
+            </p>
           </div>
 
           {/* Products */}
           <div>
             <h3 className="text-white font-bold mb-4">Products</h3>
             <ul className="space-y-3">
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Personal Banking</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Business Banking</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Crypto Wallets</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Credit Cards</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Loans</a></li>
+              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Personal Banking</Link></li>
+              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Business Banking</Link></li>
+              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Crypto Wallets</Link></li>
+              <li><Link to="/cards" className="hover:text-purple-400 transition-colors">Credit Cards</Link></li>
+              <li><Link to="/register" className="hover:text-purple-400 transition-colors">Loans & Financing</Link></li>
             </ul>
           </div>
 
@@ -47,11 +40,11 @@ export const Footer = () => {
           <div>
             <h3 className="text-white font-bold mb-4">Company</h3>
             <ul className="space-y-3">
-              <li><a href="#" className="hover:text-purple-400 transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Press</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Blog</a></li>
-              <li><a href="#" className="hover:text-purple-400 transition-colors">Partners</a></li>
+              <li><a href="#about" className="hover:text-purple-400 transition-colors">About Us</a></li>
+              <li><a href="#careers" className="hover:text-purple-400 transition-colors">Careers</a></li>
+              <li><a href="#press" className="hover:text-purple-400 transition-colors">Press & Media</a></li>
+              <li><a href="#blog" className="hover:text-purple-400 transition-colors">Blog & Resources</a></li>
+              <li><a href="#partners" className="hover:text-purple-400 transition-colors">Partner Program</a></li>
             </ul>
           </div>
 
@@ -88,10 +81,12 @@ export const Footer = () => {
             <p className="text-gray-400 text-sm">
               © 2025 Gatwick Bank. All rights reserved.
             </p>
-            <div className="flex gap-6 text-sm">
-              <a href="#" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-purple-400 transition-colors">Terms of Service</a>
-              <a href="#" className="hover:text-purple-400 transition-colors">Cookie Policy</a>
+            <div className="flex flex-wrap gap-6 text-sm">
+              <a href="#privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
+              <a href="#terms" className="hover:text-purple-400 transition-colors">Terms of Service</a>
+              <a href="#cookies" className="hover:text-purple-400 transition-colors">Cookie Policy</a>
+              <a href="#security" className="hover:text-purple-400 transition-colors">Security</a>
+              <a href="#accessibility" className="hover:text-purple-400 transition-colors">Accessibility</a>
             </div>
           </div>
         </div>

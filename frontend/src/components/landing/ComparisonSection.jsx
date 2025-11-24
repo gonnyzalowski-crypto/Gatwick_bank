@@ -13,18 +13,7 @@ export const ComparisonSection = () => {
   ];
 
   return (
-    <section id="compare" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1920&q=80" 
-          alt="Abstract purple pattern"
-          className="w-full h-full object-cover opacity-8"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95"></div>
-      </div>
-
+    <section id="compare" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-gray-50 overflow-hidden">
       <div className="max-w-5xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

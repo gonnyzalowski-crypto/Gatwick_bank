@@ -30,17 +30,7 @@ export const NewsSection = () => {
   ];
 
   return (
-    <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-purple-50 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1920&q=80" 
-          alt="Abstract hexagonal background"
-          className="w-full h-full object-cover opacity-5"
-          loading="lazy"
-        />
-      </div>
-
+    <section className="relative py-24 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
