@@ -11,6 +11,45 @@ const generateTicketNumber = () => {
   return `TKT-${timestamp}${random}`;
 };
 
+// Auto-cleanup old completed/closed tickets (30 days)
+const cleanupOldTickets = async () => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // First delete messages for old tickets
+    const oldTickets = await prisma.supportTicket.findMany({
+      where: {
+        status: { in: ['RESOLVED', 'CLOSED'] },
+        resolvedAt: { lt: thirtyDaysAgo }
+      },
+      select: { id: true }
+    });
+
+    if (oldTickets.length > 0) {
+      const ticketIds = oldTickets.map(t => t.id);
+      
+      // Delete messages first (foreign key constraint)
+      await prisma.supportMessage.deleteMany({
+        where: { ticketId: { in: ticketIds } }
+      });
+
+      // Then delete tickets
+      const result = await prisma.supportTicket.deleteMany({
+        where: { id: { in: ticketIds } }
+      });
+
+      console.log(`🧹 Auto-cleanup: Deleted ${result.count} old support tickets (30+ days resolved/closed)`);
+    }
+  } catch (error) {
+    console.error('Ticket cleanup error:', error);
+  }
+};
+
+// Run cleanup on startup and every 24 hours
+cleanupOldTickets();
+setInterval(cleanupOldTickets, 24 * 60 * 60 * 1000);
+
 // POST /api/v1/support/tickets - Create new ticket (user)
 router.post('/tickets', verifyAuth, async (req, res) => {
   try {

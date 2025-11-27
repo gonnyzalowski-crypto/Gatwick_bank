@@ -75,9 +75,8 @@ export const GatewayManagement = () => {
 
     try {
       if (editingGateway) {
-        await apiClient.put(`/gateways/${editingGateway.id}`, data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        // Don't set Content-Type - browser will set it automatically with boundary for FormData
+        await apiClient.put(`/gateways/${editingGateway.id}`, data);
         setModal({
           isOpen: true,
           type: 'success',
@@ -86,9 +85,8 @@ export const GatewayManagement = () => {
           onConfirm: null
         });
       } else {
-        await apiClient.post('/gateways', data, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        // Don't set Content-Type - browser will set it automatically with boundary for FormData
+        await apiClient.post('/gateways', data);
         setModal({
           isOpen: true,
           type: 'success',
@@ -487,6 +485,17 @@ export const GatewayManagement = () => {
               <div className="mb-2">
                 <p className="text-xs text-slate-400">Network</p>
                 <p className="text-sm text-white">{gateway.network}</p>
+              </div>
+            )}
+
+            {gateway.qrCodePath && (
+              <div className="mb-2">
+                <p className="text-xs text-slate-400">QR Code</p>
+                <img 
+                  src={gateway.qrCodePath} 
+                  alt="QR Code" 
+                  className="w-20 h-20 mt-1 rounded border border-slate-600"
+                />
               </div>
             )}
 
