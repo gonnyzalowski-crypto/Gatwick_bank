@@ -64,16 +64,7 @@ export const getUserTickets = async (userId) => {
     where: { userId },
     include: {
       messages: {
-        orderBy: { createdAt: 'asc' },
-        include: {
-          user: {
-            select: {
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
+        orderBy: { createdAt: 'asc' }
       }
     },
     orderBy: { createdAt: 'desc' }
