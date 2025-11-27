@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, UserPlus, Edit, Trash2, Lock, Unlock, Eye, MoreVertical, DollarSign, CreditCard, Wallet, ChevronDown } from 'lucide-react';
+import { Search, Filter, UserPlus, Edit, Trash2, Lock, Unlock, Eye, MoreVertical, DollarSign, CreditCard, Wallet, ChevronDown, Shield } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 import AddUserModal from './AddUserModal';
-import ViewUserModal from './ViewUserModal';
+import GodModeUserModal from './GodModeUserModal';
 import CreditDebitModal from './CreditDebitModal';
 import EditUserModal from './EditUserModal';
 
@@ -103,14 +103,15 @@ export const UserManagement = () => {
         onSuccess={fetchUsers}
       />
 
-      {/* View User Modal */}
-      <ViewUserModal 
+      {/* God Mode User Modal */}
+      <GodModeUserModal 
         isOpen={showViewModal}
         onClose={() => {
           setShowViewModal(false);
           setSelectedUser(null);
         }}
         userId={selectedUser}
+        onSuccess={fetchUsers}
       />
 
       {/* Credit/Debit Money Modal */}
@@ -293,10 +294,10 @@ export const UserManagement = () => {
                             setSelectedUser(user.id);
                             setShowViewModal(true);
                           }}
-                          className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
-                          title="View Details"
+                          className="p-2 hover:bg-purple-600/30 bg-purple-500/10 rounded-lg transition-colors border border-purple-500/30"
+                          title="God Mode - Full Control"
                         >
-                          <Eye className="w-4 h-4 text-slate-400" />
+                          <Shield className="w-4 h-4 text-purple-400" />
                         </button>
                         <button 
                           onClick={() => {

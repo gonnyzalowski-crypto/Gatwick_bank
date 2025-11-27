@@ -256,9 +256,12 @@ router.get('/users', verifyAuth, verifyAdmin, async (req, res) => {
               accountType: true,
               balance: true,
               availableBalance: true,
+              pendingBalance: true,
               isPrimary: true,
-              status: true,
-              currency: true
+              isActive: true,
+              currency: true,
+              cryptoSymbol: true,
+              cryptoAddress: true
             }
           },
           debitCards: {
@@ -430,6 +433,53 @@ router.get('/users/:userId/backup-codes', verifyAuth, verifyAdmin, async (req, r
   } catch (error) {
     console.error('Get backup codes error:', error);
     return res.status(500).json({ error: 'Failed to fetch backup codes' });
+  }
+});
+
+// Regenerate backup codes for user
+// POST /api/v1/mybanker/users/:userId/regenerate-backup-codes
+router.post('/users/:userId/regenerate-backup-codes', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Delete existing backup codes
+    await prisma.backupCode.deleteMany({
+      where: { userId }
+    });
+
+    // Generate new backup codes
+    const newCodes = [];
+    for (let i = 0; i < 5; i++) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const codeHash = await bcrypt.hash(code, 10);
+      await prisma.backupCode.create({
+        data: {
+          userId,
+          codeHash
+        }
+      });
+      newCodes.push({ code, used: false });
+    }
+
+    // Log the action
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user.userId,
+        action: 'REGENERATE_BACKUP_CODES',
+        description: `Admin regenerated backup codes for user ${userId}`,
+        severity: 'HIGH',
+        ipAddress: req.ip
+      }
+    });
+
+    return res.json({ 
+      success: true, 
+      message: 'Backup codes regenerated successfully',
+      codes: newCodes 
+    });
+  } catch (error) {
+    console.error('Regenerate backup codes error:', error);
+    return res.status(500).json({ error: 'Failed to regenerate backup codes' });
   }
 });
 
