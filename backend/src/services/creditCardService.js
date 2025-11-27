@@ -72,8 +72,7 @@ export const applyCreditCard = async (userId, requestedLimit, cardHolderName) =>
       status: 'PENDING',
       approvalStatus: 'PENDING',
       isActive: false,
-      isFrozen: false,
-      pin: '1234' // Default PIN
+      isFrozen: false
     }
   });
 
