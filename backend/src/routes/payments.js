@@ -112,33 +112,10 @@ paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, async (req, r
       });
     }
 
-    // TEST PROJECT: Make backup code optional
-    // If backup code is provided, verify it; otherwise skip verification
+    // TEST PROJECT: Skip backup code verification entirely
+    // In production, this would verify the backup code
     let validBackupCode = null;
-    if (backupCode && backupCode.length === 6) {
-      // Verify backup code - need to check all unused codes and compare hashes
-      const backupCodes = await prisma.backupCode.findMany({
-        where: {
-          userId: req.user.userId,
-          used: false
-        }
-      });
-
-      for (const code of backupCodes) {
-        const isValid = await bcrypt.compare(backupCode, code.codeHash);
-        if (isValid) {
-          validBackupCode = code;
-          break;
-        }
-      }
-
-      if (!validBackupCode) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid or already used backup code',
-        });
-      }
-    }
+    // Backup code verification is disabled for testing purposes
 
     // Verify account ownership
     const account = await prisma.account.findFirst({
