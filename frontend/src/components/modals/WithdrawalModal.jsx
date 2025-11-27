@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowUpFromLine, CreditCard, Key, CheckCircle, Wallet } from 'lucide-react';
+import { X, ArrowUpFromLine, CreditCard, Key, CheckCircle, Wallet, Shield, Clock, AlertTriangle, Copy, Loader2 } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 import { BrandFeedbackModal } from './BrandFeedbackModal';
 
@@ -10,9 +10,11 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
   const [selectedAccount, setSelectedAccount] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [walletAddress, setWalletAddress] = useState('');
   const [backupCode, setBackupCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
 
   useEffect(() => {
@@ -58,6 +60,11 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
         setError('Insufficient funds in selected account');
         return;
       }
+      // Require wallet address for crypto withdrawals
+      if (selectedGateway?.type === 'CRYPTO' && !walletAddress.trim()) {
+        setError('Please enter your wallet address');
+        return;
+      }
       setStep(3);
     }
   };
@@ -77,7 +84,8 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
         amount: parseFloat(amount),
         description,
         gatewayId: selectedGateway.id,
-        backupCode
+        backupCode,
+        walletAddress: selectedGateway?.type === 'CRYPTO' ? walletAddress : undefined
       });
 
       setStep(4);
@@ -98,6 +106,7 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
     setSelectedGateway(null);
     setAmount('');
     setDescription('');
+    setWalletAddress('');
     setBackupCode('');
     setError('');
     onClose();
@@ -273,6 +282,29 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
                   </div>
                 </div>
 
+                {/* Wallet Address for Crypto */}
+                {selectedGateway?.type === 'CRYPTO' && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Your {selectedGateway.name} Wallet Address *
+                    </label>
+                    <div className="relative">
+                      <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        value={walletAddress}
+                        onChange={(e) => setWalletAddress(e.target.value)}
+                        placeholder={`Enter your ${selectedGateway.network || selectedGateway.name} wallet address`}
+                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-mono text-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
+                      <Shield className="w-3 h-3" />
+                      Make sure the address is correct. Transactions cannot be reversed.
+                    </p>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Description (Optional)
@@ -281,15 +313,31 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Add a note about this withdrawal..."
-                    rows={3}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    rows={2}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none"
                   />
                 </div>
 
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                  <p className="text-xs text-amber-700">
-                    <strong>Note:</strong> Withdrawals are subject to admin approval and may take 1-3 business days to process.
-                  </p>
+                {/* Info Cards */}
+                <div className="space-y-3">
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-900">Important Notice</p>
+                        <p className="text-xs text-amber-700 mt-1">
+                          Withdrawals require admin approval and may take 1-3 business days to process.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {selectedGateway?.processingTime && (
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Estimated processing time: {selectedGateway.processingTime}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -363,18 +411,29 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
                 <p className="text-slate-600 mb-6">
                   Your withdrawal request has been submitted for admin approval.
                 </p>
-                <div className="bg-slate-50 rounded-lg p-4 text-left space-y-2">
+                <div className="bg-slate-50 rounded-xl p-4 text-left space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Amount:</span>
-                    <span className="font-semibold text-slate-900">${amount}</span>
+                    <span className="font-bold text-slate-900">${parseFloat(amount).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-600">Gateway:</span>
                     <span className="font-semibold text-slate-900">{selectedGateway?.name}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  {selectedGateway?.type === 'CRYPTO' && walletAddress && (
+                    <div className="text-sm">
+                      <span className="text-slate-600 block mb-1">Receiving Wallet:</span>
+                      <code className="text-xs font-mono text-slate-800 bg-slate-200 px-2 py-1 rounded break-all block">
+                        {walletAddress}
+                      </code>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm items-center pt-2 border-t border-slate-200">
                     <span className="text-slate-600">Status:</span>
-                    <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">Pending Approval</span>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full">
+                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
+                      Pending Approval
+                    </span>
                   </div>
                 </div>
               </div>
@@ -397,10 +456,15 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
                   )}
                   <button
                     onClick={step === 3 ? handleSubmit : handleNext}
-                    className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium disabled:opacity-50"
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-xl hover:from-orange-700 hover:to-orange-800 transition-all font-medium disabled:opacity-50 shadow-lg shadow-orange-500/25 disabled:shadow-none flex items-center justify-center gap-2"
                     disabled={loading}
                   >
-                    {loading ? 'Processing...' : step === 3 ? 'Submit Withdrawal' : 'Continue'}
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : step === 3 ? 'Submit Withdrawal' : 'Continue'}
                   </button>
                 </>
               )}
