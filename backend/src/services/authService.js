@@ -44,7 +44,7 @@ export const registerUser = async (email, password, firstName, lastName, additio
       balance: 0,
       availableBalance: 0,
       currency: 'USD',
-      status: 'ACTIVE',
+      isActive: true,
       isPrimary: true
     },
   });
@@ -59,7 +59,7 @@ export const registerUser = async (email, password, firstName, lastName, additio
       balance: 0,
       availableBalance: 0,
       currency: 'USD',
-      status: 'ACTIVE',
+      isActive: true,
       isPrimary: false
     },
   });
