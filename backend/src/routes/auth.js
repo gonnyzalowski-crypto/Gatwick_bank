@@ -58,7 +58,8 @@ router.post('/register', registerLimiter, async (req, res) => {
     country,
     nationality,
     governmentIdType,
-    governmentIdNumber
+    governmentIdNumber,
+    currency
   } = req.body;
 
   try {
@@ -78,7 +79,8 @@ router.post('/register', registerLimiter, async (req, res) => {
       country,
       nationality,
       governmentIdType,
-      governmentIdNumber
+      governmentIdNumber,
+      currency: currency || 'USD'
     });
     const userId = result.user.id;
 

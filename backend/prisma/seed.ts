@@ -253,12 +253,19 @@ async function main() {
   console.log('\n📋 Step 1.6: Creating currencies...');
   
   const currencies = [
+    // Base Currency
     { code: 'USD', name: 'US Dollar', symbol: '$', type: 'FIAT', exchangeRate: 1, isBase: true, isActive: true },
+    // Fiat Currencies
+    { code: 'EUR', name: 'Euro', symbol: '€', type: 'FIAT', exchangeRate: 1.08, isBase: false, isActive: true },
+    { code: 'GBP', name: 'British Pound', symbol: '£', type: 'FIAT', exchangeRate: 1.27, isBase: false, isActive: true },
+    { code: 'CAD', name: 'Canadian Dollar', symbol: 'CA$', type: 'FIAT', exchangeRate: 0.74, isBase: false, isActive: true },
+    { code: 'AUD', name: 'Australian Dollar', symbol: 'A$', type: 'FIAT', exchangeRate: 0.65, isBase: false, isActive: true },
+    { code: 'JPY', name: 'Japanese Yen', symbol: '¥', type: 'FIAT', exchangeRate: 0.0067, isBase: false, isActive: true },
+    { code: 'CHF', name: 'Swiss Franc', symbol: 'CHF', type: 'FIAT', exchangeRate: 1.13, isBase: false, isActive: true },
+    // Cryptocurrencies
     { code: 'BTC', name: 'Bitcoin', symbol: '₿', type: 'CRYPTO', exchangeRate: 87000, isBase: false, isActive: true },
     { code: 'ETH', name: 'Ethereum', symbol: 'Ξ', type: 'CRYPTO', exchangeRate: 3200, isBase: false, isActive: true },
-    { code: 'USDT', name: 'Tether', symbol: '₮', type: 'CRYPTO', exchangeRate: 1, isBase: false, isActive: true },
-    { code: 'EUR', name: 'Euro', symbol: '€', type: 'FIAT', exchangeRate: 1.08, isBase: false, isActive: true },
-    { code: 'GBP', name: 'British Pound', symbol: '£', type: 'FIAT', exchangeRate: 1.27, isBase: false, isActive: true }
+    { code: 'USDT', name: 'Tether', symbol: '₮', type: 'CRYPTO', exchangeRate: 1, isBase: false, isActive: true }
   ];
 
   for (const currency of currencies) {

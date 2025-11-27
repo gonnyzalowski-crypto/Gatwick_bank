@@ -23,6 +23,9 @@ export const registerUser = async (email, password, firstName, lastName, additio
   const routingSequence = (userCount + 1) % 1000; // 001-999
   const routingNumber = `604003${String(routingSequence).padStart(3, '0')}`;
 
+  // Extract currency from additionalData, default to USD
+  const { currency = 'USD', ...restData } = additionalData;
+  
   const user = await prisma.user.create({
     data: {
       email,
@@ -30,7 +33,7 @@ export const registerUser = async (email, password, firstName, lastName, additio
       firstName,
       lastName,
       routingNumber,
-      ...additionalData
+      ...restData
     },
   });
 
@@ -44,7 +47,7 @@ export const registerUser = async (email, password, firstName, lastName, additio
       accountNumber: savingsNumber,
       balance: 5000,
       availableBalance: 5000,
-      currency: 'USD',
+      currency: currency,
       isActive: true,
       isPrimary: true
     },
@@ -60,7 +63,7 @@ export const registerUser = async (email, password, firstName, lastName, additio
       accountNumber: checkingNumber,
       balance: 5000,
       availableBalance: 5000,
-      currency: 'USD',
+      currency: currency,
       isActive: true,
       isPrimary: false
     },

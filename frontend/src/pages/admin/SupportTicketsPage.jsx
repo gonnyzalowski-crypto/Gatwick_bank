@@ -50,7 +50,7 @@ export const SupportTicketsPage = () => {
 
   const fetchTicketDetails = async (ticketId) => {
     try {
-      const response = await apiClient.get(`/support/tickets/${ticketId}`);
+      const response = await apiClient.get(`/support-tickets/tickets/${ticketId}`);
       if (response.success) {
         setMessages(response.ticket.messages || []);
       }
@@ -64,7 +64,7 @@ export const SupportTicketsPage = () => {
     if (!newMessage.trim() || !selectedTicket) return;
 
     try {
-      const response = await apiClient.post(`/support/tickets/${selectedTicket.id}/messages`, {
+      const response = await apiClient.post(`/support-tickets/tickets/${selectedTicket.id}/messages`, {
         message: newMessage
       });
 

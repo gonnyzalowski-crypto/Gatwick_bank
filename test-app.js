@@ -12,7 +12,7 @@
  * 7. Admin Loans Management
  */
 
-const API_BASE = process.env.API_URL || 'http://localhost:8080/api/v1';
+const API_BASE = process.env.API_URL || 'https://gatwickbank.up.railway.app/api/v1';
 
 // Test credentials
 const TEST_USER = {
@@ -61,7 +61,13 @@ async function fetchAPI(endpoint, options = {}) {
       ...options
     });
     
-    const data = await response.json().catch(() => ({}));
+    const text = await response.text();
+    let data = {};
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      data = { rawResponse: text };
+    }
     return { status: response.status, ok: response.ok, data };
   } catch (error) {
     return { status: 0, ok: false, error: error.message };
@@ -100,35 +106,56 @@ async function testAuthLogin() {
     })
   });
   
+  log.info(`Login response status: ${step1.status}`);
+  log.info(`Login response data: ${JSON.stringify(step1.data).substring(0, 200)}`);
+  
+  // Check if direct token (no security question required)
+  if (step1.ok && step1.data.accessToken) {
+    log.success('Login passed - Direct token received (no security question)');
+    results.passed++;
+    return step1.data.accessToken;
+  }
+  
+  // Check if security question required
   if (step1.ok && step1.data.requiresSecurityQuestion) {
     log.success('Login Step 1 passed - Security question required');
     results.passed++;
     
-    // Test Step 2: Security Answer
+    const userId = step1.data.userId;
+    const questionId = step1.data.securityQuestions?.[0]?.id;
+    
+    if (!questionId) {
+      log.error('No security question ID found');
+      results.failed++;
+      return null;
+    }
+    
+    // Test Step 2: Security Answer via /auth/login/verify
     log.info('Testing login step 2 (security answer)...');
-    const step2 = await fetchAPI('/auth/verify-security', {
+    const step2 = await fetchAPI('/auth/login/verify', {
       method: 'POST',
       body: JSON.stringify({
-        tempToken: step1.data.tempToken,
+        userId: userId,
+        method: 'security_question',
+        questionId: questionId,
         answer: ADMIN_USER.securityAnswer
       })
     });
     
-    if (step2.ok && step2.data.token) {
+    log.info(`Step 2 response status: ${step2.status}`);
+    log.info(`Step 2 response data: ${JSON.stringify(step2.data).substring(0, 200)}`);
+    
+    if (step2.ok && step2.data.accessToken) {
       log.success('Login Step 2 passed - Token received');
       results.passed++;
-      return step2.data.token;
+      return step2.data.accessToken;
     } else {
       log.error(`Login Step 2 failed: ${JSON.stringify(step2.data)}`);
       results.failed++;
       results.issues.push('Security answer verification failing');
     }
-  } else if (step1.ok && step1.data.token) {
-    log.success('Login passed - Direct token (no security question)');
-    results.passed++;
-    return step1.data.token;
   } else {
-    log.error(`Login Step 1 failed: ${JSON.stringify(step1.data)}`);
+    log.error(`Login Step 1 failed: Status ${step1.status} - ${JSON.stringify(step1.data)}`);
     results.failed++;
     results.issues.push('Login authentication failing');
   }

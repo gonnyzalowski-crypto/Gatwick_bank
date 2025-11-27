@@ -58,7 +58,7 @@ export const TransactionMonitor = () => {
     }
   };
 
-  const totalVolume = transactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
+  const totalVolume = transactions.reduce((sum, tx) => sum + parseFloat(tx.amount || 0), 0);
   const completedCount = transactions.filter(tx => tx.status === 'COMPLETED').length;
   const pendingCount = transactions.filter(tx => tx.status === 'PENDING').length;
 
@@ -233,7 +233,7 @@ export const TransactionMonitor = () => {
                       <div className={`font-semibold ${
                         tx.type === 'CREDIT' || tx.type === 'DEPOSIT' ? 'text-green-400' : 'text-red-400'
                       }`}>
-                        {tx.type === 'CREDIT' || tx.type === 'DEPOSIT' ? '+' : '-'}${tx.amount?.toFixed(2)}
+                        {tx.type === 'CREDIT' || tx.type === 'DEPOSIT' ? '+' : '-'}${parseFloat(tx.amount || 0).toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4">

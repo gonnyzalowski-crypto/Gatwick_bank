@@ -5,9 +5,9 @@ import { verifyAuth } from '../middleware/auth.js';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Get all currencies
+// Get all currencies (public - for registration)
 // GET /api/v1/currencies
-router.get('/', verifyAuth, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const currencies = await prisma.currency.findMany({
       orderBy: [

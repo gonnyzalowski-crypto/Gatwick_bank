@@ -209,7 +209,7 @@ const CurrencyManagement = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-slate-300">
-                  {currency.exchangeRate.toFixed(6)}
+                  {parseFloat(currency.exchangeRate || 0).toFixed(6)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${

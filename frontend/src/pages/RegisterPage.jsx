@@ -21,8 +21,10 @@ export const RegisterPage = () => {
     governmentIdNumber: '',
     password: '',
     confirmPassword: '',
+    currency: 'USD',
     agreeToTerms: false
   });
+  const [currencies, setCurrencies] = useState([]);
   const [securityQuestions, setSecurityQuestions] = useState([
     { question: '', answer: '' },
     { question: '', answer: '' },
@@ -48,7 +50,21 @@ export const RegisterPage = () => {
         console.error('Failed to fetch security questions:', err);
       }
     };
+    
+    // Fetch available currencies
+    const fetchCurrencies = async () => {
+      try {
+        const response = await apiClient.get('/currencies');
+        if (response.success) {
+          setCurrencies(response.currencies.filter(c => c.isActive) || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch currencies:', err);
+      }
+    };
+    
     fetchQuestions();
+    fetchCurrencies();
   }, []);
 
   const handleChange = (e) => {
@@ -150,7 +166,8 @@ export const RegisterPage = () => {
         country: formData.country,
         nationality: formData.nationality,
         governmentIdType: formData.governmentIdType,
-        governmentIdNumber: formData.governmentIdNumber
+        governmentIdNumber: formData.governmentIdNumber,
+        currency: formData.currency
       }
     );
 
@@ -554,6 +571,33 @@ export const RegisterPage = () => {
               {fieldErrors.governmentIdNumber && (
                 <p className="text-red-600 text-xs mt-1">{fieldErrors.governmentIdNumber}</p>
               )}
+            </div>
+
+            {/* Currency Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                Account Currency *
+              </label>
+              <select
+                name="currency"
+                value={formData.currency}
+                onChange={handleChange}
+                required
+                className={`w-full h-12 px-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 transition-all ${
+                  fieldErrors.currency ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
+                }`}
+              >
+                <option value="">Select currency</option>
+                {currencies.map((currency) => (
+                  <option key={currency.code} value={currency.code}>
+                    {currency.symbol} {currency.name} ({currency.code})
+                  </option>
+                ))}
+              </select>
+              {fieldErrors.currency && (
+                <p className="text-red-600 text-xs mt-1">{fieldErrors.currency}</p>
+              )}
+              <p className="text-xs text-neutral-500 mt-1">This will be your primary account currency</p>
             </div>
 
             {/* Password */}
