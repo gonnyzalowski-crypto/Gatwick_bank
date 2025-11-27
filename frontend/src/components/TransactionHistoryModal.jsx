@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal } from './ui/Modal';
+import apiClient from '../lib/apiClient';
 import { 
   ArrowUpRight, 
   ArrowDownRight, 
@@ -9,15 +10,8 @@ import {
   Calendar,
   TrendingUp,
   TrendingDown,
-  ShoppingBag,
-  Utensils,
-  Car,
-  Home,
-  Zap,
-  Coffee,
-  Film,
-  Heart,
-  Briefcase
+  DollarSign,
+  Loader2
 } from 'lucide-react';
 
 /**
@@ -27,31 +21,39 @@ import {
 export const TransactionHistoryModal = ({ isOpen, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all'); // all, credit, debit
-  const [filterCategory, setFilterCategory] = useState('all');
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock transaction data for last 30 days
-  const transactions = [
-    { id: 1, description: 'Salary Deposit', amount: 3500.00, type: 'credit', category: 'Income', date: '2 hours ago', icon: Briefcase, color: 'emerald' },
-    { id: 2, description: 'Amazon Purchase', amount: -89.99, type: 'debit', category: 'Shopping', date: '5 hours ago', icon: ShoppingBag, color: 'purple' },
-    { id: 3, description: 'Whole Foods Market', amount: -125.50, type: 'debit', category: 'Food & Dining', date: '1 day ago', icon: Utensils, color: 'amber' },
-    { id: 4, description: 'Uber Ride', amount: -23.45, type: 'debit', category: 'Transport', date: '1 day ago', icon: Car, color: 'blue' },
-    { id: 5, description: 'Freelance Payment', amount: 850.00, type: 'credit', category: 'Income', date: '2 days ago', icon: Briefcase, color: 'emerald' },
-    { id: 6, description: 'Electric Bill', amount: -156.50, type: 'debit', category: 'Bills', date: '3 days ago', icon: Zap, color: 'red' },
-    { id: 7, description: 'Netflix Subscription', amount: -15.99, type: 'debit', category: 'Entertainment', date: '3 days ago', icon: Film, color: 'red' },
-    { id: 8, description: 'Starbucks', amount: -12.50, type: 'debit', category: 'Food & Dining', date: '4 days ago', icon: Coffee, color: 'amber' },
-    { id: 9, description: 'Gas Station', amount: -45.00, type: 'debit', category: 'Transport', date: '5 days ago', icon: Car, color: 'blue' },
-    { id: 10, description: 'Gym Membership', amount: -49.99, type: 'debit', category: 'Health', date: '5 days ago', icon: Heart, color: 'red' },
-    { id: 11, description: 'Restaurant', amount: -67.80, type: 'debit', category: 'Food & Dining', date: '6 days ago', icon: Utensils, color: 'amber' },
-    { id: 12, description: 'Target', amount: -89.45, type: 'debit', category: 'Shopping', date: '7 days ago', icon: ShoppingBag, color: 'purple' },
-    { id: 13, description: 'Investment Return', amount: 250.00, type: 'credit', category: 'Investment', date: '1 week ago', icon: TrendingUp, color: 'emerald' },
-    { id: 14, description: 'Water Bill', amount: -45.30, type: 'debit', category: 'Bills', date: '1 week ago', icon: Home, color: 'blue' },
-    { id: 15, description: 'Coffee Shop', amount: -8.75, type: 'debit', category: 'Food & Dining', date: '1 week ago', icon: Coffee, color: 'amber' },
-    { id: 16, description: 'Uber Eats', amount: -34.20, type: 'debit', category: 'Food & Dining', date: '1 week ago', icon: Utensils, color: 'amber' },
-    { id: 17, description: 'Apple Store', amount: -199.00, type: 'debit', category: 'Shopping', date: '2 weeks ago', icon: ShoppingBag, color: 'purple' },
-    { id: 18, description: 'Dividend Payment', amount: 120.00, type: 'credit', category: 'Investment', date: '2 weeks ago', icon: TrendingUp, color: 'emerald' },
-    { id: 19, description: 'Internet Bill', amount: -65.00, type: 'debit', category: 'Bills', date: '2 weeks ago', icon: Zap, color: 'red' },
-    { id: 20, description: 'Grocery Store', amount: -156.80, type: 'debit', category: 'Shopping', date: '2 weeks ago', icon: ShoppingBag, color: 'purple' },
-  ];
+  useEffect(() => {
+    if (isOpen) {
+      fetchTransactions();
+    }
+  }, [isOpen]);
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get('/transactions?limit=50');
+      if (response.success) {
+        const formattedTransactions = (response.transactions || []).map(tx => ({
+          id: tx.id,
+          description: tx.description || tx.type,
+          amount: parseFloat(tx.amount) || 0,
+          type: ['CREDIT', 'DEPOSIT'].includes(tx.type?.toUpperCase()) ? 'credit' : 'debit',
+          category: tx.category || tx.type || 'Transaction',
+          date: new Date(tx.createdAt).toLocaleDateString(),
+          color: ['CREDIT', 'DEPOSIT'].includes(tx.type?.toUpperCase()) ? 'emerald' : 'red'
+        }));
+        setTransactions(formattedTransactions);
+      }
+    } catch (err) {
+      console.error('Error fetching transactions:', err);
+      setError('Unable to load transactions');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Calculate statistics
   const totalIncome = transactions.filter(t => t.type === 'credit').reduce((sum, t) => sum + t.amount, 0);
@@ -63,22 +65,27 @@ export const TransactionHistoryModal = ({ isOpen, onClose }) => {
     const matchesSearch = txn.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          txn.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || txn.type === filterType;
-    const matchesCategory = filterCategory === 'all' || txn.category === filterCategory;
-    return matchesSearch && matchesType && matchesCategory;
+    return matchesSearch && matchesType;
   });
-
-  const categories = ['all', ...new Set(transactions.map(t => t.category))];
 
   const getColorClasses = (color) => {
     const colors = {
       emerald: 'bg-emerald-100 text-emerald-600',
       red: 'bg-red-100 text-red-600',
-      amber: 'bg-amber-100 text-amber-600',
-      blue: 'bg-blue-100 text-blue-600',
-      purple: 'bg-purple-100 text-purple-600',
     };
     return colors[color] || 'bg-neutral-100 text-neutral-600';
   };
+
+  if (loading) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} size="xl" title="Transaction History">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+          <span className="ml-2 text-neutral-600">Loading transactions...</span>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" title="Transaction History">
@@ -150,21 +157,6 @@ export const TransactionHistoryModal = ({ isOpen, onClose }) => {
               ))}
             </div>
 
-            <div className="flex items-center gap-2 ml-4">
-              <span className="text-sm font-medium text-neutral-700">Category:</span>
-            </div>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-100 text-neutral-600 border-none focus:ring-2 focus:ring-primary-500"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat === 'all' ? 'All Categories' : cat}
-                </option>
-              ))}
-            </select>
-
             <button className="ml-auto px-3 py-1.5 text-xs font-medium rounded-lg bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors flex items-center gap-2">
               <Download className="w-4 h-4" />
               Export
@@ -175,9 +167,7 @@ export const TransactionHistoryModal = ({ isOpen, onClose }) => {
         {/* Transactions List */}
         <div className="max-h-96 overflow-y-auto">
           <div className="space-y-2">
-            {filteredTransactions.map((txn) => {
-              const Icon = txn.icon;
-              return (
+            {filteredTransactions.map((txn) => (
                 <div
                   key={txn.id}
                   className="bg-neutral-50 hover:bg-neutral-100 rounded-xl p-4 transition-colors cursor-pointer"
@@ -185,7 +175,7 @@ export const TransactionHistoryModal = ({ isOpen, onClose }) => {
                   <div className="flex items-center gap-4">
                     {/* Icon */}
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${getColorClasses(txn.color)}`}>
-                      <Icon className="w-6 h-6" />
+                      <DollarSign className="w-6 h-6" />
                     </div>
 
                     {/* Details */}
@@ -212,8 +202,7 @@ export const TransactionHistoryModal = ({ isOpen, onClose }) => {
                     </div>
                   </div>
                 </div>
-              );
-            })}
+            ))}
           </div>
 
           {filteredTransactions.length === 0 && (
