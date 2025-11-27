@@ -2294,13 +2294,17 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
     if (creditCard) {
       // Update credit card
       const updateData = {};
+      console.log('Updating credit card:', cardId, 'with data:', { cardNumber, expiryDate, dailyLimit, monthlyLimit, status });
       if (cardNumber !== undefined) {
         // Encode card number to base64
         updateData.cardNumber = Buffer.from(cardNumber).toString('base64');
       }
       if (expiryDate !== undefined) updateData.expiryDate = new Date(expiryDate);
       // Credit cards use creditLimit, not dailyLimit/monthlyLimit
-      if (dailyLimit !== undefined) updateData.creditLimit = parseFloat(dailyLimit);
+      if (dailyLimit !== undefined && dailyLimit !== null && dailyLimit !== '') {
+        updateData.creditLimit = parseFloat(dailyLimit);
+        updateData.availableCredit = parseFloat(dailyLimit); // Also update available credit
+      }
       if (status !== undefined) {
         const normalizedStatus = status.toUpperCase();
         updateData.status = normalizedStatus;
@@ -2322,6 +2326,17 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
           updateData.isActive = false;
           updateData.isFrozen = false;
         }
+      }
+      
+      console.log('Final updateData for credit card:', updateData);
+      
+      // Only update if there's something to update
+      if (Object.keys(updateData).length === 0) {
+        return res.json({
+          success: true,
+          message: 'No changes to update',
+          card: creditCard
+        });
       }
       
       const updatedCard = await prisma.creditCard.update({
