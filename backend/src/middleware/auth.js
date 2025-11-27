@@ -34,8 +34,17 @@ export const verifyAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid or expired token' });
     }
 
-    // Attach user info to request
-    req.user = decoded;
+    // Fetch user to check if admin
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { isAdmin: true, role: true }
+    });
+
+    // Attach user info to request with isAdmin flag
+    req.user = {
+      ...decoded,
+      isAdmin: user?.isAdmin || user?.role === 'ADMIN'
+    };
     req.token = token;
     next();
   } catch (error) {

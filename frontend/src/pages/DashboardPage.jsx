@@ -46,9 +46,6 @@ export const DashboardPage = () => {
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
   const [showSendMoneyModal, setShowSendMoneyModal] = useState(false);
 
-  const isDevUser =
-    user?.id?.startsWith('dev-') || (user?.email && user.email.endsWith('@gatwickbank.test'));
-
   useEffect(() => {
     const fetchDashboardAndKyc = async () => {
       try {
@@ -67,93 +64,23 @@ export const DashboardPage = () => {
 
         if (dashboardResponse?.success) {
           setDashboard(dashboardResponse.dashboard);
-        } else if (isDevUser) {
-          const mockDashboard = {
-            timestamp: new Date().toISOString(),
-            summary: {
-              totalBalance: '12500.45',
-              accountCount: 3,
-              activeCards: 2,
-              totalCards: 3,
-              recentTransactionCount: 5,
-            },
-            recentTransactions: [
-              {
-                id: 1,
-                description: 'Amazon Purchase',
-                amount: '-89.99',
-                date: new Date().toISOString(),
-                type: 'debit',
-              },
-              {
-                id: 2,
-                description: 'Salary Deposit',
-                amount: '+3500.00',
-                date: new Date(Date.now() - 86400000).toISOString(),
-                type: 'credit',
-              },
-              {
-                id: 3,
-                description: 'Netflix Subscription',
-                amount: '-15.99',
-                date: new Date(Date.now() - 172800000).toISOString(),
-                type: 'debit',
-              },
-            ],
-          };
-          setDashboard(mockDashboard);
         } else {
           setError('Failed to load dashboard');
         }
 
         if (kycResponse) {
           setKyc(kycResponse);
-        } else if (isDevUser) {
-          setKyc({ kycStatus: 'VERIFIED' });
         }
       } catch (err) {
         console.error('Error fetching dashboard:', err);
-
-        if (isDevUser) {
-          const mockDashboard = {
-            timestamp: new Date().toISOString(),
-            summary: {
-              totalBalance: '12500.45',
-              accountCount: 3,
-              activeCards: 2,
-              totalCards: 3,
-              recentTransactionCount: 5,
-            },
-            recentTransactions: [
-              {
-                id: 1,
-                description: 'Amazon Purchase',
-                amount: '-89.99',
-                date: new Date().toISOString(),
-                type: 'debit',
-              },
-              {
-                id: 2,
-                description: 'Salary Deposit',
-                amount: '+3500.00',
-                date: new Date(Date.now() - 86400000).toISOString(),
-                type: 'credit',
-              },
-            ],
-          };
-          setDashboard(mockDashboard);
-          setKyc({ kycStatus: 'VERIFIED' });
-          setError(null);
-        } else {
-          setError('Unable to load dashboard data');
-        }
+        setError('Unable to load dashboard data');
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardAndKyc();
-  }, [isDevUser]);
+  }, []);
 
   const formatCurrency = (amount) => {
     const num = parseFloat(amount);
