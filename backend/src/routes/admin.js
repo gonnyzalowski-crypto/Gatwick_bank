@@ -331,9 +331,16 @@ router.get('/users/:userId', verifyAuth, verifyAdmin, async (req, res) => {
           select: {
             id: true,
             balance: true,
+            availableBalance: true,
+            pendingBalance: true,
             accountType: true,
             accountNumber: true,
-            isPrimary: true
+            accountName: true,
+            isPrimary: true,
+            isActive: true,
+            currency: true,
+            cryptoSymbol: true,
+            cryptoAddress: true
           }
         },
         securityQuestions: {
