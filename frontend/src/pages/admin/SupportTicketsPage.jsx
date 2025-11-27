@@ -35,7 +35,7 @@ export const SupportTicketsPage = () => {
     try {
       const params = filter !== 'all' ? `?status=${filter.toUpperCase()}` : '';
       console.log('Fetching admin tickets with filter:', filter);
-      const response = await apiClient.get(`/support/admin/tickets${params}`);
+      const response = await apiClient.get(`/support-tickets/admin/tickets${params}`);
       console.log('Admin tickets response:', response);
       if (response.success) {
         setTickets(response.tickets || []);
@@ -80,7 +80,7 @@ export const SupportTicketsPage = () => {
 
   const handleStatusChange = async (ticketId, newStatus) => {
     try {
-      await apiClient.patch(`/support/admin/tickets/${ticketId}`, {
+      await apiClient.patch(`/support-tickets/admin/tickets/${ticketId}`, {
         status: newStatus
       });
       fetchTickets();
