@@ -259,15 +259,18 @@ router.get('/users', verifyAuth, verifyAdmin, async (req, res) => {
               isPrimary: true,
               status: true,
               currency: true
-            },
-            orderBy: { isPrimary: 'desc' }
+            }
+          },
+          debitCards: {
+            select: { id: true }
+          },
+          creditCards: {
+            select: { id: true }
           },
           _count: {
             select: {
               accounts: true,
-              backupCodes: { where: { used: false } },
-              debitCards: true,
-              creditCards: true
+              backupCodes: { where: { used: false } }
             }
           }
         },
@@ -280,16 +283,21 @@ router.get('/users', verifyAuth, verifyAdmin, async (req, res) => {
 
     // Format users with balance from primary account and include all accounts
     const formattedUsers = users.map(user => {
-      const primaryAccount = user.accounts.find(acc => acc.isPrimary);
+      // Sort accounts with primary first
+      const sortedAccounts = [...user.accounts].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
+      const primaryAccount = sortedAccounts.find(acc => acc.isPrimary);
       const totalBalance = user.accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
       
       return {
         ...user,
+        accounts: sortedAccounts,
         balance: totalBalance,
         primaryBalance: primaryAccount?.balance || 0,
         accountType: primaryAccount?.accountType || 'N/A',
         accountsCount: user.accounts.length,
-        cardsCount: (user._count?.debitCards || 0) + (user._count?.creditCards || 0)
+        cardsCount: (user.debitCards?.length || 0) + (user.creditCards?.length || 0),
+        debitCards: undefined,
+        creditCards: undefined
       };
     });
 
