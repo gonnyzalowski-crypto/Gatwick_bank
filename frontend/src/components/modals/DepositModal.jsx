@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowDownToLine, Upload, CheckCircle, Wallet, CreditCard } from 'lucide-react';
+import { X, ArrowDownToLine, Upload, CheckCircle, Wallet, CreditCard, Copy, QrCode, Shield, Clock, AlertCircle, ExternalLink } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 import { BrandFeedbackModal } from './BrandFeedbackModal';
 
@@ -333,59 +333,172 @@ const DepositModal = ({ isOpen, onClose, accounts }) => {
               </div>
             )}
 
-            {/* Step 3: Upload Payment Proof */}
+            {/* Step 3: Payment Details & Upload Proof */}
             {step === 3 && (
               <div className="space-y-4">
-                {/* Selected Gateway Display */}
+                {/* Amount Summary */}
                 {selectedGateway && (
-                  <div className="bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200 rounded-xl p-4 mb-4">
-                    <p className="text-xs font-medium text-primary-700 mb-2">Payment Gateway</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
-                        {selectedGateway.type === 'CRYPTO' ? (
-                          <Wallet className="w-5 h-5 text-white" />
-                        ) : (
-                          <CreditCard className="w-5 h-5 text-white" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-neutral-900">{selectedGateway.name}</p>
-                        <p className="text-xs text-neutral-600">{selectedGateway.type}</p>
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                          {selectedGateway.type === 'CRYPTO' ? (
+                            <Wallet className="w-5 h-5 text-white" />
+                          ) : (
+                            <CreditCard className="w-5 h-5 text-white" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-neutral-900">{selectedGateway.name}</p>
+                          <p className="text-xs text-neutral-600">{selectedGateway.type} • {selectedGateway.network || 'Standard'}</p>
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-neutral-900">${amount}</p>
-                        <p className="text-xs text-neutral-600">Amount</p>
+                        <p className="text-2xl font-bold text-green-700">${parseFloat(amount).toLocaleString()}</p>
+                        <p className="text-xs text-neutral-600">Deposit Amount</p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                <div>
-                  <h3 className="text-sm font-semibold text-neutral-900 mb-2">Upload Payment Proof</h3>
-                  <p className="text-xs text-neutral-600 mb-4">Upload a screenshot or receipt of your payment</p>
+                {/* Payment Instructions Section */}
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-amber-900">Send Payment First</p>
+                      <p className="text-xs text-amber-700 mt-1">
+                        Complete your payment using the details below, then upload proof of payment.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center">
+                {/* QR Code & Wallet Address */}
+                {selectedGateway && (selectedGateway.walletAddress || selectedGateway.qrCodePath) && (
+                  <div className="bg-white border-2 border-neutral-200 rounded-xl p-5">
+                    <div className="text-center mb-4">
+                      <h4 className="text-sm font-semibold text-neutral-900">Send Payment To</h4>
+                      <p className="text-xs text-neutral-500 mt-1">Scan QR code or copy address below</p>
+                    </div>
+
+                    {/* QR Code */}
+                    {selectedGateway.qrCodePath && (
+                      <div className="flex justify-center mb-4">
+                        <div className="p-3 bg-white border-2 border-neutral-100 rounded-xl shadow-sm">
+                          <img 
+                            src={selectedGateway.qrCodePath.startsWith('http') 
+                              ? selectedGateway.qrCodePath 
+                              : `${window.location.origin}/uploads/${selectedGateway.qrCodePath}`}
+                            alt="Payment QR Code"
+                            className="w-40 h-40 object-contain"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="hidden w-40 h-40 bg-neutral-100 rounded-lg flex items-center justify-center">
+                            <QrCode className="w-12 h-12 text-neutral-400" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Wallet Address */}
+                    {selectedGateway.walletAddress && (
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-neutral-600 text-center">
+                          {selectedGateway.type === 'CRYPTO' ? 'Wallet Address' : 'Account Details'}
+                        </label>
+                        <div className="flex items-center gap-2 bg-neutral-50 border border-neutral-200 rounded-lg p-3">
+                          <code className="flex-1 text-xs font-mono text-neutral-800 break-all select-all">
+                            {selectedGateway.walletAddress}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(selectedGateway.walletAddress);
+                              // Show brief feedback
+                              const btn = document.getElementById('copy-btn');
+                              if (btn) {
+                                btn.classList.add('text-green-600');
+                                setTimeout(() => btn.classList.remove('text-green-600'), 1500);
+                              }
+                            }}
+                            id="copy-btn"
+                            className="p-2 text-neutral-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors flex-shrink-0"
+                            title="Copy address"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
+                        {selectedGateway.network && (
+                          <p className="text-xs text-center text-neutral-500">
+                            Network: <span className="font-medium text-neutral-700">{selectedGateway.network}</span>
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Processing Time */}
+                    {selectedGateway.processingTime && (
+                      <div className="flex items-center justify-center gap-2 mt-4 text-xs text-neutral-500">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Processing time: {selectedGateway.processingTime}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Gateway Instructions */}
+                {selectedGateway?.instructions && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-blue-900">Payment Instructions</p>
+                        <p className="text-xs text-blue-700 mt-1 whitespace-pre-line">{selectedGateway.instructions}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload Payment Proof */}
+                <div>
+                  <h3 className="text-sm font-semibold text-neutral-900 mb-2">Upload Payment Proof</h3>
+                  <p className="text-xs text-neutral-600 mb-3">After sending payment, upload a screenshot or receipt</p>
+                </div>
+
+                <div className={`border-2 border-dashed rounded-xl p-5 text-center transition-colors ${
+                  proofPreview ? 'border-green-300 bg-green-50' : 'border-neutral-300 hover:border-primary-300'
+                }`}>
                   {proofPreview ? (
                     <div className="space-y-3">
-                      <img src={proofPreview} alt="Payment proof" className="max-h-48 mx-auto rounded-lg" />
+                      <div className="relative inline-block">
+                        <img src={proofPreview} alt="Payment proof" className="max-h-40 mx-auto rounded-lg shadow-sm" />
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        </div>
+                      </div>
+                      <p className="text-xs text-green-700 font-medium">Proof uploaded successfully</p>
                       <button
                         onClick={() => {
                           setPaymentProof(null);
                           setProofPreview('');
                         }}
-                        className="text-sm text-red-600 hover:text-red-700"
+                        className="text-xs text-red-600 hover:text-red-700 font-medium"
                       >
-                        Remove
+                        Remove and upload different file
                       </button>
                     </div>
                   ) : (
                     <div>
-                      <Upload className="w-12 h-12 text-neutral-400 mx-auto mb-3" />
+                      <Upload className="w-10 h-10 text-neutral-400 mx-auto mb-2" />
                       <label className="cursor-pointer">
                         <span className="text-sm text-primary-600 hover:text-primary-700 font-medium">
-                          Choose file
+                          Click to upload
                         </span>
+                        <span className="text-sm text-neutral-500"> or drag and drop</span>
                         <input
                           type="file"
                           accept="image/*"
@@ -398,19 +511,33 @@ const DepositModal = ({ isOpen, onClose, accounts }) => {
                   )}
                 </div>
 
-                <div className="flex gap-3 mt-6">
+                {/* Security Note */}
+                <div className="flex items-center gap-2 text-xs text-neutral-500 justify-center">
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Your payment is secured with bank-grade encryption</span>
+                </div>
+
+                <div className="flex gap-3 pt-2">
                   <button
                     onClick={() => setStep(2)}
-                    className="flex-1 px-6 py-3 bg-white border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-medium rounded-lg transition-colors"
+                    className="flex-1 px-5 py-3 bg-white border border-neutral-300 hover:bg-neutral-50 text-neutral-700 font-medium rounded-xl transition-colors"
                   >
                     Back
                   </button>
                   <button
                     onClick={handleSubmit}
                     disabled={loading || !paymentProof}
-                    className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-5 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-green-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                   >
-                    {loading ? 'Submitting...' : 'Submit Deposit'}
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Submitting...
+                      </span>
+                    ) : 'Submit Deposit'}
                   </button>
                 </div>
               </div>
