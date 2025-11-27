@@ -1,7 +1,7 @@
 import prisma from '../config/prisma.js';
 
-// Generate ticket reference
-export const generateTicketReference = () => {
+// Generate ticket number
+export const generateTicketNumber = () => {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `TKT-${timestamp}${random}`.toUpperCase();
@@ -11,19 +11,31 @@ export const generateTicketReference = () => {
 export const createSupportTicket = async (userId, ticketData) => {
   const { subject, category, priority, description } = ticketData;
 
-  const reference = generateTicketReference();
+  const ticketNumber = generateTicketNumber();
 
   const ticket = await prisma.supportTicket.create({
     data: {
       userId,
-      reference,
+      ticketNumber,
       subject,
       category,
       priority: priority || 'MEDIUM',
-      description,
       status: 'OPEN'
     }
   });
+
+  // Create initial message with the description
+  if (description) {
+    await prisma.supportMessage.create({
+      data: {
+        ticketId: ticket.id,
+        senderId: userId,
+        senderType: 'USER',
+        message: description,
+        isRead: false
+      }
+    });
+  }
 
   // Create notification
   await prisma.notification.create({
@@ -31,10 +43,10 @@ export const createSupportTicket = async (userId, ticketData) => {
       userId,
       type: 'support',
       title: 'Support Ticket Created',
-      message: `Your support ticket ${reference} has been created. We'll respond shortly.`,
+      message: `Your support ticket ${ticketNumber} has been created. We'll respond shortly.`,
       metadata: {
         ticketId: ticket.id,
-        reference: ticket.reference
+        ticketNumber: ticket.ticketNumber
       }
     }
   });

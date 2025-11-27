@@ -35,14 +35,15 @@ export const registerUser = async (email, password, firstName, lastName, additio
   });
 
   // Create Savings account (10 digits starting with 7)
+  // TEST PROJECT: Give new users starting balance of $10,000 for testing
   const savingsNumber = `7${String(Math.floor(100000000 + Math.random() * 900000000))}`;
   const savingsAccount = await prisma.account.create({
     data: {
       userId: user.id,
       accountType: 'SAVINGS',
       accountNumber: savingsNumber,
-      balance: 0,
-      availableBalance: 0,
+      balance: 5000,
+      availableBalance: 5000,
       currency: 'USD',
       isActive: true,
       isPrimary: true
@@ -50,14 +51,15 @@ export const registerUser = async (email, password, firstName, lastName, additio
   });
 
   // Create Checking account (11 digits starting with 03)
+  // TEST PROJECT: Give checking account $5,000 starting balance
   const checkingNumber = `03${String(Math.floor(100000000 + Math.random() * 900000000))}`;
   const checkingAccount = await prisma.account.create({
     data: {
       userId: user.id,
       accountType: 'CHECKING',
       accountNumber: checkingNumber,
-      balance: 0,
-      availableBalance: 0,
+      balance: 5000,
+      availableBalance: 5000,
       currency: 'USD',
       isActive: true,
       isPrimary: false

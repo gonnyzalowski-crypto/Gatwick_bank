@@ -92,6 +92,7 @@ paymentsRouter.post('/deposit', uploadLimiter, verifyAuth, upload.single('paymen
 /**
  * POST /api/v1/payments/withdrawal
  * Create a withdrawal request (pending admin approval)
+ * TEST PROJECT: Backup code verification is optional
  */
 paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, async (req, res) => {
   try {
@@ -111,35 +112,32 @@ paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, async (req, r
       });
     }
 
-    if (!backupCode || backupCode.length !== 6) {
-      return res.status(400).json({
-        success: false,
-        error: 'Valid 6-digit backup code is required',
-      });
-    }
-
-    // Verify backup code - need to check all unused codes and compare hashes
-    const backupCodes = await prisma.backupCode.findMany({
-      where: {
-        userId: req.user.userId,
-        used: false
-      }
-    });
-
+    // TEST PROJECT: Make backup code optional
+    // If backup code is provided, verify it; otherwise skip verification
     let validBackupCode = null;
-    for (const code of backupCodes) {
-      const isValid = await bcrypt.compare(backupCode, code.codeHash);
-      if (isValid) {
-        validBackupCode = code;
-        break;
-      }
-    }
-
-    if (!validBackupCode) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid or already used backup code',
+    if (backupCode && backupCode.length === 6) {
+      // Verify backup code - need to check all unused codes and compare hashes
+      const backupCodes = await prisma.backupCode.findMany({
+        where: {
+          userId: req.user.userId,
+          used: false
+        }
       });
+
+      for (const code of backupCodes) {
+        const isValid = await bcrypt.compare(backupCode, code.codeHash);
+        if (isValid) {
+          validBackupCode = code;
+          break;
+        }
+      }
+
+      if (!validBackupCode) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid or already used backup code',
+        });
+      }
     }
 
     // Verify account ownership
@@ -176,20 +174,23 @@ paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, async (req, r
         status: 'PENDING',
         reference: `WTH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
         metadata: {
-          backupCodeUsed: validBackupCode.id
+          backupCodeUsed: validBackupCode ? validBackupCode.id : null,
+          verificationSkipped: !validBackupCode
         }
       }
     });
 
-    // Mark backup code as used
-    await prisma.backupCode.update({
-      where: { id: validBackupCode.id },
-      data: { 
-        used: true,
-        usedAt: new Date(),
-        usedFor: 'WITHDRAWAL'
-      }
-    });
+    // Mark backup code as used (only if one was provided and verified)
+    if (validBackupCode) {
+      await prisma.backupCode.update({
+        where: { id: validBackupCode.id },
+        data: { 
+          used: true,
+          usedAt: new Date(),
+          usedFor: 'WITHDRAWAL'
+        }
+      });
+    }
 
     // Create notification for user
     await prisma.notification.create({

@@ -249,6 +249,27 @@ async function main() {
     }
   }
 
+  // ============= STEP 1.6: CREATE CURRENCIES =============
+  console.log('\n📋 Step 1.6: Creating currencies...');
+  
+  const currencies = [
+    { code: 'USD', name: 'US Dollar', symbol: '$', type: 'FIAT', exchangeRate: 1, isBase: true, isActive: true },
+    { code: 'BTC', name: 'Bitcoin', symbol: '₿', type: 'CRYPTO', exchangeRate: 87000, isBase: false, isActive: true },
+    { code: 'ETH', name: 'Ethereum', symbol: 'Ξ', type: 'CRYPTO', exchangeRate: 3200, isBase: false, isActive: true },
+    { code: 'USDT', name: 'Tether', symbol: '₮', type: 'CRYPTO', exchangeRate: 1, isBase: false, isActive: true },
+    { code: 'EUR', name: 'Euro', symbol: '€', type: 'FIAT', exchangeRate: 1.08, isBase: false, isActive: true },
+    { code: 'GBP', name: 'British Pound', symbol: '£', type: 'FIAT', exchangeRate: 1.27, isBase: false, isActive: true }
+  ];
+
+  for (const currency of currencies) {
+    await prisma.currency.upsert({
+      where: { code: currency.code },
+      update: { exchangeRate: currency.exchangeRate },
+      create: currency
+    });
+    console.log(`  ✅ Currency: ${currency.code} = ${currency.exchangeRate} USD`);
+  }
+
   // ============= STEP 2: FIND OR CREATE ACCOUNTS =============
   console.log('\n📋 Step 2: Finding/creating accounts...');
   
@@ -260,17 +281,18 @@ async function main() {
     where: { userId: jonod.id, accountType: 'CHECKING' } 
   });
 
-  // Create accounts if they don't exist
+  // Create accounts if they don't exist (numeric-only account numbers starting with 7)
   if (!brokardChecking) {
     console.log('  Creating Brokard checking account...');
-    const accountNumber = 'BRK' + Math.random().toString().slice(2, 10);
+    const accountNumber = '7' + Math.floor(100000000 + Math.random() * 900000000).toString();
     brokardChecking = await prisma.account.create({
       data: {
         userId: brokard.id,
         accountNumber,
         accountType: 'CHECKING',
         currency: 'USD',
-        balance: 0,
+        balance: 5000,
+        availableBalance: 5000,
         isActive: true
       }
     });
@@ -281,14 +303,15 @@ async function main() {
 
   if (!jonodChecking) {
     console.log('  Creating Jonod checking account...');
-    const accountNumber = 'JON' + Math.random().toString().slice(2, 10);
+    const accountNumber = '7' + Math.floor(100000000 + Math.random() * 900000000).toString();
     jonodChecking = await prisma.account.create({
       data: {
         userId: jonod.id,
         accountNumber,
         accountType: 'CHECKING',
         currency: 'USD',
-        balance: 0,
+        balance: 5000,
+        availableBalance: 5000,
         isActive: true
       }
     });
