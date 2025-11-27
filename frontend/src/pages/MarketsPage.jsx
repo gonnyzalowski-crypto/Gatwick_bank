@@ -257,7 +257,7 @@ const MarketsPage = () => {
                 >
                   {accounts.map(account => (
                     <option key={account.id} value={account.id}>
-                      {account.accountType} ••••{account.accountNumber.slice(-4)} (${account.availableBalance.toFixed(2)})
+                      {account.accountType} ••••{account.accountNumber.slice(-4)} (${parseFloat(account.availableBalance || 0).toFixed(2)})
                     </option>
                   ))}
                 </select>
@@ -288,7 +288,7 @@ const MarketsPage = () => {
                   {tradeType === 'buy' && selectedAccount && (
                     <div className="flex justify-between text-sm">
                       <span className="text-slate-600">Available</span>
-                      <span className="text-slate-900">${selectedAccount.availableBalance.toFixed(2)}</span>
+                      <span className="text-slate-900">${parseFloat(selectedAccount?.availableBalance || 0).toFixed(2)}</span>
                     </div>
                   )}
                 </div>

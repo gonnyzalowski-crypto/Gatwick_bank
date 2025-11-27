@@ -163,7 +163,7 @@ const TransferApprovalsPage = () => {
                       KYC: {transfer.user.kycStatus}
                     </span>
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400">
-                      Available: ${transfer.account.availableBalance.toFixed(2)}
+                      Available: ${parseFloat(transfer.account?.availableBalance || 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
