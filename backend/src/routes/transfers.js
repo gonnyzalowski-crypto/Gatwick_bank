@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyAuth } from '../middleware/auth.js';
+import { verifyAuth, isAdmin } from '../middleware/auth.js';
 import prisma from '../config/prisma.js';
 import {
   getBankList,
@@ -7,6 +7,10 @@ import {
   createTransferRequest,
   getUserTransfers,
   getTransferById,
+  getPendingTransfers,
+  approveTransfer,
+  declineTransfer,
+  reverseTransfer,
   saveBeneficiary,
   getBeneficiaries,
   deleteBeneficiary
@@ -392,6 +396,129 @@ transfersRouter.post('/internal', async (req, res) => {
     console.error('Internal transfer error:', error);
     console.error('Error details:', error.message);
     res.status(500).json({ error: 'Transfer failed', details: error.message });
+  }
+});
+
+// =============================================
+// ADMIN ROUTES
+// =============================================
+
+/**
+ * GET /api/v1/transfers/admin/all
+ * Get all transfers (admin only)
+ */
+transfersRouter.get('/admin/all', isAdmin, async (req, res) => {
+  try {
+    const { status } = req.query;
+    
+    const where = {};
+    if (status && status !== 'all') {
+      where.status = status;
+    }
+    
+    const transfers = await prisma.transferRequest.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true
+          }
+        },
+        account: {
+          select: {
+            accountNumber: true,
+            accountType: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    res.json({
+      success: true,
+      count: transfers.length,
+      transfers
+    });
+  } catch (error) {
+    console.error('Error getting all transfers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/transfers/admin/pending
+ * Get pending transfers (admin only)
+ */
+transfersRouter.get('/admin/pending', isAdmin, async (req, res) => {
+  try {
+    const result = await getPendingTransfers();
+    res.json(result);
+  } catch (error) {
+    console.error('Error getting pending transfers:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/transfers/admin/:id/approve
+ * Approve a transfer (admin only)
+ */
+transfersRouter.post('/admin/:id/approve', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+    
+    const result = await approveTransfer(id, req.user.userId, notes);
+    res.json(result);
+  } catch (error) {
+    console.error('Error approving transfer:', error);
+    const statusCode = error.message.includes('not found') ? 404 : 
+                       error.message.includes('already') ? 400 : 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/transfers/admin/:id/decline
+ * Decline a transfer (admin only)
+ */
+transfersRouter.post('/admin/:id/decline', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason, notes } = req.body;
+    
+    if (!reason) {
+      return res.status(400).json({ error: 'Decline reason is required' });
+    }
+    
+    const result = await declineTransfer(id, req.user.userId, reason, notes);
+    res.json(result);
+  } catch (error) {
+    console.error('Error declining transfer:', error);
+    const statusCode = error.message.includes('not found') ? 404 : 
+                       error.message.includes('already') ? 400 : 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/transfers/admin/:id/reverse
+ * Reverse a completed transfer (admin only)
+ */
+transfersRouter.post('/admin/:id/reverse', isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await reverseTransfer(id, req.user.userId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error reversing transfer:', error);
+    const statusCode = error.message.includes('not found') ? 404 : 
+                       error.message.includes('Cannot reverse') ? 400 : 500;
+    res.status(statusCode).json({ error: error.message });
   }
 });
 

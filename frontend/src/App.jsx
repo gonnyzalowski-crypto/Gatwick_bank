@@ -21,6 +21,8 @@ import KYCUploadPage from './pages/KYCUploadPage';
 import TransactionHistoryPage from './pages/TransactionHistoryPage';
 import SupportPage from './pages/SupportTicketsPage';
 import LoansPage from './pages/LoansPage';
+import ExternalTransfersPage from './pages/ExternalTransfersPage';
+import RecurringPaymentsPage from './pages/RecurringPaymentsPage';
 
 export default function App() {
   return (
@@ -100,6 +102,14 @@ export default function App() {
             }
           />
           <Route
+            path="/transfers/external"
+            element={
+              <ProtectedRoute>
+                <ExternalTransfersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/transfers/domestic"
             element={
               <ProtectedRoute>
@@ -112,6 +122,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <InternationalTransferPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recurring-payments"
+            element={
+              <ProtectedRoute>
+                <RecurringPaymentsPage />
               </ProtectedRoute>
             }
           />

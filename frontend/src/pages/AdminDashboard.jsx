@@ -23,6 +23,8 @@ import AdminSettings from './admin/AdminSettings';
 import GatewayManagement from './admin/GatewayManagement';
 import CardsManagement from '../components/admin/CardsManagement';
 import LoansManagement from '../components/admin/LoansManagement';
+import ExternalTransfersManagement from '../components/admin/ExternalTransfersManagement';
+import RecurringPaymentsManagement from '../components/admin/RecurringPaymentsManagement';
 import { SupportTicketsPage as AdminSupportTickets } from './admin/SupportTicketsPage';
 import CurrencyManagement from './admin/CurrencyManagement';
 import NotificationBell from '../components/NotificationBell';
@@ -202,6 +204,8 @@ export const AdminDashboard = () => {
           >
             <SubMenuItem label="Cards" onClick={() => setActiveSection('cards')} />
             <SubMenuItem label="Loans" onClick={() => setActiveSection('loans')} />
+            <SubMenuItem label="External Transfers" onClick={() => setActiveSection('external-transfers')} />
+            <SubMenuItem label="Recurring Payments" onClick={() => setActiveSection('recurring-payments')} />
             <SubMenuItem label="Currencies" onClick={() => setActiveSection('currencies')} />
             <SubMenuItem label="Exchanges" onClick={() => setActiveSection('exchanges')} />
           </MenuItem>
@@ -329,11 +333,13 @@ export const AdminDashboard = () => {
                   {activeSection === 'cheque' && 'Cheque Management'}
                   {activeSection === 'cards' && 'Cards Management'}
                   {activeSection === 'loans' && 'Loans Management'}
+                  {activeSection === 'external-transfers' && 'External Transfers'}
+                  {activeSection === 'recurring-payments' && 'Recurring Payments'}
                   {activeSection === 'transfer-approvals' && 'Transfer Approvals'}
                   {activeSection === 'info' && 'System Information'}
                   {activeSection === 'tool-settings' && 'Admin Settings'}
                   {activeSection === 'payment-gateways' && 'Payment Gateway Management'}
-                  {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'loans', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets', 'withdrawal'].includes(activeSection) && 
+                  {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'loans', 'external-transfers', 'recurring-payments', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets', 'withdrawal'].includes(activeSection) && 
                     activeSection.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
                   }
                 </h1>
@@ -494,6 +500,12 @@ export const AdminDashboard = () => {
 
           {/* Loans Management */}
           {activeSection === 'loans' && <LoansManagement />}
+
+          {/* External Transfers Management */}
+          {activeSection === 'external-transfers' && <ExternalTransfersManagement />}
+
+          {/* Recurring Payments Management */}
+          {activeSection === 'recurring-payments' && <RecurringPaymentsManagement />}
 
           {/* Transfer Approvals */}
           {activeSection === 'transfer-approvals' && <TransferApprovalsPage />}

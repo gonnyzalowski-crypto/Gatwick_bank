@@ -76,6 +76,7 @@ model User {
   cardTransactions  CardTransaction[]
   supportTickets    SupportTicket[]
   withdrawals       Withdrawal[]
+  recurringPayments RecurringPayment[]
   
   @@map("users")
 }
@@ -106,6 +107,8 @@ model Account {
   creditCardFundings CreditCardFunding[]
   withdrawals Withdrawal[]
   loans       Loan[]
+  recurringPaymentsFrom RecurringPayment[] @relation("RecurringFromAccount")
+  recurringPaymentsTo   RecurringPayment[] @relation("RecurringToAccount")
   
   @@map("accounts")
 }
@@ -680,4 +683,82 @@ model Currency {
   @@index([code])
   @@index([isActive])
   @@map("currencies")
+}
+
+// Recurring Payments / Standing Orders
+model RecurringPayment {
+  id              String    @id @default(cuid())
+  userId          String
+  fromAccountId   String
+  paymentType     String    // "INTERNAL" | "EXTERNAL" | "BILL"
+  
+  // Recipient details (for external)
+  recipientName   String
+  recipientBank   String?
+  recipientAccount String?
+  recipientRouting String?
+  
+  // For internal transfers
+  toAccountId     String?
+  
+  // Payment details
+  amount          Decimal   @db.Decimal(15, 2)
+  currency        String    @default("USD")
+  description     String?
+  reference       String    @unique // REC-XXXXXX
+  
+  // Schedule
+  frequency       String    // "DAILY" | "WEEKLY" | "BIWEEKLY" | "MONTHLY" | "QUARTERLY" | "YEARLY"
+  startDate       DateTime
+  endDate         DateTime?
+  nextExecutionDate DateTime
+  lastExecutionDate DateTime?
+  dayOfMonth      Int?      // For monthly payments (1-31)
+  dayOfWeek       Int?      // For weekly payments (0-6, Sunday=0)
+  
+  // Status
+  status          String    @default("ACTIVE") // "ACTIVE" | "PAUSED" | "CANCELLED" | "COMPLETED"
+  executionCount  Int       @default(0)
+  maxExecutions   Int?      // Optional limit on number of executions
+  failedCount     Int       @default(0)
+  lastError       String?
+  
+  // Admin
+  createdBy       String?   // Admin ID if created by admin
+  pausedBy        String?
+  pausedAt        DateTime?
+  cancelledBy     String?
+  cancelledAt     DateTime?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromAccount     Account   @relation("RecurringFromAccount", fields: [fromAccountId], references: [id], onDelete: Cascade)
+  toAccount       Account?  @relation("RecurringToAccount", fields: [toAccountId], references: [id], onDelete: SetNull)
+  executions      RecurringPaymentExecution[]
+  
+  @@index([userId])
+  @@index([fromAccountId])
+  @@index([status])
+  @@index([nextExecutionDate])
+  @@map("recurring_payments")
+}
+
+// Recurring Payment Execution History
+model RecurringPaymentExecution {
+  id                  String   @id @default(cuid())
+  recurringPaymentId  String
+  executionDate       DateTime
+  amount              Decimal  @db.Decimal(15, 2)
+  status              String   // "SUCCESS" | "FAILED" | "PENDING"
+  transactionId       String?  // Reference to created transaction
+  errorMessage        String?
+  createdAt           DateTime @default(now())
+  
+  recurringPayment    RecurringPayment @relation(fields: [recurringPaymentId], references: [id], onDelete: Cascade)
+  
+  @@index([recurringPaymentId])
+  @@index([executionDate])
+  @@map("recurring_payment_executions")
 }
