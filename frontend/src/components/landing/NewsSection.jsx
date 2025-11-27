@@ -1,70 +1,84 @@
 import React from 'react';
-import { Calendar, ArrowRight } from 'lucide-react';
+import { UserPlus, Wallet, Send, CheckCircle } from 'lucide-react';
 
 export const NewsSection = () => {
-  const news = [
-    { 
-      date: 'Nov 2025', 
-      title: 'Enhanced Security Features', 
-      snippet: 'New biometric authentication and advanced fraud detection now live.',
-      category: 'Security'
+  const steps = [
+    {
+      step: '01',
+      icon: <UserPlus className="w-8 h-8" />,
+      title: 'Create an account',
+      description: 'Sign up in minutes with just your email and ID. No paperwork, no branch visits required.',
+      features: ['Instant verification', 'No minimum deposit', 'Free to open']
     },
-    { 
-      date: 'Oct 2025', 
-      title: 'Crypto Wallet Integration', 
-      snippet: 'Trade BTC, ETH, and USDT directly from your dashboard.',
-      category: 'Features'
+    {
+      step: '02',
+      icon: <Wallet className="w-8 h-8" />,
+      title: 'Set up your wallet',
+      description: 'Add funds and get local bank details in USD, EUR, GBP and more. Start receiving payments immediately.',
+      features: ['50+ currencies', 'Local bank details', 'Instant top-up']
     },
-    { 
-      date: 'Sep 2025', 
-      title: 'Instant Global Transfers', 
-      snippet: 'Send money to 150+ countries in seconds with zero fees.',
-      category: 'Updates'
-    },
-    { 
-      date: 'Aug 2025', 
-      title: '50,000 Users Milestone', 
-      snippet: 'Thank you for trusting us with your financial future!',
-      category: 'Milestone'
+    {
+      step: '03',
+      icon: <Send className="w-8 h-8" />,
+      title: 'Start receiving & spending',
+      description: 'Get paid from anywhere, convert currencies, and spend with your virtual or physical card.',
+      features: ['Global transfers', 'Multi-currency cards', 'Real-time tracking']
     }
   ];
 
   return (
-    <section className="relative py-24 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Latest <span className="bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">Updates</span>
+            Get Started With Gatwick in{' '}
+            <span className="text-purple-700">Three Simple Steps</span>
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Stay informed about new features and improvements
+            Start managing your global finances in minutes
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {news.map((item, index) => (
+        {/* Steps */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {steps.map((item, index) => (
             <div 
               key={index}
-              className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-purple-100 hover:border-purple-300 hover:-translate-y-1 cursor-pointer"
+              className="relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100"
             >
-              <div className="flex items-center gap-2 text-sm text-purple-700 mb-3">
-                <Calendar className="w-4 h-4" />
-                <span className="font-semibold">{item.date}</span>
-                <span className="ml-auto text-xs bg-purple-100 px-2 py-1 rounded-full">{item.category}</span>
+              {/* Step number */}
+              <div className="absolute -top-4 left-8 bg-purple-700 text-white text-sm font-bold px-3 py-1 rounded-full">
+                Step {item.step}
               </div>
               
-              <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-purple-700 transition-colors">
+              {/* Icon */}
+              <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-700 mb-6 mt-2">
+                {item.icon}
+              </div>
+              
+              {/* Content */}
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
                 {item.title}
               </h3>
-              
-              <p className="text-gray-600 text-sm mb-4">
-                {item.snippet}
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                {item.description}
               </p>
 
-              <div className="flex items-center gap-2 text-purple-700 font-semibold text-sm group-hover:gap-3 transition-all">
-                Read more
-                <ArrowRight className="w-4 h-4" />
+              {/* Features */}
+              <div className="space-y-2">
+                {item.features.map((feature, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    {feature}
+                  </div>
+                ))}
               </div>
+
+              {/* Connector line (not for last item) */}
+              {index < steps.length - 1 && (
+                <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-purple-200"></div>
+              )}
             </div>
           ))}
         </div>

@@ -61,21 +61,25 @@ const RecurringPaymentsPage = () => {
 
   const fetchData = async () => {
     try {
-      const [paymentsRes, accountsRes] = await Promise.all([
-        apiClient.get('/recurring-payments'),
-        apiClient.get('/accounts')
-      ]);
-      
-      setPayments(paymentsRes.payments || []);
+      const accountsRes = await apiClient.get('/accounts');
       setAccounts(accountsRes.accounts || []);
       
       if (accountsRes.accounts?.length > 0) {
         const primary = accountsRes.accounts.find(a => a.isPrimary) || accountsRes.accounts[0];
         setForm(f => ({ ...f, fromAccountId: primary.id }));
       }
+      
+      // Try to fetch recurring payments, but don't fail if it errors
+      try {
+        const paymentsRes = await apiClient.get('/recurring-payments');
+        setPayments(paymentsRes.payments || []);
+      } catch (paymentErr) {
+        console.log('Recurring payments not available:', paymentErr);
+        setPayments([]);
+      }
     } catch (err) {
       console.error('Failed to fetch data:', err);
-      setError('Failed to load data');
+      setError('Failed to load account data');
     }
     setIsLoading(false);
   };
@@ -267,6 +271,18 @@ const RecurringPaymentsPage = () => {
             <Plus className="w-4 h-4" />
             New Recurring Payment
           </button>
+        </div>
+
+        {/* Info Banner */}
+        <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-purple-800 font-medium">Recurring Payments Setup</p>
+            <p className="text-purple-600 text-sm mt-1">
+              To set up recurring payments, please contact our support team or visit your nearest branch. 
+              Our team will help you configure automatic payments for bills, subscriptions, and regular transfers.
+            </p>
+          </div>
         </div>
 
         {/* Alerts */}

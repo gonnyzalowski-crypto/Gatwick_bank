@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star } from 'lucide-react';
+import { Star, Quote } from 'lucide-react';
 
 export const TestimonialsSection = () => {
   const testimonials = [
@@ -30,22 +30,24 @@ export const TestimonialsSection = () => {
   ];
 
   return (
-    <section id="testimonials" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto relative z-10">
+    <section id="testimonials" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Loved by <span className="bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">Thousands</span> Worldwide
+            What They Say <span className="text-purple-700">About Gatwick</span>
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            See what our customers have to say about their experience
+            Join thousands of satisfied customers worldwide
           </p>
         </div>
 
+        {/* Testimonials Grid */}
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <div 
               key={index}
-              className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-purple-100 hover:-translate-y-2"
+              className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100"
             >
               {/* Rating */}
               <div className="flex gap-1 mb-4">
@@ -60,14 +62,13 @@ export const TestimonialsSection = () => {
               </p>
 
               {/* Author */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-700 to-purple-900 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold text-sm">
                   {testimonial.avatar}
                 </div>
                 <div>
-                  <div className="font-bold text-gray-900">{testimonial.name}</div>
-                  <div className="text-sm text-gray-600">{testimonial.role}</div>
-                  <div className="text-xs text-purple-600">{testimonial.company}</div>
+                  <div className="font-semibold text-gray-900">{testimonial.name}</div>
+                  <div className="text-sm text-gray-500">{testimonial.role}</div>
                 </div>
               </div>
             </div>

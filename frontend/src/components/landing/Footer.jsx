@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Mail, Phone, MapPin } from 'lucide-react';
+import { Building2, Mail, Phone, MapPin, Shield, Lock, FileCheck } from 'lucide-react';
 import { InfoModal } from '../modals/InfoModal';
 import { modalContent } from '../../data/modalContent.jsx';
 import { productsCompanyModals } from '../../data/productsCompanyModals.jsx';
@@ -17,73 +17,73 @@ export const Footer = () => {
   };
 
   return (
-    <footer className="bg-gray-900 text-gray-300 py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+    <footer className="bg-gray-900 text-gray-300">
+      {/* Compliance Bar */}
+      <div className="border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-400">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-purple-400" />
+              <span>KYC/AML Compliant</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4 text-purple-400" />
+              <span>PCI-DSS Certified</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FileCheck className="w-4 h-4 text-purple-400" />
+              <span>GDPR Ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Footer */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           {/* Company Info */}
-          <div>
-            <div className="flex items-center gap-2 mb-6">
+          <div className="lg:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center">
-                <Building2 className="w-6 h-6 text-white" />
+                <Building2 className="w-5 h-5 text-white" />
               </div>
               <span className="text-xl font-bold text-white">Gatwick Bank</span>
             </div>
-            <p className="text-gray-400 mb-6">
-              Modern banking for the digital age. Secure, fast, and designed for you.
-            </p>
-            <p className="text-sm text-gray-500">
-              FDIC Insured • Equal Housing Lender<br />
-              Member FDIC • NMLS #123456
+            <p className="text-gray-400 text-sm mb-4 max-w-sm">
+              Global banking made simple. Send, receive, and manage money across borders with enterprise-grade security.
             </p>
           </div>
 
           {/* Products */}
           <div>
-            <h3 className="text-white font-bold mb-4">Products</h3>
-            <ul className="space-y-3">
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Products</h3>
+            <ul className="space-y-2 text-sm">
               <li><button onClick={() => openModal('personalBanking')} className="hover:text-purple-400 transition-colors text-left">Personal Banking</button></li>
               <li><button onClick={() => openModal('businessBanking')} className="hover:text-purple-400 transition-colors text-left">Business Banking</button></li>
-              <li><button onClick={() => openModal('cryptoWallets')} className="hover:text-purple-400 transition-colors text-left">Crypto Wallets</button></li>
-              <li><button onClick={() => openModal('creditCards')} className="hover:text-purple-400 transition-colors text-left">Credit Cards</button></li>
-              <li><button onClick={() => openModal('loansFinancing')} className="hover:text-purple-400 transition-colors text-left">Loans & Financing</button></li>
+              <li><button onClick={() => openModal('cryptoWallets')} className="hover:text-purple-400 transition-colors text-left">Multi-Currency</button></li>
+              <li><button onClick={() => openModal('creditCards')} className="hover:text-purple-400 transition-colors text-left">Virtual Cards</button></li>
             </ul>
           </div>
 
           {/* Company */}
           <div>
-            <h3 className="text-white font-bold mb-4">Company</h3>
-            <ul className="space-y-3">
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Company</h3>
+            <ul className="space-y-2 text-sm">
               <li><button onClick={() => openModal('aboutUs')} className="hover:text-purple-400 transition-colors text-left">About Us</button></li>
               <li><button onClick={() => openModal('careers')} className="hover:text-purple-400 transition-colors text-left">Careers</button></li>
-              <li><button onClick={() => openModal('pressMedia')} className="hover:text-purple-400 transition-colors text-left">Press & Media</button></li>
-              <li><button onClick={() => openModal('blogResources')} className="hover:text-purple-400 transition-colors text-left">Blog & Resources</button></li>
-              <li><button onClick={() => openModal('partnerProgram')} className="hover:text-purple-400 transition-colors text-left">Partner Program</button></li>
+              <li><button onClick={() => openModal('pressMedia')} className="hover:text-purple-400 transition-colors text-left">Press</button></li>
+              <li><button onClick={() => openModal('blogResources')} className="hover:text-purple-400 transition-colors text-left">Blog</button></li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Legal */}
           <div>
-            <h3 className="text-white font-bold mb-4">Contact</h3>
-            <ul className="space-y-3">
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-purple-400" />
-                <a href="mailto:support@gatwickbank.com" className="hover:text-purple-400 transition-colors">
-                  support@gatwickbank.com
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-purple-400" />
-                <a href="tel:+1234567890" className="hover:text-purple-400 transition-colors">
-                  +1 (234) 567-890
-                </a>
-              </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-purple-400 flex-shrink-0 mt-1" />
-                <span>
-                  123 Financial District<br />
-                  New York, NY 10004
-                </span>
-              </li>
+            <h3 className="text-white font-semibold mb-4 text-sm uppercase tracking-wider">Legal</h3>
+            <ul className="space-y-2 text-sm">
+              <li><button onClick={() => openModal('privacy')} className="hover:text-purple-400 transition-colors text-left">Privacy Policy</button></li>
+              <li><button onClick={() => openModal('terms')} className="hover:text-purple-400 transition-colors text-left">Terms of Service</button></li>
+              <li><button onClick={() => openModal('cookies')} className="hover:text-purple-400 transition-colors text-left">Cookie Policy</button></li>
+              <li><button onClick={() => openModal('security')} className="hover:text-purple-400 transition-colors text-left">Security</button></li>
             </ul>
           </div>
         </div>
@@ -91,15 +91,13 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-400 text-sm">
-              © 2025 Gatwick Bank. All rights reserved.
+            <p className="text-gray-500 text-sm">
+              2025 Gatwick Bank. All rights reserved.
             </p>
-            <div className="flex flex-wrap gap-6 text-sm">
-              <button onClick={() => openModal('privacy')} className="hover:text-purple-400 transition-colors">Privacy Policy</button>
-              <button onClick={() => openModal('terms')} className="hover:text-purple-400 transition-colors">Terms of Service</button>
-              <button onClick={() => openModal('cookies')} className="hover:text-purple-400 transition-colors">Cookie Policy</button>
-              <button onClick={() => openModal('security')} className="hover:text-purple-400 transition-colors">Security</button>
-              <button onClick={() => openModal('accessibility')} className="hover:text-purple-400 transition-colors">Accessibility</button>
+            <div className="flex items-center gap-4">
+              <a href="mailto:support@gatwickbank.com" className="text-sm text-gray-400 hover:text-purple-400 transition-colors">
+                support@gatwickbank.com
+              </a>
             </div>
           </div>
         </div>

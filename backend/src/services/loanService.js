@@ -61,12 +61,12 @@ export const createLoanApplication = async (userId, data) => {
     throw new Error('No active account found');
   }
 
-  // Default interest rates by loan type
+  // Realistic interest rates by loan type (industry standard)
   const defaultRates = {
-    PERSONAL: 8.5,
-    BUSINESS: 7.0,
-    MORTGAGE: 5.5,
-    AUTO: 6.0
+    PERSONAL: 12.5,  // Personal loans typically 10-15%
+    BUSINESS: 9.5,   // Business loans typically 7-12%
+    MORTGAGE: 6.5,   // Mortgage rates typically 5-8%
+    AUTO: 8.0        // Auto loans typically 6-10%
   };
 
   const interestRate = defaultRates[loanType];

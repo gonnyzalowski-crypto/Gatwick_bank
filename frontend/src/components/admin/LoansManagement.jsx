@@ -22,6 +22,7 @@ import apiClient from '../../lib/apiClient';
 
 const LoansManagement = () => {
   const [loans, setLoans] = useState([]);
+  const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,6 +34,14 @@ const LoansManagement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Realistic interest rates
+  const defaultRates = {
+    PERSONAL: 12.5,
+    BUSINESS: 9.5,
+    MORTGAGE: 6.5,
+    AUTO: 8.0
+  };
 
   const [approveForm, setApproveForm] = useState({
     interestRate: '',
@@ -49,8 +58,19 @@ const LoansManagement = () => {
     purpose: ''
   });
 
+  const [createForm, setCreateForm] = useState({
+    userId: '',
+    loanType: 'PERSONAL',
+    amount: '',
+    interestRate: '12.5',
+    termMonths: 12,
+    purpose: '',
+    status: 'APPROVED'
+  });
+
   useEffect(() => {
     fetchLoans();
+    fetchUsers();
   }, [filterStatus]);
 
   const fetchLoans = async () => {
@@ -63,6 +83,48 @@ const LoansManagement = () => {
       setError('Failed to load loans');
     }
     setIsLoading(false);
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await apiClient.get('/mybanker/users');
+      setUsers(response.users || []);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
+
+  const handleCreateLoan = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError('');
+    try {
+      await apiClient.post('/mybanker/loans', createForm);
+      setSuccess('Loan created successfully!');
+      setShowCreateModal(false);
+      setCreateForm({
+        userId: '',
+        loanType: 'PERSONAL',
+        amount: '',
+        interestRate: '12.5',
+        termMonths: 12,
+        purpose: '',
+        status: 'APPROVED'
+      });
+      fetchLoans();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (error) {
+      setError(error.message || 'Failed to create loan');
+    }
+    setIsSubmitting(false);
+  };
+
+  const calculateMonthlyPayment = (amount, rate, months) => {
+    if (!amount || !rate || !months) return 0;
+    const monthlyRate = rate / 100 / 12;
+    const numerator = monthlyRate * Math.pow(1 + monthlyRate, months);
+    const denominator = Math.pow(1 + monthlyRate, months) - 1;
+    return (amount * numerator) / denominator;
   };
 
   const handleApprove = async (loanId) => {
@@ -188,6 +250,13 @@ const LoansManagement = () => {
           <h2 className="text-2xl font-bold text-white">Loans Management</h2>
           <p className="text-slate-400 text-sm">Review and manage all loan applications</p>
         </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition font-medium"
+        >
+          <Plus className="w-5 h-5" />
+          Create Loan for User
+        </button>
       </div>
 
       {/* Alerts */}
@@ -536,6 +605,172 @@ const LoansManagement = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Loan Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-700">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-white">Create Loan for User</h3>
+                <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-white">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <form onSubmit={handleCreateLoan} className="p-6 space-y-4">
+              {/* Select User */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Select User</label>
+                <select
+                  value={createForm.userId}
+                  onChange={(e) => setCreateForm({...createForm, userId: e.target.value})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  required
+                >
+                  <option value="">-- Select a user --</option>
+                  {users.map(user => (
+                    <option key={user.id} value={user.id}>
+                      {user.firstName} {user.lastName} ({user.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Loan Type */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Loan Type</label>
+                <select
+                  value={createForm.loanType}
+                  onChange={(e) => setCreateForm({
+                    ...createForm, 
+                    loanType: e.target.value,
+                    interestRate: defaultRates[e.target.value]
+                  })}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                >
+                  <option value="PERSONAL">Personal (12.5% APR)</option>
+                  <option value="BUSINESS">Business (9.5% APR)</option>
+                  <option value="MORTGAGE">Mortgage (6.5% APR)</option>
+                  <option value="AUTO">Auto (8.0% APR)</option>
+                </select>
+              </div>
+
+              {/* Amount */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Loan Amount ($)</label>
+                <input
+                  type="number"
+                  value={createForm.amount}
+                  onChange={(e) => setCreateForm({...createForm, amount: e.target.value})}
+                  placeholder="Enter amount"
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  required
+                  min="1000"
+                />
+              </div>
+
+              {/* Interest Rate */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Interest Rate (% APR)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={createForm.interestRate}
+                  onChange={(e) => setCreateForm({...createForm, interestRate: e.target.value})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  required
+                />
+              </div>
+
+              {/* Term */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Term (Months)</label>
+                <select
+                  value={createForm.termMonths}
+                  onChange={(e) => setCreateForm({...createForm, termMonths: parseInt(e.target.value)})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                >
+                  <option value={6}>6 months</option>
+                  <option value={12}>12 months</option>
+                  <option value={24}>24 months</option>
+                  <option value={36}>36 months</option>
+                  <option value={48}>48 months</option>
+                  <option value={60}>60 months (5 years)</option>
+                  <option value={120}>120 months (10 years)</option>
+                  <option value={180}>180 months (15 years)</option>
+                  <option value={240}>240 months (20 years)</option>
+                  <option value={360}>360 months (30 years)</option>
+                </select>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Initial Status</label>
+                <select
+                  value={createForm.status}
+                  onChange={(e) => setCreateForm({...createForm, status: e.target.value})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                >
+                  <option value="APPROVED">Approved (Credit account immediately)</option>
+                  <option value="PENDING">Pending (Requires approval)</option>
+                </select>
+              </div>
+
+              {/* Purpose */}
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Purpose (Optional)</label>
+                <textarea
+                  value={createForm.purpose}
+                  onChange={(e) => setCreateForm({...createForm, purpose: e.target.value})}
+                  placeholder="Describe the purpose of this loan"
+                  rows={2}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white resize-none"
+                />
+              </div>
+
+              {/* Estimated Payment Preview */}
+              {createForm.amount && parseFloat(createForm.amount) >= 1000 && (
+                <div className="bg-indigo-900/20 border border-indigo-800 rounded-lg p-4">
+                  <div className="text-indigo-300 text-sm font-medium mb-1">Estimated Monthly Payment</div>
+                  <div className="text-2xl font-bold text-white">
+                    ${calculateMonthlyPayment(
+                      parseFloat(createForm.amount),
+                      parseFloat(createForm.interestRate),
+                      createForm.termMonths
+                    ).toFixed(2)}/month
+                  </div>
+                  <div className="text-slate-400 text-sm mt-1">
+                    Total repayment: ${(calculateMonthlyPayment(
+                      parseFloat(createForm.amount),
+                      parseFloat(createForm.interestRate),
+                      createForm.termMonths
+                    ) * createForm.termMonths).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !createForm.userId || !createForm.amount}
+                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  {isSubmitting ? 'Creating...' : 'Create Loan'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -1,70 +1,80 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Check, Minus, ArrowRight } from 'lucide-react';
+import { X, Check, Clock, DollarSign, AlertTriangle, Zap, Shield, Globe } from 'lucide-react';
 
 export const ComparisonSection = () => {
-  const comparisonFeatures = [
-    { feature: 'Account Opening Time', traditional: '5-7 days', gatwick: '5 minutes' },
-    { feature: 'International Transfers', traditional: '3-5 business days', gatwick: 'Instant' },
-    { feature: 'Monthly Fees', traditional: '$12-25', gatwick: '$0' },
-    { feature: 'Crypto Support', traditional: 'Not available', gatwick: 'BTC, ETH, USDT' },
-    { feature: '24/7 Support', traditional: 'Limited hours', gatwick: 'Always available' },
-    { feature: 'Mobile App', traditional: 'Basic features', gatwick: 'Full-featured' }
+  const oldWay = [
+    { icon: <Clock className="w-5 h-5" />, text: 'Wait 3-5 days for international transfers' },
+    { icon: <DollarSign className="w-5 h-5" />, text: 'Pay high fees and hidden charges' },
+    { icon: <AlertTriangle className="w-5 h-5" />, text: 'Limited currency options' },
+    { icon: <X className="w-5 h-5" />, text: 'Complex account opening process' },
+  ];
+
+  const gatwickWay = [
+    { icon: <Zap className="w-5 h-5" />, text: 'Instant transfers to 150+ countries' },
+    { icon: <Shield className="w-5 h-5" />, text: 'Transparent pricing, no hidden fees' },
+    { icon: <Globe className="w-5 h-5" />, text: '50+ currencies supported' },
+    { icon: <Check className="w-5 h-5" />, text: 'Open account in 5 minutes' },
   ];
 
   return (
-    <section id="compare" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-gray-50 overflow-hidden">
-      <div className="max-w-5xl mx-auto relative z-10">
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <div className="max-w-6xl mx-auto">
+        {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Why Choose <span className="bg-gradient-to-r from-purple-700 to-purple-900 bg-clip-text text-transparent">Gatwick Bank</span>?
+            The Old Way vs <span className="text-purple-700">The Gatwick Way</span>
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            See how we compare to traditional banks
+            See how we make global banking simple
           </p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl border border-purple-100 overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-3 bg-gradient-to-r from-purple-700 to-purple-900 text-white p-6">
-            <div className="font-bold text-lg">Feature</div>
-            <div className="font-bold text-lg text-center">Traditional Banks</div>
-            <div className="font-bold text-lg text-center">Gatwick Bank</div>
+        {/* Comparison Cards */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Old Way Card */}
+          <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <X className="w-5 h-5 text-gray-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-700">Old Way</h3>
+            </div>
+            <div className="space-y-4">
+              {oldWay.map((item, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center text-red-500 flex-shrink-0 mt-0.5">
+                    {item.icon}
+                  </div>
+                  <span className="text-gray-600">{item.text}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Table Rows */}
-          {comparisonFeatures.map((item, index) => (
-            <div 
-              key={index}
-              className={`grid grid-cols-3 p-6 items-center ${
-                index % 2 === 0 ? 'bg-purple-50/50' : 'bg-white'
-              }`}
-            >
-              <div className="font-semibold text-gray-900">{item.feature}</div>
-              <div className="text-center">
-                <span className="inline-flex items-center gap-2 text-gray-600">
-                  <Minus className="w-4 h-4 text-red-500" />
-                  {item.traditional}
-                </span>
+          {/* Gatwick Way Card */}
+          <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-8 text-white relative overflow-hidden">
+            {/* Decorative element */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+            
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <Check className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xl font-bold">With Gatwick</h3>
               </div>
-              <div className="text-center">
-                <span className="inline-flex items-center gap-2 text-purple-600 font-semibold">
-                  <Check className="w-5 h-5 text-green-500" />
-                  {item.gatwick}
-                </span>
+              <div className="space-y-4">
+                {gatwickWay.map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white flex-shrink-0 mt-0.5">
+                      {item.icon}
+                    </div>
+                    <span className="text-purple-100">{item.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className="text-center mt-8">
-          <Link 
-            to="/register"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-xl font-semibold hover:shadow-2xl hover:scale-105 transition-all duration-200"
-          >
-            Start Your Journey Today
-            <ArrowRight className="w-5 h-5" />
-          </Link>
+          </div>
         </div>
       </div>
     </section>
