@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { verifyAuth, isAdmin } from '../middleware/auth.js';
+import { checkDebitEligibility } from '../middleware/accountRestrictions.js';
 import prisma from '../config/prisma.js';
 import {
   getBankList,
@@ -58,8 +59,9 @@ transfersRouter.post('/validate-routing', async (req, res) => {
 /**
  * POST /api/v1/transfers
  * Create transfer request
+ * PND and SUSPENDED users cannot create transfers
  */
-transfersRouter.post('/', async (req, res) => {
+transfersRouter.post('/', checkDebitEligibility, async (req, res) => {
   try {
     const { fromAccountId, destinationBank, routingNumber, accountNumber, accountName, amount, description, saveBeneficiary, beneficiaryNickname } = req.body;
     

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { verifyAuth, isAdmin } from '../middleware/auth.js';
+import { checkDebitEligibility } from '../middleware/accountRestrictions.js';
 import prisma from '../config/prisma.js';
 
 const recurringPaymentsRouter = Router();
@@ -130,8 +131,9 @@ recurringPaymentsRouter.get('/:id', async (req, res) => {
 /**
  * POST /api/v1/recurring-payments
  * Create a new recurring payment
+ * PND and SUSPENDED users cannot create recurring payments
  */
-recurringPaymentsRouter.post('/', async (req, res) => {
+recurringPaymentsRouter.post('/', checkDebitEligibility, async (req, res) => {
   try {
     const {
       fromAccountId,

@@ -492,24 +492,93 @@ router.post('/users/:userId/regenerate-backup-codes', verifyAuth, verifyAdmin, a
 
 // Update user status
 // PUT /api/v1/mybanker/users/:userId/status
+// Supports: LIMITED, ACTIVE, PND (Pending No Debit), SUSPENDED (Complete lockout)
 router.put('/users/:userId/status', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { accountStatus } = req.body;
+    const { accountStatus, suspensionReason } = req.body;
+
+    // Validate status
+    const validStatuses = ['LIMITED', 'ACTIVE', 'PND', 'SUSPENDED'];
+    if (!validStatuses.includes(accountStatus)) {
+      return res.status(400).json({ 
+        error: 'Invalid status. Must be one of: LIMITED, ACTIVE, PND, SUSPENDED' 
+      });
+    }
+
+    const updateData = { accountStatus };
+    
+    // Add suspension reason for PND or SUSPENDED
+    if (accountStatus === 'PND' || accountStatus === 'SUSPENDED') {
+      updateData.suspensionReason = suspensionReason || (
+        accountStatus === 'PND' 
+          ? 'Account under review - debit transactions restricted'
+          : 'Account suspended - physical verification required'
+      );
+    } else {
+      // Clear suspension reason when activating
+      updateData.suspensionReason = null;
+    }
 
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { accountStatus },
+      data: updateData,
       select: {
         id: true,
         email: true,
         firstName: true,
         lastName: true,
-        accountStatus: true
+        accountStatus: true,
+        suspensionReason: true
       }
     });
 
-    return res.json({ user, message: 'User status updated successfully' });
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user.userId,
+        action: 'USER_STATUS_CHANGE',
+        description: `Changed user ${user.email} status to ${accountStatus}${suspensionReason ? `: ${suspensionReason}` : ''}`,
+        severity: accountStatus === 'SUSPENDED' ? 'HIGH' : 'MEDIUM',
+        ipAddress: req.ip
+      }
+    });
+
+    // Create notification for user
+    let notificationMessage = '';
+    switch (accountStatus) {
+      case 'ACTIVE':
+        notificationMessage = 'Your account has been fully activated. All features are now available.';
+        break;
+      case 'LIMITED':
+        notificationMessage = 'Your account has been set to limited status. Some features may be restricted.';
+        break;
+      case 'PND':
+        notificationMessage = 'Your account is under review. Debit transactions are temporarily restricted. You can still receive funds. Please contact your account manager for assistance.';
+        break;
+      case 'SUSPENDED':
+        notificationMessage = 'Your account has been suspended. Please visit your nearest Gatwick Bank branch with valid identification to restore access.';
+        break;
+    }
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: 'account',
+        title: `Account Status: ${accountStatus}`,
+        message: notificationMessage,
+        metadata: { 
+          accountStatus, 
+          suspensionReason: updateData.suspensionReason 
+        }
+      }
+    });
+
+    return res.json({ 
+      success: true,
+      user, 
+      message: `User status updated to ${accountStatus}` 
+    });
   } catch (error) {
     console.error('Update user status error:', error);
     return res.status(500).json({ error: 'Failed to update user status' });

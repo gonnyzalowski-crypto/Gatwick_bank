@@ -48,7 +48,8 @@ model User {
   governmentIdType String?  // Passport, Driver's License, National ID
   governmentIdNumber String? // Government ID number
   isAdmin          Boolean  @default(false)
-  accountStatus    String   @default("LIMITED") // LIMITED | ACTIVE | SUSPENDED
+  accountStatus    String   @default("LIMITED") // LIMITED | ACTIVE | PND | SUSPENDED
+  suspensionReason String?  // Reason for PND or SUSPENDED status
   kycStatus        String   @default("NOT_SUBMITTED") // NOT_SUBMITTED | PENDING | VERIFIED | REJECTED
   kycRejectionReason String? // Reason if KYC rejected
   kycSubmittedAt   DateTime? // When KYC was submitted

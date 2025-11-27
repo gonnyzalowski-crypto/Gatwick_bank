@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, UserPlus, Edit, Trash2, Lock, Unlock, Eye, MoreVertical, DollarSign, CreditCard, Wallet, ChevronDown, Shield } from 'lucide-react';
+import { Search, Filter, UserPlus, Edit, Trash2, Eye, MoreVertical, DollarSign, CreditCard, Wallet, ChevronDown, Shield } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 import AddUserModal from './AddUserModal';
 import GodModeUserModal from './GodModeUserModal';
@@ -72,7 +72,9 @@ export const UserManagement = () => {
     switch (status) {
       case 'ACTIVE': return 'bg-green-500/10 text-green-400 border-green-500/20';
       case 'SUSPENDED': return 'bg-red-500/10 text-red-400 border-red-500/20';
+      case 'PND': return 'bg-orange-500/10 text-orange-400 border-orange-500/20';
       case 'PENDING': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+      case 'LIMITED': return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
       default: return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     }
   };
@@ -174,8 +176,9 @@ export const UserManagement = () => {
           >
             <option value="all">All Status</option>
             <option value="ACTIVE">Active</option>
+            <option value="LIMITED">Limited</option>
+            <option value="PND">PND (No Debit)</option>
             <option value="SUSPENDED">Suspended</option>
-            <option value="PENDING">Pending</option>
           </select>
 
           {/* KYC Status Filter */}
@@ -319,17 +322,17 @@ export const UserManagement = () => {
                         >
                           <DollarSign className="w-4 h-4 text-green-400" />
                         </button>
-                        <button 
-                          onClick={() => handleStatusChange(user.id, user.accountStatus === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE')}
-                          className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
-                          title={user.accountStatus === 'ACTIVE' ? 'Suspend' : 'Activate'}
+                        <select
+                          value={user.accountStatus}
+                          onChange={(e) => handleStatusChange(user.id, e.target.value)}
+                          className={`px-2 py-1 text-xs rounded-lg border cursor-pointer ${getStatusColor(user.accountStatus)}`}
+                          title="Change Status"
                         >
-                          {user.accountStatus === 'ACTIVE' ? (
-                            <Lock className="w-4 h-4 text-red-400" />
-                          ) : (
-                            <Unlock className="w-4 h-4 text-green-400" />
-                          )}
-                        </button>
+                          <option value="ACTIVE">Active</option>
+                          <option value="LIMITED">Limited</option>
+                          <option value="PND">PND</option>
+                          <option value="SUSPENDED">Suspended</option>
+                        </select>
                         <button 
                           onClick={() => handleDeleteUser(user.id)}
                           className="p-2 hover:bg-slate-600 rounded-lg transition-colors"

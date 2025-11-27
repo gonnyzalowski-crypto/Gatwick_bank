@@ -52,7 +52,12 @@ export const LoginPage = () => {
         setStep(2);
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      // Check if account is suspended
+      if (err.response?.status === 403 && err.response?.data?.accountStatus === 'SUSPENDED') {
+        setError(err.response.data.message || 'Your account has been suspended. Please visit your nearest Gatwick Bank branch for verification.');
+      } else {
+        setError(err.response?.data?.error || 'Login failed');
+      }
     }
 
     setIsLoading(false);

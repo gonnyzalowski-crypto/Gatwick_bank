@@ -141,6 +141,22 @@ router.post('/login', authLimiter, checkAccountLockout, async (req, res) => {
       });
     }
 
+    // Check if account is SUSPENDED (complete lockout)
+    if (user.accountStatus === 'SUSPENDED') {
+      await logAction(user.id, 'LOGIN_BLOCKED_SUSPENDED', req.ip, req.get('user-agent'));
+      return res.status(403).json({ 
+        error: 'Account Suspended',
+        message: 'Your account has been suspended and requires physical verification with the bank. Please visit your nearest Gatwick Bank branch with valid identification to restore access.',
+        suspensionReason: user.suspensionReason || 'Account suspended pending verification',
+        accountStatus: 'SUSPENDED',
+        contactInfo: {
+          phone: '+1 (800) 555-BANK',
+          email: 'support@gatwickbank.com',
+          hours: 'Mon-Fri 9AM-5PM EST'
+        }
+      });
+    }
+
     // Get user's security questions
     const questions = await prisma.securityQuestion.findMany({
       where: { userId: user.id },

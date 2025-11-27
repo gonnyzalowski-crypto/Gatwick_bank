@@ -1,6 +1,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { verifyAuth } from '../middleware/auth.js';
+import { checkDebitEligibility } from '../middleware/accountRestrictions.js';
 import { upload } from '../middleware/upload.js';
 import { transactionLimiter, uploadLimiter } from '../middleware/rateLimiter.js';
 import prisma from '../config/prisma.js';
@@ -92,9 +93,10 @@ paymentsRouter.post('/deposit', uploadLimiter, verifyAuth, upload.single('paymen
 /**
  * POST /api/v1/payments/withdrawal
  * Create a withdrawal request (pending admin approval)
+ * PND and SUSPENDED users cannot make withdrawals
  * TEST PROJECT: Backup code verification is optional
  */
-paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, async (req, res) => {
+paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, checkDebitEligibility, async (req, res) => {
   try {
     const { accountId, amount, description, gatewayId, backupCode } = req.body;
 
