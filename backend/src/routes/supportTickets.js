@@ -46,9 +46,13 @@ const cleanupOldTickets = async () => {
   }
 };
 
-// Run cleanup on startup and every 24 hours
-cleanupOldTickets();
-setInterval(cleanupOldTickets, 24 * 60 * 60 * 1000);
+// Run cleanup after a delay on startup and every 24 hours
+setTimeout(() => {
+  cleanupOldTickets().catch(err => console.error('Initial cleanup failed:', err));
+}, 10000); // Wait 10 seconds for database connection
+setInterval(() => {
+  cleanupOldTickets().catch(err => console.error('Scheduled cleanup failed:', err));
+}, 24 * 60 * 60 * 1000);
 
 // POST /api/v1/support/tickets - Create new ticket (user)
 router.post('/tickets', verifyAuth, async (req, res) => {
