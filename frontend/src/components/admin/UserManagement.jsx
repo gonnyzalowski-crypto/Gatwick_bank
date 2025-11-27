@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, UserPlus, Edit, Trash2, Lock, Unlock, Eye, MoreVertical, DollarSign } from 'lucide-react';
+import { Search, Filter, UserPlus, Edit, Trash2, Lock, Unlock, Eye, MoreVertical, DollarSign, CreditCard, Wallet, ChevronDown } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 import AddUserModal from './AddUserModal';
 import ViewUserModal from './ViewUserModal';
@@ -231,7 +231,41 @@ export const UserManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-white font-mono">{user.accountNumber || 'N/A'}</div>
+                      <div className="space-y-1">
+                        {user.accounts && user.accounts.length > 0 ? (
+                          <div className="relative group">
+                            <div className="flex items-center gap-2 cursor-pointer">
+                              <Wallet className="w-4 h-4 text-indigo-400" />
+                              <span className="text-white font-mono text-sm">
+                                {user.accounts.length} Account{user.accounts.length > 1 ? 's' : ''}
+                              </span>
+                              <ChevronDown className="w-3 h-3 text-slate-400" />
+                            </div>
+                            {/* Dropdown on hover */}
+                            <div className="absolute left-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-xl z-20 min-w-[280px] hidden group-hover:block">
+                              <div className="p-2 space-y-1 max-h-48 overflow-y-auto">
+                                {user.accounts.map((acc, idx) => (
+                                  <div 
+                                    key={acc.id} 
+                                    className={`p-2 rounded ${acc.isPrimary ? 'bg-indigo-500/10 border border-indigo-500/30' : 'hover:bg-slate-800'}`}
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs text-slate-400">{acc.accountType}</span>
+                                      {acc.isPrimary && (
+                                        <span className="text-xs bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded">Primary</span>
+                                      )}
+                                    </div>
+                                    <div className="text-white font-mono text-sm">{acc.accountNumber}</div>
+                                    <div className="text-green-400 text-sm font-semibold">${parseFloat(acc.balance || 0).toLocaleString()}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-slate-500 text-sm">No accounts</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(user.accountStatus)}`}>
@@ -244,7 +278,8 @@ export const UserManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-white font-medium">${user.balance?.toFixed(2) || '0.00'}</div>
+                      <div className="text-white font-semibold">${parseFloat(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                      <div className="text-slate-400 text-xs">{user.accountsCount || 0} acct{user.accountsCount !== 1 ? 's' : ''} • {user.cardsCount || 0} card{user.cardsCount !== 1 ? 's' : ''}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-slate-400 text-sm">

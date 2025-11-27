@@ -249,16 +249,25 @@ router.get('/users', verifyAuth, verifyAdmin, async (req, res) => {
           totalSentAmount: true,
           createdAt: true,
           accounts: {
-            where: { isPrimary: true },
             select: {
+              id: true,
+              accountNumber: true,
+              accountName: true,
+              accountType: true,
               balance: true,
-              accountType: true
-            }
+              availableBalance: true,
+              isPrimary: true,
+              status: true,
+              currency: true
+            },
+            orderBy: { isPrimary: 'desc' }
           },
           _count: {
             select: {
               accounts: true,
-              backupCodes: { where: { used: false } }
+              backupCodes: { where: { used: false } },
+              debitCards: true,
+              creditCards: true
             }
           }
         },
@@ -269,13 +278,20 @@ router.get('/users', verifyAuth, verifyAdmin, async (req, res) => {
       prisma.user.count({ where })
     ]);
 
-    // Format users with balance from primary account
-    const formattedUsers = users.map(user => ({
-      ...user,
-      balance: user.accounts[0]?.balance || 0,
-      accountType: user.accounts[0]?.accountType || 'N/A',
-      accounts: undefined // Remove accounts array from response
-    }));
+    // Format users with balance from primary account and include all accounts
+    const formattedUsers = users.map(user => {
+      const primaryAccount = user.accounts.find(acc => acc.isPrimary);
+      const totalBalance = user.accounts.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
+      
+      return {
+        ...user,
+        balance: totalBalance,
+        primaryBalance: primaryAccount?.balance || 0,
+        accountType: primaryAccount?.accountType || 'N/A',
+        accountsCount: user.accounts.length,
+        cardsCount: (user._count?.debitCards || 0) + (user._count?.creditCards || 0)
+      };
+    });
 
     return res.json({
       users: formattedUsers,
