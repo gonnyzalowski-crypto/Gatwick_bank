@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, ArrowDownLeft, Search, Filter, Download, Eye } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, Search, Filter, Download, Eye, Edit, Trash2, Plus, X, Save } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 
 export const TransactionMonitor = () => {
@@ -9,6 +9,9 @@ export const TransactionMonitor = () => {
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [dateRange, setDateRange] = useState('7days');
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+  const [editForm, setEditForm] = useState({});
 
   useEffect(() => {
     fetchTransactions();
@@ -58,6 +61,38 @@ export const TransactionMonitor = () => {
   const totalVolume = transactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
   const completedCount = transactions.filter(tx => tx.status === 'COMPLETED').length;
   const pendingCount = transactions.filter(tx => tx.status === 'PENDING').length;
+
+  const handleEditClick = (tx) => {
+    setEditingTransaction(tx.id);
+    setEditForm({
+      type: tx.type,
+      amount: tx.amount,
+      description: tx.description || '',
+      status: tx.status
+    });
+  };
+
+  const handleSaveEdit = async (txId) => {
+    try {
+      await apiClient.put(`/mybanker/transactions/${txId}`, editForm);
+      setEditingTransaction(null);
+      fetchTransactions();
+    } catch (error) {
+      console.error('Failed to update transaction:', error);
+      alert('Failed to update transaction');
+    }
+  };
+
+  const handleDeleteTransaction = async (txId) => {
+    try {
+      await apiClient.delete(`/mybanker/transactions/${txId}`);
+      setShowDeleteConfirm(null);
+      fetchTransactions();
+    } catch (error) {
+      console.error('Failed to delete transaction:', error);
+      alert('Failed to delete transaction');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -212,9 +247,20 @@ export const TransactionMonitor = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center justify-end">
-                        <button className="p-2 hover:bg-slate-600 rounded-lg transition-colors">
-                          <Eye className="w-4 h-4 text-slate-400" />
+                      <div className="flex items-center justify-end gap-1">
+                        <button 
+                          onClick={() => handleEditClick(tx)}
+                          className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                          title="Edit transaction"
+                        >
+                          <Edit className="w-4 h-4 text-indigo-400" />
+                        </button>
+                        <button 
+                          onClick={() => setShowDeleteConfirm(tx.id)}
+                          className="p-2 hover:bg-slate-600 rounded-lg transition-colors"
+                          title="Delete transaction"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-400" />
                         </button>
                       </div>
                     </td>
@@ -225,6 +271,111 @@ export const TransactionMonitor = () => {
           </table>
         </div>
       </div>
+
+      {/* Edit Transaction Modal */}
+      {editingTransaction && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Edit Transaction</h3>
+              <button onClick={() => setEditingTransaction(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Type</label>
+                <select
+                  value={editForm.type}
+                  onChange={(e) => setEditForm({...editForm, type: e.target.value})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                >
+                  <option value="CREDIT">Credit</option>
+                  <option value="DEBIT">Debit</option>
+                  <option value="DEPOSIT">Deposit</option>
+                  <option value="WITHDRAWAL">Withdrawal</option>
+                  <option value="TRANSFER">Transfer</option>
+                  <option value="PAYMENT">Payment</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Amount</label>
+                <input
+                  type="number"
+                  value={editForm.amount}
+                  onChange={(e) => setEditForm({...editForm, amount: parseFloat(e.target.value)})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Description</label>
+                <input
+                  type="text"
+                  value={editForm.description}
+                  onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-slate-400 mb-1">Status</label>
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm({...editForm, status: e.target.value})}
+                  className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                >
+                  <option value="COMPLETED">Completed</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="FAILED">Failed</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setEditingTransaction(null)}
+                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleSaveEdit(editingTransaction)}
+                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition flex items-center justify-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 w-full max-w-sm">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Delete Transaction?</h3>
+              <p className="text-slate-400 text-sm mb-6">This action cannot be undone. The transaction will be permanently removed.</p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(null)}
+                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => handleDeleteTransaction(showDeleteConfirm)}
+                  className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

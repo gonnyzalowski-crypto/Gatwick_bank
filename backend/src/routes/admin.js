@@ -852,6 +852,176 @@ router.get('/transactions', verifyAuth, verifyAdmin, async (req, res) => {
   }
 });
 
+// Create manual transaction (Admin only)
+// POST /api/v1/mybanker/transactions
+router.post('/transactions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { accountId, type, amount, description, status = 'COMPLETED' } = req.body;
+
+    if (!accountId || !type || !amount) {
+      return res.status(400).json({ error: 'Account ID, type, and amount are required' });
+    }
+
+    // Verify account exists
+    const account = await prisma.account.findUnique({
+      where: { id: accountId },
+      include: { user: { select: { id: true, email: true, firstName: true, lastName: true } } }
+    });
+
+    if (!account) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+
+    // Generate reference
+    const reference = `ADM-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+    // Create transaction
+    const transaction = await prisma.transaction.create({
+      data: {
+        accountId,
+        type: type.toUpperCase(),
+        amount: parseFloat(amount),
+        description: description || `Admin manual ${type.toLowerCase()}`,
+        reference,
+        status: status.toUpperCase(),
+        balanceAfter: parseFloat(account.balance) + (type.toUpperCase() === 'CREDIT' ? parseFloat(amount) : -parseFloat(amount))
+      }
+    });
+
+    // Update account balance if transaction is completed
+    if (status.toUpperCase() === 'COMPLETED') {
+      const newBalance = type.toUpperCase() === 'CREDIT' 
+        ? parseFloat(account.balance) + parseFloat(amount)
+        : parseFloat(account.balance) - parseFloat(amount);
+
+      await prisma.account.update({
+        where: { id: accountId },
+        data: { 
+          balance: newBalance,
+          availableBalance: newBalance
+        }
+      });
+    }
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: account.user.id,
+        action: 'ADMIN_TRANSACTION_CREATED',
+        details: `Admin created ${type} transaction of $${amount} for ${account.user.email}`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({ 
+      success: true, 
+      message: 'Transaction created successfully',
+      transaction 
+    });
+  } catch (error) {
+    console.error('Create transaction error:', error);
+    return res.status(500).json({ error: 'Failed to create transaction' });
+  }
+});
+
+// Update transaction (Admin only)
+// PUT /api/v1/mybanker/transactions/:transactionId
+router.put('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const { type, amount, description, status } = req.body;
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: transactionId },
+      include: { 
+        account: { 
+          include: { user: { select: { id: true, email: true } } } 
+        } 
+      }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
+    }
+
+    const updateData = {};
+    if (type) updateData.type = type.toUpperCase();
+    if (amount !== undefined) updateData.amount = parseFloat(amount);
+    if (description) updateData.description = description;
+    if (status) updateData.status = status.toUpperCase();
+
+    const updatedTransaction = await prisma.transaction.update({
+      where: { id: transactionId },
+      data: updateData
+    });
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: transaction.account.user.id,
+        action: 'ADMIN_TRANSACTION_UPDATED',
+        details: `Admin updated transaction ${transactionId}`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({ 
+      success: true, 
+      message: 'Transaction updated successfully',
+      transaction: updatedTransaction 
+    });
+  } catch (error) {
+    console.error('Update transaction error:', error);
+    return res.status(500).json({ error: 'Failed to update transaction' });
+  }
+});
+
+// Delete transaction (Admin only)
+// DELETE /api/v1/mybanker/transactions/:transactionId
+router.delete('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+
+    const transaction = await prisma.transaction.findUnique({
+      where: { id: transactionId },
+      include: { 
+        account: { 
+          include: { user: { select: { id: true, email: true } } } 
+        } 
+      }
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
+    }
+
+    await prisma.transaction.delete({
+      where: { id: transactionId }
+    });
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: transaction.account.user.id,
+        action: 'ADMIN_TRANSACTION_DELETED',
+        details: `Admin deleted transaction ${transactionId} (${transaction.type} $${transaction.amount})`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({ 
+      success: true, 
+      message: 'Transaction deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete transaction error:', error);
+    return res.status(500).json({ error: 'Failed to delete transaction' });
+  }
+});
+
 // Get audit logs
 // GET /api/v1/mybanker/audit-logs
 router.get('/audit-logs', verifyAuth, verifyAdmin, async (req, res) => {
