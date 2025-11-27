@@ -83,6 +83,74 @@ transfersRouter.post('/', async (req, res) => {
 });
 
 /**
+ * POST /api/v1/transfers/domestic
+ * Create domestic transfer request (same as regular transfer)
+ * TEST PROJECT: Backup code verification is optional
+ */
+transfersRouter.post('/domestic', async (req, res) => {
+  try {
+    const { fromAccountId, bankName, routingNumber, accountNumber, accountHolderName, amount, description, backupCode } = req.body;
+    
+    if (!fromAccountId || !bankName || !routingNumber || !accountNumber || !accountHolderName || !amount) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // TEST PROJECT: Skip backup code verification for testing
+    // In production, verify backup code here
+    
+    const result = await createTransferRequest(req.user.userId, {
+      fromAccountId,
+      destinationBank: bankName,
+      routingNumber,
+      accountNumber,
+      accountName: accountHolderName,
+      amount: parseFloat(amount),
+      description,
+      transferType: 'DOMESTIC'
+    });
+    
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Error creating domestic transfer:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/transfers/international
+ * Create international transfer request
+ * TEST PROJECT: Backup code verification is optional
+ */
+transfersRouter.post('/international', async (req, res) => {
+  try {
+    const { fromAccountId, bankName, swiftCode, iban, accountHolderName, amount, description, country, backupCode } = req.body;
+    
+    if (!fromAccountId || !bankName || !swiftCode || !accountHolderName || !amount) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    
+    // TEST PROJECT: Skip backup code verification for testing
+    
+    const result = await createTransferRequest(req.user.userId, {
+      fromAccountId,
+      destinationBank: bankName,
+      routingNumber: swiftCode,
+      accountNumber: iban || swiftCode,
+      accountName: accountHolderName,
+      amount: parseFloat(amount),
+      description,
+      transferType: 'INTERNATIONAL',
+      country
+    });
+    
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Error creating international transfer:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
  * GET /api/v1/transfers
  * Get user's transfers
  */
