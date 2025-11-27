@@ -22,6 +22,7 @@ import SystemInfo from './admin/SystemInfo';
 import AdminSettings from './admin/AdminSettings';
 import GatewayManagement from './admin/GatewayManagement';
 import CardsManagement from '../components/admin/CardsManagement';
+import LoansManagement from '../components/admin/LoansManagement';
 import { SupportTicketsPage as AdminSupportTickets } from './admin/SupportTicketsPage';
 import CurrencyManagement from './admin/CurrencyManagement';
 import NotificationBell from '../components/NotificationBell';
@@ -327,11 +328,12 @@ export const AdminDashboard = () => {
                   {activeSection === 'withdrawal' && 'Withdrawal Management'}
                   {activeSection === 'cheque' && 'Cheque Management'}
                   {activeSection === 'cards' && 'Cards Management'}
+                  {activeSection === 'loans' && 'Loans Management'}
                   {activeSection === 'transfer-approvals' && 'Transfer Approvals'}
                   {activeSection === 'info' && 'System Information'}
                   {activeSection === 'tool-settings' && 'Admin Settings'}
                   {activeSection === 'payment-gateways' && 'Payment Gateway Management'}
-                  {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'transfer-approvals', 'info', 'tool-settings'].includes(activeSection) && 
+                  {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'cheque', 'cards', 'loans', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets', 'withdrawal'].includes(activeSection) && 
                     activeSection.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
                   }
                 </h1>
@@ -489,6 +491,9 @@ export const AdminDashboard = () => {
 
           {/* Cards Management */}
           {activeSection === 'cards' && <CardsManagement />}
+
+          {/* Loans Management */}
+          {activeSection === 'loans' && <LoansManagement />}
 
           {/* Transfer Approvals */}
           {activeSection === 'transfer-approvals' && <TransferApprovalsPage />}

@@ -20,6 +20,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import KYCUploadPage from './pages/KYCUploadPage';
 import TransactionHistoryPage from './pages/TransactionHistoryPage';
 import SupportPage from './pages/SupportTicketsPage';
+import LoansPage from './pages/LoansPage';
 
 export default function App() {
   return (
@@ -47,6 +48,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <SupportPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/loans"
+            element={
+              <ProtectedRoute>
+                <LoansPage />
               </ProtectedRoute>
             }
           />

@@ -2687,4 +2687,227 @@ router.post('/fix-accounts/:userId', verifyAuth, verifyAdmin, async (req, res) =
   }
 });
 
+// =============================================
+// LOANS MANAGEMENT (God Mode)
+// =============================================
+
+// Update loan (Admin only - God Mode)
+// PUT /api/v1/mybanker/loans/:loanId
+router.put('/loans/:loanId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { loanId } = req.params;
+    const { amount, interestRate, termMonths, status, purpose, remainingBalance, monthlyPayment } = req.body;
+
+    const loan = await prisma.loan.findUnique({
+      where: { id: loanId }
+    });
+
+    if (!loan) {
+      return res.status(404).json({ error: 'Loan not found' });
+    }
+
+    const updateData = {};
+    if (amount !== undefined) updateData.amount = parseFloat(amount);
+    if (interestRate !== undefined) updateData.interestRate = parseFloat(interestRate);
+    if (termMonths !== undefined) updateData.termMonths = parseInt(termMonths);
+    if (status !== undefined) updateData.status = status.toUpperCase();
+    if (purpose !== undefined) updateData.purpose = purpose;
+    if (remainingBalance !== undefined) updateData.remainingBalance = parseFloat(remainingBalance);
+    if (monthlyPayment !== undefined) updateData.monthlyPayment = parseFloat(monthlyPayment);
+
+    // Recalculate monthly payment if amount, rate, or term changed
+    if ((amount || interestRate || termMonths) && !monthlyPayment) {
+      const principal = amount ? parseFloat(amount) : parseFloat(loan.amount);
+      const rate = interestRate ? parseFloat(interestRate) : parseFloat(loan.interestRate);
+      const months = termMonths ? parseInt(termMonths) : loan.termMonths;
+      
+      if (rate === 0) {
+        updateData.monthlyPayment = principal / months;
+      } else {
+        const monthlyRate = rate / 100 / 12;
+        const numerator = monthlyRate * Math.pow(1 + monthlyRate, months);
+        const denominator = Math.pow(1 + monthlyRate, months) - 1;
+        updateData.monthlyPayment = (principal * numerator) / denominator;
+      }
+    }
+
+    const updatedLoan = await prisma.loan.update({
+      where: { id: loanId },
+      data: updateData,
+      include: {
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true }
+        }
+      }
+    });
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: loan.userId,
+        action: 'ADMIN_LOAN_UPDATED',
+        details: `Admin updated loan ${loanId}`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Loan updated successfully',
+      loan: updatedLoan
+    });
+  } catch (error) {
+    console.error('Update loan error:', error);
+    return res.status(500).json({ error: 'Failed to update loan' });
+  }
+});
+
+// Delete loan (Admin only - God Mode)
+// DELETE /api/v1/mybanker/loans/:loanId
+router.delete('/loans/:loanId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { loanId } = req.params;
+
+    const loan = await prisma.loan.findUnique({
+      where: { id: loanId },
+      include: { user: { select: { id: true, email: true } } }
+    });
+
+    if (!loan) {
+      return res.status(404).json({ error: 'Loan not found' });
+    }
+
+    // Delete associated loan payments first
+    await prisma.loanPayment.deleteMany({
+      where: { loanId }
+    });
+
+    // Delete the loan
+    await prisma.loan.delete({
+      where: { id: loanId }
+    });
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: loan.user.id,
+        action: 'ADMIN_LOAN_DELETED',
+        details: `Admin deleted loan ${loanId} (${loan.loanType} $${loan.amount})`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Loan deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete loan error:', error);
+    return res.status(500).json({ error: 'Failed to delete loan' });
+  }
+});
+
+// Create loan for user (Admin only - God Mode)
+// POST /api/v1/mybanker/loans
+router.post('/loans', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId, loanType, amount, interestRate, termMonths, purpose, status = 'APPROVED' } = req.body;
+
+    if (!userId || !loanType || !amount || !termMonths) {
+      return res.status(400).json({ error: 'User ID, loan type, amount, and term are required' });
+    }
+
+    // Get user's primary account
+    const account = await prisma.account.findFirst({
+      where: { userId, isPrimary: true, isActive: true }
+    });
+
+    if (!account) {
+      return res.status(400).json({ error: 'User has no active primary account' });
+    }
+
+    // Calculate monthly payment
+    const principal = parseFloat(amount);
+    const rate = interestRate ? parseFloat(interestRate) : 8.5; // Default rate
+    const months = parseInt(termMonths);
+    
+    let monthlyPayment;
+    if (rate === 0) {
+      monthlyPayment = principal / months;
+    } else {
+      const monthlyRate = rate / 100 / 12;
+      const numerator = monthlyRate * Math.pow(1 + monthlyRate, months);
+      const denominator = Math.pow(1 + monthlyRate, months) - 1;
+      monthlyPayment = (principal * numerator) / denominator;
+    }
+
+    const loan = await prisma.loan.create({
+      data: {
+        userId,
+        accountId: account.id,
+        loanType: loanType.toUpperCase(),
+        amount: principal,
+        interestRate: rate,
+        termMonths: months,
+        monthlyPayment,
+        remainingBalance: principal,
+        purpose: purpose || null,
+        status: status.toUpperCase(),
+        approvedBy: status.toUpperCase() === 'APPROVED' ? req.user.userId : null,
+        approvedAt: status.toUpperCase() === 'APPROVED' ? new Date() : null,
+        disbursedAt: status.toUpperCase() === 'APPROVED' ? new Date() : null
+      },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } }
+      }
+    });
+
+    // If approved, credit the account
+    if (status.toUpperCase() === 'APPROVED') {
+      await prisma.account.update({
+        where: { id: account.id },
+        data: {
+          balance: { increment: principal },
+          availableBalance: { increment: principal }
+        }
+      });
+
+      // Create transaction record
+      await prisma.transaction.create({
+        data: {
+          accountId: account.id,
+          type: 'CREDIT',
+          amount: principal,
+          description: `${loanType} loan disbursement (Admin created)`,
+          reference: `LOAN-ADM-${Date.now()}`,
+          status: 'COMPLETED',
+          category: 'LOAN'
+        }
+      });
+    }
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        userId,
+        action: 'ADMIN_LOAN_CREATED',
+        details: `Admin created ${loanType} loan of $${amount} for user`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Loan created successfully',
+      loan
+    });
+  } catch (error) {
+    console.error('Create loan error:', error);
+    return res.status(500).json({ error: 'Failed to create loan' });
+  }
+});
+
 export default router;
