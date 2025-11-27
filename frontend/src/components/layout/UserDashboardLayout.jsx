@@ -20,6 +20,9 @@ import {
   ArrowUpFromLine,
   Globe,
   Home,
+  Building2,
+  Repeat,
+  Landmark,
 } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import NotificationBell from '../NotificationBell';
@@ -181,6 +184,14 @@ const UserDashboardLayout = ({ children }) => {
                         <Globe className="h-4 w-4" />
                         <span>International</span>
                       </NavLink>
+                      <NavLink
+                        to="/transfers/external"
+                        className={navItemClasses}
+                        onClick={closeSidebar}
+                      >
+                        <Building2 className="h-4 w-4" />
+                        <span>External Bank</span>
+                      </NavLink>
                     </div>
                   )}
                 </div>
@@ -188,6 +199,16 @@ const UserDashboardLayout = ({ children }) => {
                 <NavLink to="/transaction-history" className={navItemClasses} onClick={closeSidebar}>
                   <FileText className="h-5 w-5" />
                   <span>Transaction History</span>
+                </NavLink>
+
+                <NavLink to="/recurring-payments" className={navItemClasses} onClick={closeSidebar}>
+                  <Repeat className="h-5 w-5" />
+                  <span>Recurring Payments</span>
+                </NavLink>
+
+                <NavLink to="/loans" className={navItemClasses} onClick={closeSidebar}>
+                  <Landmark className="h-5 w-5" />
+                  <span>Loans</span>
                 </NavLink>
               </div>
             </div>

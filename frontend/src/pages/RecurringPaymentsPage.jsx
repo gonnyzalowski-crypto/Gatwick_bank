@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   Plus,
   Calendar,
   Clock,
@@ -19,12 +17,16 @@ import {
   Save,
   Loader2,
   Building2,
-  User
+  User,
+  ArrowRight,
+  TrendingUp,
+  CalendarDays,
+  Zap
 } from 'lucide-react';
 import apiClient from '../lib/apiClient';
+import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 
 const RecurringPaymentsPage = () => {
-  const navigate = useNavigate();
   const [payments, setPayments] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +34,7 @@ const RecurringPaymentsPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
+  // Modals
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(null);
   const [showEditModal, setShowEditModal] = useState(null);
@@ -94,7 +97,7 @@ const RecurringPaymentsPage = () => {
       setShowCreateModal(false);
       resetForm();
       fetchData();
-      setTimeout(() => setSuccess(''), 3000);
+      setTimeout(() => setSuccess(''), 5000);
     } catch (err) {
       setError(err.message || 'Failed to create recurring payment');
     }
@@ -191,12 +194,12 @@ const RecurringPaymentsPage = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      ACTIVE: 'bg-green-500/10 text-green-400 border-green-500/20',
-      PAUSED: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      CANCELLED: 'bg-red-500/10 text-red-400 border-red-500/20',
-      COMPLETED: 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+      ACTIVE: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', dot: 'bg-green-500' },
+      PAUSED: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', dot: 'bg-amber-500' },
+      CANCELLED: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-500' },
+      COMPLETED: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', dot: 'bg-blue-500' }
     };
-    return styles[status] || 'bg-slate-500/10 text-slate-400';
+    return styles[status] || styles.ACTIVE;
   };
 
   const getFrequencyLabel = (freq) => {
@@ -211,8 +214,18 @@ const RecurringPaymentsPage = () => {
     return labels[freq] || freq;
   };
 
+  const getFrequencyIcon = (freq) => {
+    switch (freq) {
+      case 'DAILY': return <Zap className="w-4 h-4" />;
+      case 'WEEKLY': return <CalendarDays className="w-4 h-4" />;
+      case 'MONTHLY': return <Calendar className="w-4 h-4" />;
+      default: return <Repeat className="w-4 h-4" />;
+    }
+  };
+
   // Stats
   const activeCount = payments.filter(p => p.status === 'ACTIVE').length;
+  const pausedCount = payments.filter(p => p.status === 'PAUSED').length;
   const totalMonthly = payments
     .filter(p => p.status === 'ACTIVE')
     .reduce((sum, p) => {
@@ -230,182 +243,251 @@ const RecurringPaymentsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
-      </div>
+      <UserDashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+        </div>
+      </UserDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white">
-      {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button onClick={() => navigate('/dashboard')} className="p-2 hover:bg-slate-700 rounded-lg transition">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <div>
-                <h1 className="text-xl font-bold">Recurring Payments</h1>
-                <p className="text-sm text-slate-400">Manage your standing orders</p>
-              </div>
-            </div>
-            <button
-              onClick={() => { resetForm(); setShowCreateModal(true); }}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              New Payment
-            </button>
+    <UserDashboardLayout>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-neutral-900">Recurring Payments</h1>
+            <p className="text-neutral-500 mt-1">Automate your regular payments</p>
           </div>
+          <button
+            onClick={() => { resetForm(); setShowCreateModal(true); }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-medium shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 transition-all duration-200"
+          >
+            <Plus className="w-4 h-4" />
+            New Recurring Payment
+          </button>
         </div>
-      </div>
 
-      {/* Alerts */}
-      <div className="max-w-6xl mx-auto px-4 pt-4">
+        {/* Alerts */}
         {error && (
-          <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 flex items-center gap-3 mb-4">
-            <AlertCircle className="w-5 h-5 text-red-400" />
-            <p className="text-red-400">{error}</p>
-            <button onClick={() => setError('')} className="ml-auto"><X className="w-4 h-4" /></button>
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm">{error}</p>
+            <button onClick={() => setError('')} className="ml-auto text-red-400 hover:text-red-600">
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
         {success && (
-          <div className="bg-green-900/20 border border-green-800 rounded-lg p-4 flex items-center gap-3 mb-4">
-            <CheckCircle className="w-5 h-5 text-green-400" />
-            <p className="text-green-400">{success}</p>
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <p className="text-green-700 text-sm">{success}</p>
           </div>
         )}
-      </div>
 
-      {/* Stats */}
-      <div className="max-w-6xl mx-auto px-4 py-4">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-            <div className="text-slate-400 text-sm">Total Payments</div>
-            <div className="text-2xl font-bold text-white mt-1">{payments.length}</div>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
+                <Repeat className="w-6 h-6 text-primary-600" />
+              </div>
+              <div>
+                <p className="text-sm text-neutral-500">Total Payments</p>
+                <p className="text-2xl font-bold text-neutral-900">{payments.length}</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-            <div className="text-slate-400 text-sm">Active</div>
-            <div className="text-2xl font-bold text-green-400 mt-1">{activeCount}</div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
+                <Play className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-neutral-500">Active</p>
+                <p className="text-2xl font-bold text-green-600">{activeCount}</p>
+              </div>
+            </div>
           </div>
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-4">
-            <div className="text-slate-400 text-sm">Est. Monthly Total</div>
-            <div className="text-2xl font-bold text-indigo-400 mt-1">${totalMonthly.toLocaleString()}</div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
+                <Pause className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <p className="text-sm text-neutral-500">Paused</p>
+                <p className="text-2xl font-bold text-amber-600">{pausedCount}</p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-neutral-500">Est. Monthly</p>
+                <p className="text-2xl font-bold text-blue-600">${totalMonthly.toLocaleString()}</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Payments List */}
-      <div className="max-w-6xl mx-auto px-4 pb-8">
-        {payments.length === 0 ? (
-          <div className="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
-            <Repeat className="w-12 h-12 mx-auto mb-4 text-slate-500" />
-            <p className="text-slate-400">No recurring payments set up</p>
-            <p className="text-sm text-slate-500 mt-1">Create one to automate your payments</p>
+        {/* Payments List */}
+        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+          <div className="border-b border-neutral-200 px-6 py-4">
+            <h2 className="text-lg font-semibold text-neutral-900">Your Recurring Payments</h2>
           </div>
-        ) : (
-          <div className="space-y-4">
-            {payments.map(payment => (
-              <div key={payment.id} className="bg-slate-800 border border-slate-700 rounded-xl p-4 hover:border-slate-600 transition">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      payment.status === 'ACTIVE' ? 'bg-green-600/20' :
-                      payment.status === 'PAUSED' ? 'bg-amber-600/20' : 'bg-slate-600/20'
-                    }`}>
-                      <Repeat className={`w-6 h-6 ${
-                        payment.status === 'ACTIVE' ? 'text-green-400' :
-                        payment.status === 'PAUSED' ? 'text-amber-400' : 'text-slate-400'
-                      }`} />
-                    </div>
-                    <div>
-                      <div className="font-medium text-white">{payment.recipientName}</div>
-                      <div className="text-sm text-slate-400">{payment.recipientBank || 'Internal Transfer'}</div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(payment.status)}`}>
-                          {payment.status}
-                        </span>
-                        <span className="text-xs text-slate-500">{getFrequencyLabel(payment.frequency)}</span>
+          
+          {payments.length === 0 ? (
+            <div className="text-center py-16 px-6">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center mb-4">
+                <Repeat className="w-8 h-8 text-primary-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-neutral-900 mb-2">No recurring payments yet</h3>
+              <p className="text-neutral-500 max-w-md mx-auto mb-6">
+                Set up automatic payments for bills, subscriptions, or regular transfers to save time.
+              </p>
+              <button
+                onClick={() => { resetForm(); setShowCreateModal(true); }}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Create Your First Payment
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {payments.map(payment => {
+                const statusStyle = getStatusBadge(payment.status);
+                return (
+                  <div
+                    key={payment.id}
+                    className="p-5 hover:bg-neutral-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          payment.status === 'ACTIVE' ? 'bg-green-100' :
+                          payment.status === 'PAUSED' ? 'bg-amber-100' : 'bg-neutral-100'
+                        }`}>
+                          <Repeat className={`w-6 h-6 ${
+                            payment.status === 'ACTIVE' ? 'text-green-600' :
+                            payment.status === 'PAUSED' ? 'text-amber-600' : 'text-neutral-400'
+                          }`} />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-neutral-900">{payment.recipientName}</span>
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`}></span>
+                              {payment.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-1 text-sm text-neutral-500">
+                            <span className="flex items-center gap-1">
+                              <Building2 className="w-3.5 h-3.5" />
+                              {payment.recipientBank || 'Internal'}
+                            </span>
+                            <span className="text-neutral-300">•</span>
+                            <span className="flex items-center gap-1">
+                              {getFrequencyIcon(payment.frequency)}
+                              {getFrequencyLabel(payment.frequency)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-neutral-900">
+                            ${parseFloat(payment.amount).toLocaleString()}
+                          </div>
+                          <div className="text-sm text-neutral-500">
+                            Next: {payment.nextExecutionDate 
+                              ? new Date(payment.nextExecutionDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                              : 'N/A'}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setShowDetailsModal(payment)}
+                            className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          {payment.status === 'ACTIVE' && (
+                            <>
+                              <button
+                                onClick={() => openEditModal(payment)}
+                                className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handlePause(payment.id)}
+                                className="p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                                title="Pause"
+                              >
+                                <Pause className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
+                          {payment.status === 'PAUSED' && (
+                            <button
+                              onClick={() => handleResume(payment.id)}
+                              className="p-2 text-green-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                              title="Resume"
+                            >
+                              <Play className="w-4 h-4" />
+                            </button>
+                          )}
+                          {payment.status !== 'CANCELLED' && (
+                            <button
+                              onClick={() => handleCancel(payment.id)}
+                              className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Cancel"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold text-white">${parseFloat(payment.amount).toLocaleString()}</div>
-                    <div className="text-sm text-slate-400">
-                      Next: {payment.nextExecutionDate ? new Date(payment.nextExecutionDate).toLocaleDateString() : 'N/A'}
-                    </div>
-                    <div className="flex items-center justify-end gap-1 mt-2">
-                      <button
-                        onClick={() => setShowDetailsModal(payment)}
-                        className="p-1.5 hover:bg-slate-700 rounded transition"
-                        title="View Details"
-                      >
-                        <Eye className="w-4 h-4 text-slate-400" />
-                      </button>
-                      {payment.status === 'ACTIVE' && (
-                        <>
-                          <button
-                            onClick={() => openEditModal(payment)}
-                            className="p-1.5 hover:bg-slate-700 rounded transition"
-                            title="Edit"
-                          >
-                            <Edit className="w-4 h-4 text-slate-400" />
-                          </button>
-                          <button
-                            onClick={() => handlePause(payment.id)}
-                            className="p-1.5 hover:bg-slate-700 rounded transition"
-                            title="Pause"
-                          >
-                            <Pause className="w-4 h-4 text-amber-400" />
-                          </button>
-                        </>
-                      )}
-                      {payment.status === 'PAUSED' && (
-                        <button
-                          onClick={() => handleResume(payment.id)}
-                          className="p-1.5 hover:bg-slate-700 rounded transition"
-                          title="Resume"
-                        >
-                          <Play className="w-4 h-4 text-green-400" />
-                        </button>
-                      )}
-                      {payment.status !== 'CANCELLED' && (
-                        <button
-                          onClick={() => handleCancel(payment.id)}
-                          className="p-1.5 hover:bg-slate-700 rounded transition"
-                          title="Cancel"
-                        >
-                          <XCircle className="w-4 h-4 text-red-400" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-              <h3 className="text-lg font-bold">Create Recurring Payment</h3>
-              <button onClick={() => setShowCreateModal(false)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+          <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-white border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-neutral-900">Create Recurring Payment</h3>
+                <p className="text-sm text-neutral-500">Set up automatic payments</p>
+              </div>
+              <button onClick={() => setShowCreateModal(false)} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-neutral-500" />
               </button>
             </div>
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
+            
+            <form onSubmit={handleCreate} className="p-6 space-y-5">
+              {/* From Account */}
               <div>
-                <label className="block text-sm text-slate-400 mb-1">From Account</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">From Account</label>
                 <select
                   value={form.fromAccountId}
                   onChange={(e) => setForm({...form, fromAccountId: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                   required
                 >
                   {accounts.map(acc => (
@@ -416,25 +498,50 @@ const RecurringPaymentsPage = () => {
                 </select>
               </div>
 
+              {/* Payment Type */}
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Payment Type</label>
-                <select
-                  value={form.paymentType}
-                  onChange={(e) => setForm({...form, paymentType: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
-                >
-                  <option value="EXTERNAL">External Bank Transfer</option>
-                  <option value="INTERNAL">Internal Transfer</option>
-                </select>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">Payment Type</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setForm({...form, paymentType: 'EXTERNAL'})}
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      form.paymentType === 'EXTERNAL'
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <Building2 className={`w-5 h-5 mx-auto mb-1 ${form.paymentType === 'EXTERNAL' ? 'text-primary-600' : 'text-neutral-400'}`} />
+                    <span className={`text-sm font-medium ${form.paymentType === 'EXTERNAL' ? 'text-primary-700' : 'text-neutral-600'}`}>
+                      External Bank
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setForm({...form, paymentType: 'INTERNAL'})}
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      form.paymentType === 'INTERNAL'
+                        ? 'border-primary-500 bg-primary-50'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}
+                  >
+                    <User className={`w-5 h-5 mx-auto mb-1 ${form.paymentType === 'INTERNAL' ? 'text-primary-600' : 'text-neutral-400'}`} />
+                    <span className={`text-sm font-medium ${form.paymentType === 'INTERNAL' ? 'text-primary-700' : 'text-neutral-600'}`}>
+                      Internal Transfer
+                    </span>
+                  </button>
+                </div>
               </div>
 
+              {/* Recipient Details */}
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Recipient Name</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">Recipient Name</label>
                 <input
                   type="text"
                   value={form.recipientName}
                   onChange={(e) => setForm({...form, recipientName: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="e.g., Electric Company"
                   required
                 />
               </div>
@@ -442,34 +549,34 @@ const RecurringPaymentsPage = () => {
               {form.paymentType === 'EXTERNAL' ? (
                 <>
                   <div>
-                    <label className="block text-sm text-slate-400 mb-1">Bank Name</label>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1.5">Bank Name</label>
                     <input
                       type="text"
                       value={form.recipientBank}
                       onChange={(e) => setForm({...form, recipientBank: e.target.value})}
-                      className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       required
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm text-slate-400 mb-1">Routing Number</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5">Routing Number</label>
                       <input
                         type="text"
                         value={form.recipientRouting}
                         onChange={(e) => setForm({...form, recipientRouting: e.target.value})}
                         maxLength={9}
-                        className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-slate-400 mb-1">Account Number</label>
+                      <label className="block text-sm font-medium text-neutral-700 mb-1.5">Account Number</label>
                       <input
                         type="text"
                         value={form.recipientAccount}
                         onChange={(e) => setForm({...form, recipientAccount: e.target.value})}
-                        className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                        className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                         required
                       />
                     </div>
@@ -477,37 +584,41 @@ const RecurringPaymentsPage = () => {
                 </>
               ) : (
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Recipient Account Number</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">Recipient Account Number</label>
                   <input
                     type="text"
                     value={form.toAccountNumber}
                     onChange={(e) => setForm({...form, toAccountNumber: e.target.value})}
                     placeholder="Gatwick Bank account number"
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     required
                   />
                 </div>
               )}
 
+              {/* Amount & Frequency */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Amount ($)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="1"
-                    value={form.amount}
-                    onChange={(e) => setForm({...form, amount: e.target.value})}
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
-                    required
-                  />
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">Amount</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="1"
+                      value={form.amount}
+                      onChange={(e) => setForm({...form, amount: e.target.value})}
+                      className="w-full pl-8 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Frequency</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">Frequency</label>
                   <select
                     value={form.frequency}
                     onChange={(e) => setForm({...form, frequency: e.target.value})}
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                   >
                     <option value="DAILY">Daily</option>
                     <option value="WEEKLY">Weekly</option>
@@ -519,70 +630,73 @@ const RecurringPaymentsPage = () => {
                 </div>
               </div>
 
+              {/* Dates */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Start Date</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">Start Date</label>
                   <input
                     type="date"
                     value={form.startDate}
                     onChange={(e) => setForm({...form, startDate: e.target.value})}
                     min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">End Date (Optional)</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">End Date (Optional)</label>
                   <input
                     type="date"
                     value={form.endDate}
                     onChange={(e) => setForm({...form, endDate: e.target.value})}
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
               </div>
 
               {form.frequency === 'MONTHLY' && (
                 <div>
-                  <label className="block text-sm text-slate-400 mb-1">Day of Month (1-31)</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1.5">Day of Month (1-31)</label>
                   <input
                     type="number"
                     min="1"
                     max="31"
                     value={form.dayOfMonth}
                     onChange={(e) => setForm({...form, dayOfMonth: e.target.value})}
-                    placeholder="e.g., 15 for 15th of each month"
-                    className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                    placeholder="e.g., 15 for 15th"
+                    className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   />
                 </div>
               )}
 
+              {/* Description */}
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Description (Optional)</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">Description (Optional)</label>
                 <input
                   type="text"
                   value={form.description}
                   onChange={(e) => setForm({...form, description: e.target.value})}
-                  placeholder="e.g., Rent payment"
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  placeholder="e.g., Monthly rent payment"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
 
+              {/* Actions */}
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                  className="flex-1 px-4 py-3 border border-neutral-300 text-neutral-700 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl font-medium hover:from-primary-700 hover:to-primary-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                  Create
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  Create Payment
                 </button>
               </div>
             </form>
@@ -593,58 +707,66 @@ const RecurringPaymentsPage = () => {
       {/* Details Modal */}
       {showDetailsModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-              <h3 className="text-lg font-bold">Payment Details</h3>
-              <button onClick={() => setShowDetailsModal(null)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-neutral-900">Payment Details</h3>
+              <button onClick={() => setShowDetailsModal(null)} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-neutral-500" />
               </button>
             </div>
+            
             <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">Reference</span>
-                <span className="font-mono text-indigo-400">{showDetailsModal.reference}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">Status</span>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(showDetailsModal.status)}`}>
+              <div className="text-center pb-4 border-b border-neutral-200">
+                <div className="text-3xl font-bold text-neutral-900 mb-2">
+                  ${parseFloat(showDetailsModal.amount).toLocaleString()}
+                </div>
+                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(showDetailsModal.status).bg} ${getStatusBadge(showDetailsModal.status).text}`}>
+                  <span className={`w-2 h-2 rounded-full ${getStatusBadge(showDetailsModal.status).dot}`}></span>
                   {showDetailsModal.status}
                 </span>
               </div>
-              <hr className="border-slate-700" />
-              <div>
-                <div className="text-sm text-slate-400 mb-1">Recipient</div>
-                <div className="text-white">{showDetailsModal.recipientName}</div>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between py-2">
+                  <span className="text-neutral-500">Reference</span>
+                  <span className="font-mono text-sm text-primary-600">{showDetailsModal.reference}</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-neutral-500">Recipient</span>
+                  <span className="font-medium text-neutral-900">{showDetailsModal.recipientName}</span>
+                </div>
                 {showDetailsModal.recipientBank && (
-                  <div className="text-sm text-slate-400">{showDetailsModal.recipientBank}</div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-neutral-500">Bank</span>
+                    <span className="text-neutral-900">{showDetailsModal.recipientBank}</span>
+                  </div>
                 )}
+                <div className="flex justify-between py-2">
+                  <span className="text-neutral-500">Frequency</span>
+                  <span className="text-neutral-900">{getFrequencyLabel(showDetailsModal.frequency)}</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-neutral-500">Next Payment</span>
+                  <span className="text-neutral-900">
+                    {showDetailsModal.nextExecutionDate 
+                      ? new Date(showDetailsModal.nextExecutionDate).toLocaleDateString()
+                      : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-neutral-500">Total Executions</span>
+                  <span className="text-neutral-900">{showDetailsModal.executionCount || 0}</span>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">Amount</span>
-                <span className="text-xl font-bold text-white">${parseFloat(showDetailsModal.amount).toLocaleString()}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">Frequency</span>
-                <span className="text-white">{getFrequencyLabel(showDetailsModal.frequency)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">Next Execution</span>
-                <span className="text-white">
-                  {showDetailsModal.nextExecutionDate ? new Date(showDetailsModal.nextExecutionDate).toLocaleDateString() : 'N/A'}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">Executions</span>
-                <span className="text-white">{showDetailsModal.executionCount}</span>
-              </div>
+
               {showDetailsModal.executions?.length > 0 && (
-                <div>
-                  <div className="text-sm text-slate-400 mb-2">Recent Executions</div>
+                <div className="pt-4 border-t border-neutral-200">
+                  <h4 className="text-sm font-medium text-neutral-700 mb-3">Recent Executions</h4>
                   <div className="space-y-2">
-                    {showDetailsModal.executions.map(exec => (
-                      <div key={exec.id} className="flex items-center justify-between text-sm bg-slate-900 p-2 rounded">
-                        <span className="text-slate-400">{new Date(exec.executionDate).toLocaleDateString()}</span>
-                        <span className={exec.status === 'SUCCESS' ? 'text-green-400' : 'text-red-400'}>
+                    {showDetailsModal.executions.slice(0, 5).map(exec => (
+                      <div key={exec.id} className="flex items-center justify-between text-sm bg-neutral-50 p-3 rounded-lg">
+                        <span className="text-neutral-600">{new Date(exec.executionDate).toLocaleDateString()}</span>
+                        <span className={exec.status === 'SUCCESS' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
                           {exec.status}
                         </span>
                       </div>
@@ -652,6 +774,13 @@ const RecurringPaymentsPage = () => {
                   </div>
                 </div>
               )}
+              
+              <button
+                onClick={() => setShowDetailsModal(null)}
+                className="w-full px-4 py-3 bg-neutral-100 text-neutral-700 rounded-xl font-medium hover:bg-neutral-200 transition-colors mt-4"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
@@ -660,32 +789,36 @@ const RecurringPaymentsPage = () => {
       {/* Edit Modal */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-md">
-            <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-              <h3 className="text-lg font-bold">Edit Payment</h3>
-              <button onClick={() => setShowEditModal(null)} className="text-slate-400 hover:text-white">
-                <X className="w-5 h-5" />
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-neutral-900">Edit Payment</h3>
+              <button onClick={() => setShowEditModal(null)} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
+                <X className="w-5 h-5 text-neutral-500" />
               </button>
             </div>
+            
             <form onSubmit={handleUpdate} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Amount ($)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="1"
-                  value={form.amount}
-                  onChange={(e) => setForm({...form, amount: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
-                  required
-                />
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">Amount</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500">$</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="1"
+                    value={form.amount}
+                    onChange={(e) => setForm({...form, amount: e.target.value})}
+                    className="w-full pl-8 pr-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    required
+                  />
+                </div>
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Frequency</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">Frequency</label>
                 <select
                   value={form.frequency}
                   onChange={(e) => setForm({...form, frequency: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
                 >
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
@@ -696,45 +829,46 @@ const RecurringPaymentsPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-1">End Date (Optional)</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">End Date (Optional)</label>
                 <input
                   type="date"
                   value={form.endDate}
                   onChange={(e) => setForm({...form, endDate: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm text-slate-400 mb-1">Description</label>
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">Description</label>
                 <input
                   type="text"
                   value={form.description}
                   onChange={(e) => setForm({...form, description: e.target.value})}
-                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
+              
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(null)}
-                  className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition"
+                  className="flex-1 px-4 py-3 border border-neutral-300 text-neutral-700 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-4 h-4" />}
+                  Save Changes
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </UserDashboardLayout>
   );
 };
 
