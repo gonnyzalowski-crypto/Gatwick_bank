@@ -102,6 +102,48 @@ export const DepositManagement = () => {
     }
   };
 
+  const handleApproveWithdrawal = async (withdrawalId) => {
+    try {
+      await apiClient.post(`/mybanker/withdrawals/${withdrawalId}/approve`);
+      setFeedbackModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Withdrawal Approved',
+        message: 'Withdrawal processed successfully!'
+      });
+      fetchAllPendingTransactions();
+    } catch (error) {
+      console.error('Failed to approve withdrawal:', error);
+      setFeedbackModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Approval Failed',
+        message: error.response?.data?.error || 'Failed to approve withdrawal'
+      });
+    }
+  };
+
+  const handleRejectWithdrawal = async (withdrawalId) => {
+    try {
+      await apiClient.post(`/mybanker/withdrawals/${withdrawalId}/reject`, { reason: 'Rejected by admin' });
+      setFeedbackModal({
+        isOpen: true,
+        type: 'success',
+        title: 'Withdrawal Rejected',
+        message: 'Withdrawal has been rejected.'
+      });
+      fetchAllPendingTransactions();
+    } catch (error) {
+      console.error('Failed to reject withdrawal:', error);
+      setFeedbackModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Rejection Failed',
+        message: error.response?.data?.error || 'Failed to reject withdrawal'
+      });
+    }
+  };
+
   const filteredDeposits = deposits.filter(deposit => 
     deposit.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     deposit.reference?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -278,6 +320,54 @@ export const DepositManagement = () => {
                 </td>
               </tr>
             )}
+            {activeTab === 'withdrawals' && withdrawals.map((withdrawal) => (
+              <tr key={withdrawal.id} className="hover:bg-slate-700/50 transition-colors">
+                <td className="px-6 py-4">
+                  <div>
+                    <div className="text-white font-medium">{withdrawal.user?.firstName} {withdrawal.user?.lastName}</div>
+                    <div className="text-slate-400 text-sm">{withdrawal.user?.email}</div>
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="text-white font-semibold">${parseFloat(withdrawal.amount || 0).toLocaleString()}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="text-slate-300 text-sm">{withdrawal.method || 'WITHDRAWAL'}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="text-slate-400 text-sm font-mono">{withdrawal.reference}</span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusBadge(withdrawal.status)}`}>
+                    {withdrawal.status === 'PENDING' && <Clock className="w-3 h-3" />}
+                    {withdrawal.status === 'COMPLETED' && <Check className="w-3 h-3" />}
+                    {withdrawal.status === 'FAILED' && <X className="w-3 h-3" />}
+                    {withdrawal.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <span className="text-slate-400 text-sm">{new Date(withdrawal.createdAt).toLocaleDateString()}</span>
+                </td>
+                <td className="px-6 py-4">
+                  {withdrawal.status === 'PENDING' && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleApproveWithdrawal(withdrawal.id)}
+                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleRejectWithdrawal(withdrawal.id)}
+                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
             
             {activeTab === 'transfers' && transfers.length === 0 && (
               <tr>
