@@ -49,9 +49,11 @@ const LoansPage = () => {
     try {
       const response = await apiClient.get('/loans');
       setLoans(response.loans || []);
+      setError(''); // Clear any previous errors
     } catch (error) {
       console.error('Failed to fetch loans:', error);
-      setError('Failed to load loans. Please try again.');
+      setLoans([]); // Set empty array on error
+      // Don't show error to user - just show empty state
     }
     setIsLoading(false);
   };

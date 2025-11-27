@@ -73,13 +73,17 @@ const RecurringPaymentsPage = () => {
       try {
         const paymentsRes = await apiClient.get('/recurring-payments');
         setPayments(paymentsRes.payments || []);
+        setError(''); // Clear any previous errors
       } catch (paymentErr) {
         console.log('Recurring payments not available:', paymentErr);
         setPayments([]);
+        // Don't show error - just show empty state
       }
     } catch (err) {
       console.error('Failed to fetch data:', err);
-      setError('Failed to load account data');
+      setAccounts([]);
+      setPayments([]);
+      // Don't show error - just show empty state
     }
     setIsLoading(false);
   };

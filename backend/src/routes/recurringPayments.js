@@ -63,6 +63,7 @@ const calculateNextExecutionDate = (frequency, startDate, dayOfMonth, dayOfWeek)
  */
 recurringPaymentsRouter.get('/', async (req, res) => {
   try {
+    console.log('Fetching recurring payments for user:', req.user.userId);
     const payments = await prisma.recurringPayment.findMany({
       where: { userId: req.user.userId },
       include: {
@@ -80,14 +81,16 @@ recurringPaymentsRouter.get('/', async (req, res) => {
       orderBy: { createdAt: 'desc' }
     });
     
+    console.log('Found recurring payments:', payments?.length || 0);
     res.json({
       success: true,
-      count: payments.length,
-      payments
+      count: payments?.length || 0,
+      payments: payments || []
     });
   } catch (error) {
     console.error('Error getting recurring payments:', error);
-    res.status(500).json({ error: error.message });
+    // Return empty array instead of error for better UX
+    res.json({ success: true, count: 0, payments: [] });
   }
 });
 

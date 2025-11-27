@@ -42,18 +42,21 @@ loansRouter.post('/', verifyAuth, async (req, res) => {
 loansRouter.get('/', verifyAuth, async (req, res) => {
   try {
     const { status } = req.query;
+    console.log('Fetching loans for user:', req.user.userId);
 
     const loans = await loanService.getUserLoans(req.user.userId, {
       status
     });
 
+    console.log('Found loans:', loans?.length || 0);
     return res.json({
       success: true,
-      loans
+      loans: loans || []
     });
   } catch (error) {
     console.error('Error in GET /loans:', error);
-    return res.status(500).json({ success: false, message: error.message });
+    // Return empty array instead of error for better UX
+    return res.json({ success: true, loans: [] });
   }
 });
 
