@@ -22,10 +22,14 @@ export const verifyAuth = async (req, res, next) => {
       return res.status(401).json({ error: 'No authentication token provided' });
     }
 
-    // Check if token is blacklisted
-    const blacklisted = await redis.get(`blacklist:${token}`);
-    if (blacklisted) {
-      return res.status(401).json({ error: 'Token has been revoked' });
+    // Check if token is blacklisted (skip if Redis is unavailable)
+    try {
+      const blacklisted = await redis.get(`blacklist:${token}`);
+      if (blacklisted) {
+        return res.status(401).json({ error: 'Token has been revoked' });
+      }
+    } catch (redisError) {
+      console.log('Redis unavailable, skipping blacklist check');
     }
 
     // Verify token
@@ -68,8 +72,17 @@ export const optionalAuth = async (req, res, next) => {
     }
 
     if (token) {
-      const blacklisted = await redis.get(`blacklist:${token}`);
-      if (!blacklisted) {
+      try {
+        const blacklisted = await redis.get(`blacklist:${token}`);
+        if (!blacklisted) {
+          const decoded = verifyToken(token);
+          if (decoded) {
+            req.user = decoded;
+            req.token = token;
+          }
+        }
+      } catch (redisError) {
+        // Redis unavailable, just decode token
         const decoded = verifyToken(token);
         if (decoded) {
           req.user = decoded;
