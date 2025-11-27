@@ -48,8 +48,8 @@ export const createLoanApplication = async (userId, data) => {
     throw new Error('Term must be between 6 and 360 months');
   }
 
-  // Get user's primary account
-  const account = await prisma.account.findFirst({
+  // Get user's primary account, or any active account if no primary
+  let account = await prisma.account.findFirst({
     where: {
       userId,
       isPrimary: true,
@@ -57,8 +57,30 @@ export const createLoanApplication = async (userId, data) => {
     }
   });
 
+  // Fallback to any active account if no primary account
   if (!account) {
-    throw new Error('No active account found');
+    account = await prisma.account.findFirst({
+      where: {
+        userId,
+        isActive: true
+      }
+    });
+  }
+
+  // Create a default account if none exists
+  if (!account) {
+    account = await prisma.account.create({
+      data: {
+        userId,
+        accountNumber: `7${Date.now().toString().slice(-9)}`,
+        accountType: 'SAVINGS',
+        currency: 'USD',
+        balance: 0,
+        availableBalance: 0,
+        isPrimary: true,
+        isActive: true
+      }
+    });
   }
 
   // Realistic interest rates by loan type (industry standard)
