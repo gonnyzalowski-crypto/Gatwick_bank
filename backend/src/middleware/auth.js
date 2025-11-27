@@ -47,13 +47,13 @@ export const verifyAuth = async (req, res, next) => {
     // Fetch user to check if admin
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { isAdmin: true, role: true }
+      select: { isAdmin: true }
     });
 
     // Attach user info to request with isAdmin flag
     req.user = {
       ...decoded,
-      isAdmin: user?.isAdmin || user?.role === 'ADMIN'
+      isAdmin: user?.isAdmin || false
     };
     req.token = token;
     next();
