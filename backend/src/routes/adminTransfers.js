@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyAuth } from '../middleware/auth.js';
+import { verifyAuth, isAdmin } from '../middleware/auth.js';
 import {
   getPendingTransfers,
   approveTransfer,
@@ -9,17 +9,8 @@ import {
 
 export const adminTransfersRouter = Router();
 
-// Protect all routes
+// Protect all routes with auth and admin check
 adminTransfersRouter.use(verifyAuth);
-
-// Admin check middleware
-const isAdmin = (req, res, next) => {
-  if (!req.user.isAdmin) {
-    return res.status(403).json({ error: 'Access denied. Admin only.' });
-  }
-  next();
-};
-
 adminTransfersRouter.use(isAdmin);
 
 /**

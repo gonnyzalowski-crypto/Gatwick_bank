@@ -199,9 +199,9 @@ export const PremiumModal = ({
           </div>
         </div>
 
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-2xl" />
-        <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-white/5 to-transparent rounded-full blur-2xl" />
+        {/* Decorative elements - pointer-events-none to prevent blocking clicks */}
+        <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-white/5 to-transparent rounded-full blur-2xl pointer-events-none" />
       </div>
     </div>
   );

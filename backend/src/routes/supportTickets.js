@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import prisma from '../config/prisma.js';
-import { verifyAuth } from '../middleware/auth.js';
+import { verifyAuth, isAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -9,26 +9,6 @@ const generateTicketNumber = () => {
   const timestamp = Date.now().toString().slice(-6);
   const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
   return `TKT-${timestamp}${random}`;
-};
-
-// Middleware to check admin
-const isAdmin = async (req, res, next) => {
-  try {
-    // Fetch user from database to check role
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-      select: { role: true }
-    });
-
-    if (!user || user.role !== 'ADMIN') {
-      return res.status(403).json({ error: 'Admin access required' });
-    }
-    
-    next();
-  } catch (error) {
-    console.error('Admin check error:', error);
-    return res.status(500).json({ error: 'Failed to verify admin status' });
-  }
 };
 
 // POST /api/v1/support/tickets - Create new ticket (user)
