@@ -58,6 +58,7 @@ app.get('/healthz', (req, res) => {
   res.json({ 
     status: 'ok', 
     service: 'gatwick-bank-backend',
+    version: '1.0.1',
     timestamp: new Date().toISOString()
   });
 });
