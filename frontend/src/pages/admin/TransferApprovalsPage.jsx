@@ -111,7 +111,7 @@ const TransferApprovalsPage = () => {
                         Amount
                       </div>
                       <p className="text-white font-semibold text-lg">
-                        ${transfer.amount.toLocaleString()}
+                        ${parseFloat(transfer.amount || 0).toLocaleString()}
                       </p>
                     </div>
 
@@ -206,7 +206,7 @@ const TransferApprovalsPage = () => {
                 {action === 'approve' ? 'Approve Transfer' : action === 'decline' ? 'Decline Transfer' : 'Reverse Transfer'}
               </h2>
               <p className="text-sm text-slate-400 mt-1">
-                {selectedTransfer.reference} - ${selectedTransfer.amount.toFixed(2)}
+                {selectedTransfer.reference} - ${parseFloat(selectedTransfer.amount || 0).toFixed(2)}
               </p>
             </div>
 
