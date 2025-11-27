@@ -2301,7 +2301,23 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
       if (expiryDate !== undefined) updateData.expiryDate = new Date(expiryDate);
       // Credit cards use creditLimit, not dailyLimit/monthlyLimit
       if (dailyLimit !== undefined) updateData.creditLimit = parseFloat(dailyLimit);
-      if (status !== undefined) updateData.status = status;
+      if (status !== undefined) {
+        updateData.status = status;
+        // Also update approvalStatus when activating a credit card
+        if (status === 'ACTIVE') {
+          updateData.approvalStatus = 'APPROVED';
+          updateData.isActive = true;
+          updateData.approvedAt = new Date();
+        } else if (status === 'FROZEN') {
+          updateData.isFrozen = true;
+        } else if (status === 'PENDING') {
+          updateData.approvalStatus = 'PENDING';
+          updateData.isActive = false;
+        } else if (status === 'DECLINED') {
+          updateData.approvalStatus = 'DECLINED';
+          updateData.isActive = false;
+        }
+      }
       
       const updatedCard = await prisma.creditCard.update({
         where: { id: cardId },
