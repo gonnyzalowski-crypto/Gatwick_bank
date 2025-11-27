@@ -39,18 +39,19 @@ class ApiClient {
       if (!response.ok) {
         // Handle token expiration (but NOT for login/verify endpoints or admin operations)
         if (response.status === 401) {
-          // Don't redirect if this is a login, verification, or admin operation
+          // Don't redirect if this is a login, verification, admin, or payment operation
           const isLoginAttempt = path.includes('/auth/login') || path.includes('/auth/register');
           const isAdminOperation = path.includes('/mybanker') || path.includes('/gateways') || path.includes('/currencies');
+          const isPaymentOperation = path.includes('/payments') || path.includes('/transfers') || path.includes('/kyc');
           
-          // Only auto-logout for regular user operations, not admin operations
-          if (!isLoginAttempt && !isAdminOperation) {
+          // Only auto-logout for regular user operations, not admin/payment operations
+          if (!isLoginAttempt && !isAdminOperation && !isPaymentOperation) {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
             window.location.href = '/login';
           }
-          // For admin operations, let the error bubble up without logout
+          // For admin/payment operations, let the error bubble up without logout
         }
 
         const error = new Error(data?.error || 'Request failed');

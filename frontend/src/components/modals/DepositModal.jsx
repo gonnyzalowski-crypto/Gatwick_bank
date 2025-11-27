@@ -107,7 +107,12 @@ const DepositModal = ({ isOpen, onClose, accounts }) => {
       resetForm();
       setStep(4);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to submit deposit request');
+      // Handle session expiration gracefully
+      if (err.response?.status === 401) {
+        setError('Session expired. Please log in again and retry your deposit.');
+      } else {
+        setError(err.response?.data?.error || 'Failed to submit deposit request');
+      }
     } finally {
       setLoading(false);
     }
