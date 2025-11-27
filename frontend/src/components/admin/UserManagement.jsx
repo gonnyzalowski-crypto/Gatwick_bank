@@ -40,10 +40,16 @@ export const UserManagement = () => {
 
   const handleStatusChange = async (userId, newStatus) => {
     try {
-      await apiClient.put(`/mybanker/users/${userId}/status`, { accountStatus: newStatus });
+      console.log('Changing status for user', userId, 'to', newStatus);
+      const response = await apiClient.put(`/mybanker/users/${userId}/status`, { accountStatus: newStatus });
+      console.log('Status change response:', response);
+      if (response.success) {
+        alert(`Status updated to ${newStatus}`);
+      }
       fetchUsers();
     } catch (error) {
       console.error('Failed to update status:', error);
+      alert('Failed to update status: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -324,14 +330,18 @@ export const UserManagement = () => {
                         </button>
                         <select
                           value={user.accountStatus}
-                          onChange={(e) => handleStatusChange(user.id, e.target.value)}
-                          className={`px-2 py-1 text-xs rounded-lg border cursor-pointer ${getStatusColor(user.accountStatus)}`}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleStatusChange(user.id, e.target.value);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className={`px-2 py-1 text-xs rounded-lg border cursor-pointer bg-slate-800 ${getStatusColor(user.accountStatus)}`}
                           title="Change Status"
                         >
-                          <option value="ACTIVE">Active</option>
-                          <option value="LIMITED">Limited</option>
-                          <option value="PND">PND</option>
-                          <option value="SUSPENDED">Suspended</option>
+                          <option value="ACTIVE" className="bg-slate-800 text-green-400">Active</option>
+                          <option value="LIMITED" className="bg-slate-800 text-yellow-400">Limited</option>
+                          <option value="PND" className="bg-slate-800 text-orange-400">PND</option>
+                          <option value="SUSPENDED" className="bg-slate-800 text-red-400">Suspended</option>
                         </select>
                         <button 
                           onClick={() => handleDeleteUser(user.id)}

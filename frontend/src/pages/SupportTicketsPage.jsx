@@ -163,7 +163,17 @@ const SupportTicketsPage = () => {
                 tickets.map(ticket => (
                   <button
                     key={ticket.id}
-                    onClick={() => setSelectedTicket(ticket)}
+                    onClick={async () => {
+                      try {
+                        const response = await apiClient.get(`/support/tickets/${ticket.id}`);
+                        if (response.success) {
+                          setSelectedTicket(response.ticket);
+                        }
+                      } catch (err) {
+                        console.error('Error fetching ticket details:', err);
+                        setSelectedTicket(ticket); // Fallback to basic ticket
+                      }
+                    }}
                     className={`w-full text-left p-4 rounded-xl border transition-all ${
                       selectedTicket?.id === ticket.id
                         ? 'bg-blue-50 border-blue-200'
@@ -211,11 +221,11 @@ const SupportTicketsPage = () => {
                     {selectedTicket.messages?.map(msg => (
                       <div
                         key={msg.id}
-                        className={`flex ${msg.user.isAdmin ? 'justify-start' : 'justify-end'}`}
+                        className={`flex ${msg.senderType === 'ADMIN' ? 'justify-start' : 'justify-end'}`}
                       >
-                        <div className={`max-w-md ${msg.user.isAdmin ? 'bg-slate-100' : 'bg-blue-100'} rounded-lg p-4`}>
+                        <div className={`max-w-md ${msg.senderType === 'ADMIN' ? 'bg-slate-100' : 'bg-blue-100'} rounded-lg p-4`}>
                           <p className="text-xs font-medium text-slate-600 mb-1">
-                            {msg.user.isAdmin ? 'Support Team' : 'You'}
+                            {msg.senderType === 'ADMIN' ? 'Support Team' : 'You'}
                           </p>
                           <p className="text-sm text-slate-900">{msg.message}</p>
                           <p className="text-xs text-slate-500 mt-2">

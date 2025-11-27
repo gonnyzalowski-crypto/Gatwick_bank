@@ -115,9 +115,8 @@ export const SettingsPage = () => {
       const formData = new FormData();
       formData.append('profilePhoto', profilePhoto);
 
-      const response = await apiClient.post('/auth/users/profile-photo', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      // Don't set Content-Type manually - browser will set it with correct boundary for FormData
+      const response = await apiClient.post('/auth/users/profile-photo', formData);
 
       console.log('Profile photo upload response:', response);
 
