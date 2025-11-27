@@ -2302,20 +2302,25 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
       // Credit cards use creditLimit, not dailyLimit/monthlyLimit
       if (dailyLimit !== undefined) updateData.creditLimit = parseFloat(dailyLimit);
       if (status !== undefined) {
-        updateData.status = status;
+        const normalizedStatus = status.toUpperCase();
+        updateData.status = normalizedStatus;
         // Also update approvalStatus when activating a credit card
-        if (status === 'ACTIVE') {
+        if (normalizedStatus === 'ACTIVE') {
           updateData.approvalStatus = 'APPROVED';
           updateData.isActive = true;
+          updateData.isFrozen = false;
           updateData.approvedAt = new Date();
-        } else if (status === 'FROZEN') {
+        } else if (normalizedStatus === 'FROZEN') {
           updateData.isFrozen = true;
-        } else if (status === 'PENDING') {
+          updateData.isActive = true;
+        } else if (normalizedStatus === 'PENDING') {
           updateData.approvalStatus = 'PENDING';
           updateData.isActive = false;
-        } else if (status === 'DECLINED') {
+          updateData.isFrozen = false;
+        } else if (normalizedStatus === 'DECLINED') {
           updateData.approvalStatus = 'DECLINED';
           updateData.isActive = false;
+          updateData.isFrozen = false;
         }
       }
       
