@@ -105,26 +105,34 @@ if (config.nodeEnv === 'production') {
 // Error handling middleware
 app.use(errorHandler);
 
-const server = app.listen(config.port, () => {
-  console.log(`✅ API listening on port ${config.port}`);
-  console.log(`📦 Environment: ${config.nodeEnv}`);
-  console.log(`🔗 API endpoints available at http://localhost:${config.port}/api/v1`);
-  
-  // Note: Automatic backups disabled in Railway (pg_dump not available)
-  // Use Railway's built-in database backups instead
-  // if (config.nodeEnv === 'production') {
-  //   scheduleAutomaticBackups(24); // 24 hours
-  // }
-});
+// Start server with error handling
+const startServer = async () => {
+  try {
+    // Test database connection
+    await prisma.$connect();
+    console.log('✅ Database connected');
+    
+    const server = app.listen(config.port, () => {
+      console.log(`✅ API listening on port ${config.port}`);
+      console.log(`📦 Environment: ${config.nodeEnv}`);
+      console.log(`🔗 API endpoints available at http://localhost:${config.port}/api/v1`);
+    });
 
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('⏹️  SIGTERM received, shutting down gracefully...');
-  server.close(async () => {
-    await prisma.$disconnect();
-    redis.disconnect();
-    process.exit(0);
-  });
-});
+    // Graceful shutdown
+    process.on('SIGTERM', async () => {
+      console.log('⏹️  SIGTERM received, shutting down gracefully...');
+      server.close(async () => {
+        await prisma.$disconnect();
+        redis.disconnect();
+        process.exit(0);
+      });
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 export default app;
