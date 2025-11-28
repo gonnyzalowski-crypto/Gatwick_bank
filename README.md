@@ -2,6 +2,27 @@ Gatwick Bank — Deploy Copy
 
 This folder (`bank_deploy/`) is a self-contained, Railway-ready copy of the app (backend + frontend + Prisma schema). It is intended to be used as a clean repository for deployment so you avoid large legacy assets from the main workspace.
 
+## Production URL
+- **Live Site:** https://gatwickbank.up.railway.app
+
+## Test Credentials
+- **Admin:** jonod@gmail.com / Password123! (security answer: fluffy)
+- **User:** wilkinhha@gmail.com / Password123! (backup code: 345678)
+
+## Recent Updates (Nov 28, 2025)
+
+### Account Suspension System
+- **PND (Pending - No Debit):** Users cannot make debit transactions but can receive credits
+- **SUSPENDED:** Users cannot login - shows suspension message with contact info
+- Admin can change user status via dropdown in User Management
+
+### Bug Fixes
+- Fixed profile photo upload "authentication failed" error (removed manual Content-Type header)
+- Fixed support ticket message display (uses senderType instead of user.isAdmin)
+- Fixed admin status dropdown not activating commands (added stopPropagation)
+- Removed SendGrid warning log (email service is optional)
+- Added proper async startup with database connection test
+
 Quick Start (local)
 
 1. Backend
