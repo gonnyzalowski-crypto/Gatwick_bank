@@ -1,11 +1,10 @@
 import sgMail from '@sendgrid/mail';
 import config from '../config/app.js';
 
-// Initialize SendGrid with API key
+// Initialize SendGrid with API key (disabled for now)
+// Email service is optional - will be enabled when SENDGRID_API_KEY is configured
 if (config.sendgridApiKey) {
   sgMail.setApiKey(config.sendgridApiKey);
-} else {
-  console.warn('⚠️  SendGrid API key not configured. Email service will not work.');
 }
 
 const FROM_EMAIL = config.fromEmail || 'noreply@gatwickbank.com';
