@@ -83,17 +83,7 @@ export const getTicketById = async (ticketId, userId) => {
     where: { id: ticketId, userId },
     include: {
       messages: {
-        orderBy: { createdAt: 'asc' },
-        include: {
-          user: {
-            select: {
-              firstName: true,
-              lastName: true,
-              email: true,
-              isAdmin: true
-            }
-          }
-        }
+        orderBy: { createdAt: 'asc' }
       }
     }
   });
@@ -102,9 +92,25 @@ export const getTicketById = async (ticketId, userId) => {
     throw new Error('Ticket not found');
   }
 
+  // Fetch sender details for each message
+  const messagesWithSenders = await Promise.all(
+    ticket.messages.map(async (msg) => {
+      const sender = await prisma.user.findUnique({
+        where: { id: msg.senderId },
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          isAdmin: true
+        }
+      });
+      return { ...msg, sender };
+    })
+  );
+
   return {
     success: true,
-    ticket
+    ticket: { ...ticket, messages: messagesWithSenders }
   };
 };
 

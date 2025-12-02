@@ -114,16 +114,10 @@ export const internationalTransfer = async (fromAccountId, userId, { recipientNa
         accountNumber: recipientIBAN,
         accountName: recipientName,
         amount,
-        description: description || `International transfer to ${recipientName}`,
+        description: `International transfer to ${recipientName} (${recipientCountry})${description ? ' - ' + description : ''}`,
         reference,
         status: 'PENDING',
-        estimatedCompletion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
-        metadata: {
-          transferType: 'INTERNATIONAL',
-          country: recipientCountry,
-          swift: recipientSWIFT,
-          iban: recipientIBAN
-        }
+        estimatedCompletion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000) // 5 days
       },
     });
 
