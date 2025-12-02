@@ -22,7 +22,6 @@ import {
   Plus,
   Clock,
   PiggyBank,
-  Receipt,
   DollarSign,
   Landmark,
 } from 'lucide-react';
@@ -218,30 +217,7 @@ export const DashboardPage = () => {
         />
 
         {/* Financial Overview - Charts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Monthly Spending */}
-          <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Receipt className="w-5 h-5 text-blue-600" />
-              </div>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">-12%</span>
-            </div>
-            <h3 className="text-sm font-medium text-neutral-600 mb-1">Monthly Spending</h3>
-            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.monthlySpending || 4250)}</p>
-            {/* Mini Bar Chart */}
-            <div className="flex items-end gap-1 h-12">
-              {[65, 45, 80, 55, 70, 40, 60].map((height, i) => (
-                <div 
-                  key={i} 
-                  className="flex-1 bg-blue-200 rounded-t"
-                  style={{ height: `${height}%` }}
-                />
-              ))}
-            </div>
-            <p className="text-xs text-neutral-500 mt-2">Last 7 days</p>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Monthly Income */}
           <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">

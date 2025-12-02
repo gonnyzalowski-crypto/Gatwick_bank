@@ -69,7 +69,20 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-primary-500 p-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-2xl font-bold">
+            {userData?.profilePhoto ? (
+              <img 
+                src={userData.profilePhoto.startsWith('http') ? userData.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${userData.profilePhoto}`}
+                alt="Profile"
+                className="w-16 h-16 rounded-full object-cover ring-2 ring-white/30"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div 
+              className={`w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-2xl font-bold ${userData?.profilePhoto ? 'hidden' : ''}`}
+            >
               {userData?.firstName?.[0]?.toUpperCase() || userData?.email?.[0]?.toUpperCase() || 'U'}
             </div>
             <div>

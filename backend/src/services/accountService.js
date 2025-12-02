@@ -264,7 +264,11 @@ export const getAccountSummary = async (userId) => {
     0,
   );
 
-  const pendingBalance = totalBalance - availableBalance;
+  // Calculate pending balance from actual pendingBalance field, not derived
+  const pendingBalance = accounts.reduce(
+    (sum, acc) => sum + Number(acc.pendingBalance || 0),
+    0,
+  );
 
   const activeCards = cards.filter((c) => c.isActive && !c.isFrozen).length;
 

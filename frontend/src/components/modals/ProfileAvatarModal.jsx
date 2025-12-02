@@ -19,12 +19,15 @@ const ProfileAvatarModal = ({ isOpen, onClose, user, accounts }) => {
           </button>
           
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 ring-4 ring-white/30">
+            <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 ring-4 ring-white/30 overflow-hidden">
               {user?.profilePhoto ? (
                 <img
-                  src={user.profilePhoto}
+                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
                   alt={user?.firstName}
                   className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
                 />
               ) : (
                 <User className="w-12 h-12 text-white" />

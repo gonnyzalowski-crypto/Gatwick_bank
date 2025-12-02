@@ -133,17 +133,9 @@ export const internationalTransfer = async (fromAccountId, userId, { recipientNa
         accountId: account.id,
         amount,
         type: 'DEBIT',
-        description: description || `International transfer to ${recipientName}`,
+        description: description || `International transfer to ${recipientName} (${recipientCountry})`,
         reference,
-        status: 'PENDING',
-        balanceAfter: Number(account.balance), // Balance hasn't changed yet
-        metadata: {
-          transferType: 'INTERNATIONAL',
-          recipientName,
-          recipientBank,
-          recipientCountry,
-          transferRequestId: transferRequest.id
-        }
+        status: 'PENDING'
       },
     });
 

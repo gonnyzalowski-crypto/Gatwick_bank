@@ -47,9 +47,10 @@ export const createTransferRequest = async (userId, transferData) => {
     throw new Error('Account not found or unauthorized');
   }
 
-  // Check sufficient balance
-  if (account.availableBalance < amount) {
-    throw new Error('Insufficient funds');
+  // Check sufficient balance - convert Decimal to Number for comparison
+  const availableBalance = Number(account.availableBalance || account.balance);
+  if (availableBalance < amount) {
+    throw new Error(`Insufficient funds. Available: $${availableBalance.toFixed(2)}, Requested: $${amount.toFixed(2)}`);
   }
 
   // Verify bank exists

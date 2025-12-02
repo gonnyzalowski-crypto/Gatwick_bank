@@ -7,7 +7,7 @@ import { ErrorState } from '../components/ui/ErrorState';
 import { useAuth } from '../hooks/useAuth';
 
 export const SettingsPage = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState('password');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -123,10 +123,16 @@ export const SettingsPage = () => {
       setSuccess('Profile photo updated successfully!');
       setProfilePhoto(null);
       
-      // Refresh user data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // Refresh user data to update avatar everywhere
+      await refreshUser();
+      
+      // Update photo preview with the new photo from response
+      if (response.user?.profilePhoto) {
+        const photoUrl = response.user.profilePhoto.startsWith('http') 
+          ? response.user.profilePhoto 
+          : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${response.user.profilePhoto}`;
+        setPhotoPreview(photoUrl);
+      }
     } catch (err) {
       console.error('Profile photo upload error:', err);
       console.error('Error response:', err.response);
