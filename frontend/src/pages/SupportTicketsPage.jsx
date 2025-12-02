@@ -52,7 +52,7 @@ const SupportTicketsPage = () => {
         subject,
         category,
         priority,
-        description  // Backend expects 'description'
+        message: description  // Backend expects 'message' field
       });
 
       console.log('Create ticket response:', response);

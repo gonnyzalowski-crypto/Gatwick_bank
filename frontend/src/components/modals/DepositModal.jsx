@@ -91,11 +91,8 @@ const DepositModal = ({ isOpen, onClose, accounts }) => {
       formData.append('gatewayId', selectedGateway.id);
       formData.append('paymentProof', paymentProof);
 
-      await apiClient.post('/payments/deposit', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      // Don't set Content-Type manually - browser will set it with correct boundary for FormData
+      await apiClient.post('/payments/deposit', formData);
 
       setFeedbackModal({
         isOpen: true,

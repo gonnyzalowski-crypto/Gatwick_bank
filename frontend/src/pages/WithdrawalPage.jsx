@@ -89,43 +89,6 @@ export const WithdrawalPage = () => {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm text-neutral-500">Pending</p>
-                <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-neutral-500">Completed</p>
-                <p className="text-2xl font-bold text-green-600">{completedCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center">
-                <ArrowUpFromLine className="w-6 h-6 text-orange-600" />
-              </div>
-              <div>
-                <p className="text-sm text-neutral-500">Total Withdrawn</p>
-                <p className="text-2xl font-bold text-neutral-900">${totalWithdrawn.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Withdrawal Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8">
           <div className="text-center mb-8">

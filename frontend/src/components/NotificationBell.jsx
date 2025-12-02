@@ -168,7 +168,7 @@ const NotificationBell = ({ isAdmin = false }) => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-2xl border border-slate-200 z-50 max-h-[600px] flex flex-col">
+        <div className="fixed inset-x-4 top-16 sm:absolute sm:inset-auto sm:right-0 sm:top-auto sm:mt-2 w-auto sm:w-80 md:w-96 bg-white rounded-xl shadow-2xl border border-slate-200 z-50 max-h-[70vh] sm:max-h-[500px] flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-200">
             <h3 className="font-semibold text-slate-900">Notifications</h3>
@@ -186,8 +186,8 @@ const NotificationBell = ({ isAdmin = false }) => {
           {/* Notifications List */}
           <div className="overflow-y-auto flex-1">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center">
-                <Bell className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+              <div className="p-6 text-center">
+                <Bell className="w-10 h-10 text-slate-300 mx-auto mb-2" />
                 <p className="text-slate-500 text-sm">No notifications</p>
               </div>
             ) : (
@@ -195,28 +195,28 @@ const NotificationBell = ({ isAdmin = false }) => {
                 {notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer ${
+                    className={`p-3 sm:p-4 hover:bg-slate-50 transition-colors cursor-pointer ${
                       !notification.isRead ? 'bg-blue-50/50' : ''
                     }`}
                     onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex gap-3">
-                      <div className="flex-shrink-0 mt-1">
+                      <div className="flex-shrink-0 mt-0.5">
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-semibold text-slate-900 truncate">
+                          <p className="text-sm font-semibold text-slate-900 line-clamp-1">
                             {notification.title}
                           </p>
                           {!notification.isRead && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1" />
+                            <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1.5" />
                           )}
                         </div>
-                        <p className="text-sm text-slate-600 mt-1 line-clamp-2">
+                        <p className="text-xs sm:text-sm text-slate-600 mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-slate-400 mt-2">
+                        <p className="text-xs text-slate-400 mt-1.5">
                           {formatTime(notification.createdAt)}
                         </p>
                       </div>

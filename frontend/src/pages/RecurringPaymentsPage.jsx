@@ -306,54 +306,6 @@ const RecurringPaymentsPage = () => {
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
-                <Repeat className="w-6 h-6 text-primary-600" />
-              </div>
-              <div>
-                <p className="text-sm text-neutral-500">Total Payments</p>
-                <p className="text-2xl font-bold text-neutral-900">{payments.length}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center">
-                <Play className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-neutral-500">Active</p>
-                <p className="text-2xl font-bold text-green-600">{activeCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
-                <Pause className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-sm text-neutral-500">Paused</p>
-                <p className="text-2xl font-bold text-amber-600">{pausedCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-sm text-neutral-500">Est. Monthly</p>
-                <p className="text-2xl font-bold text-blue-600">${totalMonthly.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Payments List */}
         <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
           <div className="border-b border-neutral-200 px-6 py-4">

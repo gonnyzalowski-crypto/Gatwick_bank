@@ -455,7 +455,7 @@ export const CardsPage = () => {
                         
                         {/* Card Number */}
                         <div className="relative z-10">
-                          <p className="text-xl font-mono tracking-[0.2em] mb-4 drop-shadow-md">
+                          <p className="text-sm font-mono tracking-wider mb-4 drop-shadow-md">
                             {formatCardNumber(card.cardNumber, card.cardType)}
                           </p>
                           

@@ -275,6 +275,10 @@ const UserDashboardLayout = ({ children }) => {
             >
               ☰
             </button>
+            {/* Logo - visible on mobile when sidebar is closed */}
+            <div className="lg:hidden">
+              <Logo size="sm" />
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

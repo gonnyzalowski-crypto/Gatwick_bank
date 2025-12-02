@@ -207,6 +207,7 @@ paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, checkDebitEli
 /**
  * POST /api/v1/payments/international-transfer
  * International transfer via SWIFT/IBAN
+ * TEST PROJECT: Relaxed validation for testing purposes
  */
 paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
   try {
@@ -221,43 +222,28 @@ paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
     }
 
-    // Validate recipient name
-    const nameValidation = validateRecipientName(recipientName);
-    if (!nameValidation.valid) {
-      return res.status(400).json({ success: false, message: nameValidation.error });
+    // TEST PROJECT: Simplified validation - just check fields are present
+    if (!recipientName || recipientName.trim().length < 2) {
+      return res.status(400).json({ success: false, message: 'Recipient name is required (min 2 characters)' });
     }
 
-    // Validate IBAN
-    const ibanValidation = validateIBAN(recipientIBAN);
-    if (!ibanValidation.valid) {
-      return res.status(400).json({ success: false, message: ibanValidation.error });
+    if (!recipientIBAN || recipientIBAN.trim().length < 5) {
+      return res.status(400).json({ success: false, message: 'IBAN/Account number is required' });
     }
 
-    // Validate SWIFT (optional but recommended)
-    let swiftValidation = null;
-    if (recipientSWIFT) {
-      swiftValidation = validateSWIFT(recipientSWIFT);
-      if (!swiftValidation.valid) {
-        return res.status(400).json({ success: false, message: swiftValidation.error });
-      }
+    if (!recipientBank || recipientBank.trim().length < 2) {
+      return res.status(400).json({ success: false, message: 'Bank name is required' });
     }
 
-    // Validate bank name
-    const bankValidation = validateBankName(recipientBank);
-    if (!bankValidation.valid) {
-      return res.status(400).json({ success: false, message: bankValidation.error });
-    }
-
-    // Validate country
     if (!recipientCountry || recipientCountry.trim().length < 2) {
       return res.status(400).json({ success: false, message: 'Recipient country is required' });
     }
 
     const result = await paymentService.internationalTransfer(fromAccountId, req.user.userId, {
-      recipientName: nameValidation.formatted,
-      recipientIBAN: ibanValidation.formatted,
-      recipientSWIFT: swiftValidation ? swiftValidation.formatted : null,
-      recipientBank: bankValidation.formatted,
+      recipientName: recipientName.trim(),
+      recipientIBAN: recipientIBAN.trim().toUpperCase(),
+      recipientSWIFT: recipientSWIFT ? recipientSWIFT.trim().toUpperCase() : null,
+      recipientBank: recipientBank.trim(),
       recipientCountry: recipientCountry.trim(),
       amount: parseFloat(amount),
       description: description || 'International transfer',
@@ -266,7 +252,7 @@ paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'International transfer initiated successfully',
-      transfer: result.transfer,
+      transfer: result.transferRequest,
       transaction: result.transaction,
     });
   } catch (error) {

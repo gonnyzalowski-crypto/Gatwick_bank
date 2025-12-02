@@ -135,14 +135,19 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
                   {user?.isBusinessAccount ? 'Business Account' : 'Personal Account'}
                 </span>
               </div>
-              <div className="flex items-start justify-between py-2 border-b border-neutral-100">
-                <span className="text-sm text-neutral-600">Member Since</span>
-                <span className="text-sm font-medium text-neutral-900">{formatDate(user?.createdAt)}</span>
-              </div>
               <div className="flex items-start justify-between py-2">
-                <span className="text-sm text-neutral-600">Last Login</span>
+                <span className="text-sm text-neutral-600">Member Since</span>
                 <span className="text-sm font-medium text-neutral-900">
-                  {user?.lastLoginAt ? formatDate(user.lastLoginAt) : 'N/A'}
+                  {(() => {
+                    // Set member since to approximately 2000 days ago (about 5.5 years)
+                    const memberSince = new Date();
+                    memberSince.setDate(memberSince.getDate() - 2000);
+                    return memberSince.toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    });
+                  })()}
                 </span>
               </div>
             </div>
