@@ -78,26 +78,35 @@ const SupportTicketsPage = () => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !selectedTicket?.id) return;
 
     setSending(true);
+    setError('');
     try {
+      console.log('Sending message to ticket:', selectedTicket.id);
       const response = await apiClient.post(`/support/tickets/${selectedTicket.id}/messages`, {
-        message: newMessage
+        message: newMessage.trim()
       });
+
+      console.log('Send message response:', response);
 
       if (response.success) {
         setNewMessage('');
-        // Refresh ticket
+        // Refresh ticket to get updated messages
         const ticketResponse = await apiClient.get(`/support/tickets/${selectedTicket.id}`);
+        console.log('Refreshed ticket:', ticketResponse);
         if (ticketResponse.success) {
           setSelectedTicket(ticketResponse.ticket);
           // Update in list
-          setTickets(tickets.map(t => t.id === selectedTicket.id ? ticketResponse.ticket : t));
+          setTickets(prev => prev.map(t => t.id === selectedTicket.id ? ticketResponse.ticket : t));
         }
+      } else {
+        setError('Failed to send message');
       }
     } catch (err) {
       console.error('Error sending message:', err);
+      console.error('Error details:', err.response?.data);
+      setError(err.response?.data?.error || 'Failed to send message. Please try again.');
     } finally {
       setSending(false);
     }

@@ -325,22 +325,29 @@ export const declineTransfer = async (transferId, adminId, reason) => {
   };
 };
 
-// Admin: Reverse transfer (approve then immediately reverse)
-export const reverseTransfer = async (transferId, adminId, reason) => {
+// Admin: Reverse transfer (can reverse PENDING or APPROVED transfers)
+export const reverseTransfer = async (transferId, adminId, reason = 'Admin reversal') => {
   const transfer = await prisma.transferRequest.findUnique({
-    where: { id: transferId }
+    where: { id: transferId },
+    include: {
+      account: true
+    }
   });
 
   if (!transfer) {
     throw new Error('Transfer not found');
   }
 
-  if (transfer.status !== 'PENDING') {
-    throw new Error('Transfer has already been processed');
+  if (transfer.status === 'REVERSED' || transfer.status === 'DECLINED') {
+    throw new Error('Transfer has already been reversed or declined');
   }
 
   // Generate RVSL reference
   const rvslReference = `RVSL-${transfer.reference.replace('TRF-', '')}`;
+
+  // Handle based on current status
+  const wasPending = transfer.status === 'PENDING';
+  const wasApproved = transfer.status === 'APPROVED';
 
   // Update transfer status
   const updated = await prisma.transferRequest.update({
@@ -349,17 +356,48 @@ export const reverseTransfer = async (transferId, adminId, reason) => {
       status: 'REVERSED',
       adminAction: 'REVERSE',
       adminId,
-      adminNotes: `Reversed: ${reason}. RVSL ID: ${rvslReference}`,
+      adminNotes: `Reversed: ${reason || 'Admin reversal'}. RVSL ID: ${rvslReference}`,
       processedAt: new Date()
     }
   });
 
-  // Return money to available balance
-  await prisma.account.update({
-    where: { id: transfer.fromAccountId },
+  // Return money based on previous status
+  if (wasPending) {
+    // Was pending - move from pending back to available
+    await prisma.account.update({
+      where: { id: transfer.fromAccountId },
+      data: {
+        availableBalance: { increment: transfer.amount },
+        pendingBalance: { decrement: transfer.amount }
+      }
+    });
+  } else if (wasApproved) {
+    // Was approved - add back to both balance and available
+    await prisma.account.update({
+      where: { id: transfer.fromAccountId },
+      data: {
+        balance: { increment: transfer.amount },
+        availableBalance: { increment: transfer.amount }
+      }
+    });
+  }
+
+  // Create reversal transaction record
+  await prisma.transaction.create({
     data: {
-      availableBalance: { increment: transfer.amount },
-      pendingBalance: { decrement: transfer.amount }
+      accountId: transfer.fromAccountId,
+      type: 'CREDIT',
+      amount: transfer.amount,
+      description: `Transfer Reversal - ${rvslReference}`,
+      reference: rvslReference,
+      status: 'COMPLETED',
+      balanceAfter: parseFloat(transfer.account.balance) + transfer.amount,
+      metadata: {
+        originalTransferId: transfer.id,
+        originalReference: transfer.reference,
+        reversalReason: reason || 'Admin reversal',
+        reversedBy: adminId
+      }
     }
   });
 
@@ -369,12 +407,12 @@ export const reverseTransfer = async (transferId, adminId, reason) => {
       userId: transfer.userId,
       type: 'transfer',
       title: 'Transfer Reversed',
-      message: `Your transfer of $${transfer.amount.toFixed(2)} was reversed. RVSL ID: ${rvslReference}. Reason: ${reason}`,
+      message: `Your transfer of $${transfer.amount.toFixed(2)} was reversed. RVSL ID: ${rvslReference}. Funds have been returned to your account.`,
       metadata: {
         transferId: transfer.id,
         reference: transfer.reference,
         rvslReference,
-        reason
+        reason: reason || 'Admin reversal'
       }
     }
   });

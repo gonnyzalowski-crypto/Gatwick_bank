@@ -91,20 +91,27 @@ export const AuthProvider = ({ children }) => {
   const getProfile = useCallback(async () => {
     try {
       const response = await apiClient.get('/auth/me');
-      const { user } = response || {};
+      const { user: userData } = response || {};
 
-      if (!user) {
+      if (!userData) {
         throw new Error('Failed to load user profile');
       }
 
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-      return user;
+      // Merge with existing user data to preserve any additional fields
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
     } catch (err) {
       console.error('Failed to fetch profile:', err);
       return null;
     }
-  }, []);
+  }, [user]);
+
+  // Refresh user profile to get latest data including profilePhoto
+  const refreshUser = useCallback(async () => {
+    return getProfile();
+  }, [getProfile]);
 
   const updateProfile = useCallback(async (firstName, lastName) => {
     try {
@@ -174,6 +181,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     getProfile,
+    refreshUser,
     updateProfile,
     changePassword,
     devLogin,

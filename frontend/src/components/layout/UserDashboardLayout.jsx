@@ -290,8 +290,21 @@ const UserDashboardLayout = ({ children }) => {
               onClick={() => setShowProfileModal(true)}
               className="flex items-center gap-2 p-2 hover:bg-neutral-100 rounded-lg transition-colors"
             >
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xs font-bold">
-                {user?.email?.[0]?.toUpperCase() || 'U'}
+              {user?.profilePhoto ? (
+                <img 
+                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}/uploads/${user.profilePhoto}`}
+                  alt="Profile"
+                  className="h-8 w-8 rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className={`h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-xs font-bold ${user?.profilePhoto ? 'hidden' : ''}`}
+              >
+                {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
               </div>
             </button>
 

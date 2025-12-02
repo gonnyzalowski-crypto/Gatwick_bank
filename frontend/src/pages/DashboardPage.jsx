@@ -93,7 +93,7 @@ export const DashboardPage = () => {
     );
   }
 
-  if (error && !isDevUser) {
+  if (error) {
     return (
       <UserDashboardLayout>
         <div className="max-w-4xl mx-auto py-12">
@@ -384,19 +384,6 @@ export const DashboardPage = () => {
           onClose={() => setShowMarketRates(false)} 
         />
 
-        {/* Analytics Modals */}
-        <IncomeModal 
-          isOpen={showIncomeModal} 
-          onClose={() => setShowIncomeModal(false)} 
-        />
-        <ExpensesModal 
-          isOpen={showExpensesModal} 
-          onClose={() => setShowExpensesModal(false)} 
-        />
-        <SavingsModal 
-          isOpen={showSavingsModal} 
-          onClose={() => setShowSavingsModal(false)} 
-        />
         <TransactionHistoryModal 
           isOpen={showTransactionHistory} 
           onClose={() => setShowTransactionHistory(false)} 

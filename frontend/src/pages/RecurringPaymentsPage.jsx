@@ -336,31 +336,33 @@ const RecurringPaymentsPage = () => {
                 return (
                   <div
                     key={payment.id}
-                    className="p-5 hover:bg-neutral-50 transition-colors"
+                    className="p-4 sm:p-5 hover:bg-neutral-50 transition-colors"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                    {/* Mobile Layout */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      {/* Left: Icon + Info */}
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                           payment.status === 'ACTIVE' ? 'bg-green-100' :
                           payment.status === 'PAUSED' ? 'bg-amber-100' : 'bg-neutral-100'
                         }`}>
-                          <Repeat className={`w-6 h-6 ${
+                          <Repeat className={`w-5 h-5 sm:w-6 sm:h-6 ${
                             payment.status === 'ACTIVE' ? 'text-green-600' :
                             payment.status === 'PAUSED' ? 'text-amber-600' : 'text-neutral-400'
                           }`} />
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-neutral-900">{payment.recipientName}</span>
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-semibold text-neutral-900 truncate">{payment.recipientName}</span>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`}></span>
                               {payment.status}
                             </span>
                           </div>
-                          <div className="flex items-center gap-3 mt-1 text-sm text-neutral-500">
+                          <div className="flex flex-wrap items-center gap-2 mt-1 text-xs sm:text-sm text-neutral-500">
                             <span className="flex items-center gap-1">
-                              <Building2 className="w-3.5 h-3.5" />
-                              {payment.recipientBank || 'Internal'}
+                              <Building2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                              {payment.recipientBank || 'So'}
                             </span>
                             <span className="text-neutral-300">•</span>
                             <span className="flex items-center gap-1">
@@ -371,60 +373,34 @@ const RecurringPaymentsPage = () => {
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-6">
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-neutral-900">
+                      {/* Right: Amount + Actions */}
+                      <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 pl-13 sm:pl-0">
+                        <div className="text-left sm:text-right">
+                          <div className="text-lg sm:text-xl font-bold text-neutral-900">
                             ${parseFloat(payment.amount).toLocaleString()}
                           </div>
-                          <div className="text-sm text-neutral-500">
+                          <div className="text-xs sm:text-sm text-neutral-500">
                             Next: {payment.nextExecutionDate 
                               ? new Date(payment.nextExecutionDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                               : 'N/A'}
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-0.5 sm:gap-1">
                           <button
                             onClick={() => setShowDetailsModal(payment)}
-                            className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                            className="p-1.5 sm:p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
                             title="View Details"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           {payment.status === 'ACTIVE' && (
-                            <>
-                              <button
-                                onClick={() => openEditModal(payment)}
-                                className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-                                title="Edit"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handlePause(payment.id)}
-                                className="p-2 text-amber-500 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                                title="Pause"
-                              >
-                                <Pause className="w-4 h-4" />
-                              </button>
-                            </>
-                          )}
-                          {payment.status === 'PAUSED' && (
                             <button
-                              onClick={() => handleResume(payment.id)}
-                              className="p-2 text-green-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                              title="Resume"
+                              onClick={() => openEditModal(payment)}
+                              className="p-1.5 sm:p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                              title="Edit"
                             >
-                              <Play className="w-4 h-4" />
-                            </button>
-                          )}
-                          {payment.status !== 'CANCELLED' && (
-                            <button
-                              onClick={() => handleCancel(payment.id)}
-                              className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                              title="Cancel"
-                            >
-                              <XCircle className="w-4 h-4" />
+                              <Edit className="w-4 h-4" />
                             </button>
                           )}
                         </div>

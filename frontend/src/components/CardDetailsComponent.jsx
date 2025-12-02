@@ -61,8 +61,8 @@ export const CardDetailsComponent = ({ cardId, onBack }) => {
 
   if (!card) {
     return (
-      <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-8 text-center">
-        <p className="text-slate-400">Card not found</p>
+      <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-8 text-center">
+        <p className="text-neutral-500">Card not found</p>
       </div>
     );
   }
@@ -73,23 +73,23 @@ export const CardDetailsComponent = ({ cardId, onBack }) => {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={onBack}
-          className="text-blue-400 hover:text-blue-300 transition duration-200 flex items-center gap-2"
+          className="text-primary-600 hover:text-primary-700 transition duration-200 flex items-center gap-2"
         >
-          ← Back
+          ← Back to Cards
         </button>
-        <h2 className="text-2xl font-bold text-white">
-          {card.cardType.charAt(0).toUpperCase() + card.cardType.slice(1)} Card
+        <h2 className="text-2xl font-bold text-neutral-900">
+          {card.cardType.charAt(0).toUpperCase() + card.cardType.slice(1).toLowerCase()} Card
         </h2>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 bg-slate-700/50 p-1 rounded-lg">
+      <div className="flex gap-2 bg-neutral-100 p-1 rounded-lg">
         <button
           onClick={() => setActiveTab('management')}
           className={`flex-1 py-2 px-4 rounded transition duration-200 font-semibold ${
             activeTab === 'management'
-              ? 'bg-blue-500 text-white'
-              : 'bg-transparent text-slate-400 hover:text-white'
+              ? 'bg-white text-primary-700 shadow-sm'
+              : 'bg-transparent text-neutral-500 hover:text-neutral-700'
           }`}
         >
           Management
@@ -98,8 +98,8 @@ export const CardDetailsComponent = ({ cardId, onBack }) => {
           onClick={() => setActiveTab('transactions')}
           className={`flex-1 py-2 px-4 rounded transition duration-200 font-semibold ${
             activeTab === 'transactions'
-              ? 'bg-blue-500 text-white'
-              : 'bg-transparent text-slate-400 hover:text-white'
+              ? 'bg-white text-primary-700 shadow-sm'
+              : 'bg-transparent text-neutral-500 hover:text-neutral-700'
           }`}
         >
           Transactions
@@ -118,66 +118,68 @@ export const CardDetailsComponent = ({ cardId, onBack }) => {
       {/* Transactions Tab */}
       {activeTab === 'transactions' && (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold text-white">Card Transactions</h3>
+          <h3 className="text-lg font-bold text-neutral-900">Card Transactions</h3>
           {card.transactions && card.transactions.length > 0 ? (
             <div className="space-y-3">
               {card.transactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="bg-slate-700 border border-slate-600 rounded-lg p-4"
+                  className="bg-white border border-neutral-200 rounded-lg p-4"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white font-medium">{transaction.description}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-neutral-900 font-medium">{transaction.description}</p>
+                      <p className="text-xs text-neutral-500">
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="text-right">
                       <p
                         className={`font-bold ${
-                          transaction.type === 'debit' ? 'text-red-400' : 'text-green-400'
+                          transaction.type === 'debit' ? 'text-red-600' : 'text-green-600'
                         }`}
                       >
-                        {transaction.type === 'debit' ? '-' : '+'}${transaction.amount.toFixed(2)}
+                        {transaction.type === 'debit' ? '-' : '+'}${parseFloat(transaction.amount).toFixed(2)}
                       </p>
-                      <p className="text-xs text-slate-400 capitalize">{transaction.status}</p>
+                      <p className="text-xs text-neutral-500 capitalize">{transaction.status}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-8 text-center">
-              <p className="text-slate-400">No transactions for this card</p>
+            <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-8 text-center">
+              <p className="text-neutral-500">No transactions for this card</p>
             </div>
           )}
         </div>
       )}
 
       {/* Account Info */}
-      <div className="bg-slate-700 border border-slate-600 rounded-lg p-4 space-y-3">
-        <h3 className="text-lg font-bold text-white">Linked Account</h3>
+      {card.account && (
+        <div className="bg-white border border-neutral-200 rounded-lg p-4 space-y-3">
+          <h3 className="text-lg font-bold text-neutral-900">Linked Account</h3>
 
-        <div className="space-y-2">
-          <div className="flex justify-between items-center pb-2 border-b border-slate-600">
-            <span className="text-slate-400">Account Type</span>
-            <span className="text-white font-medium capitalize">
-              {card.account.accountType}
-            </span>
-          </div>
-          <div className="flex justify-between items-center pb-2 border-b border-slate-600">
-            <span className="text-slate-400">Account Number</span>
-            <span className="text-white font-mono">••{card.account.accountNumber.slice(-4)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">Account Balance</span>
-            <span className="text-white font-bold text-lg">
-              ${card.account.balance.toFixed(2)}
-            </span>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center pb-2 border-b border-neutral-100">
+              <span className="text-neutral-500">Account Type</span>
+              <span className="text-neutral-900 font-medium capitalize">
+                {card.account.accountType}
+              </span>
+            </div>
+            <div className="flex justify-between items-center pb-2 border-b border-neutral-100">
+              <span className="text-neutral-500">Account Number</span>
+              <span className="text-neutral-900 font-mono">••{card.account.accountNumber?.slice(-4)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-neutral-500">Account Balance</span>
+              <span className="text-neutral-900 font-bold text-lg">
+                ${parseFloat(card.account.balance || 0).toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

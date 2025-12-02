@@ -77,7 +77,7 @@ export const withdrawMoney = async (accountId, userId, { amount, description }) 
 };
 
 // International transfer
-export const internationalTransfer = async (fromAccountId, userId, { recipientName, recipientIBAN, recipientBank, recipientCountry, amount, description }) => {
+export const internationalTransfer = async (fromAccountId, userId, { recipientName, recipientIBAN, recipientSWIFT, recipientBank, recipientCountry, amount, description }) => {
   if (amount <= 0) {
     throw new Error('Amount must be greater than 0');
   }
@@ -86,27 +86,23 @@ export const internationalTransfer = async (fromAccountId, userId, { recipientNa
     const account = await tx.account.findFirst({ where: { id: fromAccountId, userId } });
     if (!account) throw new Error('Account not found or unauthorized');
 
-    const accountBalance = Number(account.balance);
-    if (accountBalance < amount) {
+    // Check available balance (not total balance)
+    const availableBalance = Number(account.availableBalance || account.balance);
+    if (availableBalance < amount) {
       throw new Error('Insufficient funds');
     }
 
+    // Move amount from available to pending (don't deduct from total yet)
     const updatedAccount = await tx.account.update({
       where: { id: account.id },
-      data: { balance: account.balance.minus(amount) },
-    });
-
-    const transaction = await tx.transaction.create({
-      data: {
-        accountId: account.id,
-        amount,
-        type: 'TRANSFER',
-        description: description || `International transfer to ${recipientName}`,
-        category: 'international_transfer',
-        status: 'PENDING', // International transfers are pending initially
-        merchantName: recipientBank,
+      data: { 
+        availableBalance: { decrement: amount },
+        pendingBalance: { increment: amount }
       },
     });
+
+    // Generate reference
+    const reference = `INT-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
 
     // Create a transfer request for admin approval
     const transferRequest = await tx.transferRequest.create({
@@ -114,15 +110,56 @@ export const internationalTransfer = async (fromAccountId, userId, { recipientNa
         userId,
         fromAccountId,
         destinationBank: recipientBank,
-        routingNumber: recipientIBAN, // Using IBAN as routing number for international
+        routingNumber: recipientSWIFT || recipientIBAN, // Using SWIFT or IBAN
         accountNumber: recipientIBAN,
         accountName: recipientName,
         amount,
         description: description || `International transfer to ${recipientName}`,
-        reference: `INT-${Date.now()}`,
+        reference,
         status: 'PENDING',
         estimatedCompletion: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days
+        metadata: {
+          transferType: 'INTERNATIONAL',
+          country: recipientCountry,
+          swift: recipientSWIFT,
+          iban: recipientIBAN
+        }
       },
+    });
+
+    // Create pending transaction record
+    const transaction = await tx.transaction.create({
+      data: {
+        accountId: account.id,
+        amount,
+        type: 'DEBIT',
+        description: description || `International transfer to ${recipientName}`,
+        reference,
+        status: 'PENDING',
+        balanceAfter: Number(account.balance), // Balance hasn't changed yet
+        metadata: {
+          transferType: 'INTERNATIONAL',
+          recipientName,
+          recipientBank,
+          recipientCountry,
+          transferRequestId: transferRequest.id
+        }
+      },
+    });
+
+    // Create notification
+    await tx.notification.create({
+      data: {
+        userId,
+        type: 'transfer',
+        title: 'International Transfer Submitted',
+        message: `Your international transfer of $${amount.toFixed(2)} to ${recipientName} is pending admin approval.`,
+        metadata: {
+          transferId: transferRequest.id,
+          reference,
+          amount
+        }
+      }
     });
 
     return { account: updatedAccount, transaction, transferRequest };
