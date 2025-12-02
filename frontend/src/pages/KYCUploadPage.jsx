@@ -112,7 +112,7 @@ export const KYCUploadPage = () => {
       });
       formData.append('category', selectedCategory);
       
-      await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'}/kyc/upload`, {
+      await fetch(`${import.meta.env.MODE === 'production' ? 'https://gatwickbank.up.railway.app/api/v1' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1')}/kyc/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`

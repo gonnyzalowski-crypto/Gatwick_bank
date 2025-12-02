@@ -1,4 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+// Production URL hardcoded to fix deployment issue
+const API_BASE_URL = import.meta.env.MODE === 'production' 
+  ? 'https://gatwickbank.up.railway.app/api/v1'
+  : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1');
 
 class ApiClient {
   constructor(baseURL) {
