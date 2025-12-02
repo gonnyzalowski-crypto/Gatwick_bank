@@ -43,6 +43,12 @@ const upload = multer({
 // Middleware to check admin
 const isAdmin = async (req, res, next) => {
   try {
+    // First check if isAdmin is already set by auth middleware
+    if (req.user?.isAdmin) {
+      return next();
+    }
+    
+    // Otherwise check database
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
       select: { isAdmin: true }

@@ -2213,14 +2213,9 @@ router.post('/withdrawals/:withdrawalId/approve', verifyAuth, verifyAdmin, async
           accountId: withdrawal.accountId,
           type: 'WITHDRAWAL',
           amount: parseFloat(withdrawal.amount),
-          description: withdrawal.description || 'Withdrawal',
+          description: `${withdrawal.description || 'Withdrawal'} - Approved by admin`,
           status: 'COMPLETED',
-          reference: `WTH-${Date.now()}`,
-          metadata: {
-            withdrawalId: withdrawal.id,
-            approvedBy: req.user.userId,
-            notes
-          }
+          reference: `WTH-${Date.now()}`
         }
       });
       

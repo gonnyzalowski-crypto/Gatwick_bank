@@ -292,7 +292,7 @@ const UserDashboardLayout = ({ children }) => {
             >
               {user?.profilePhoto ? (
                 <img 
-                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}/uploads/${user.profilePhoto}`}
+                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
                   alt="Profile"
                   className="h-8 w-8 rounded-full object-cover"
                   onError={(e) => {

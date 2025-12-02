@@ -7,7 +7,6 @@ import { MetricCard } from '../components/ui/MetricCard';
 import { ActionButton } from '../components/ui/ActionButton';
 import { ErrorState } from '../components/ui/ErrorState';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
-import { MarketRatesModal } from '../components/MarketRatesModal';
 import { TransactionHistoryModal } from '../components/TransactionHistoryModal';
 import AccountCreationModal from '../components/modals/AccountCreationModal';
 import SendMoneyModal from '../components/modals/SendMoneyModal';
@@ -35,7 +34,6 @@ export const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [kyc, setKyc] = useState(null);
-  const [showMarketRates, setShowMarketRates] = useState(false);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
   const [showSendMoneyModal, setShowSendMoneyModal] = useState(false);
@@ -213,180 +211,6 @@ export const DashboardPage = () => {
           </div>
         )}
 
-        {/* Market Rates Card */}
-        <div 
-          onClick={() => setShowMarketRates(true)}
-          className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-        >
-          <div className="px-6 py-5 border-b border-neutral-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-neutral-900">Market Rates</h2>
-                <p className="text-sm text-neutral-500 mt-0.5">Live forex, stocks, crypto & commodities</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span className="text-xs font-medium text-neutral-600">Live</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-6">
-            {/* Quick Preview - Top 6 Markets */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {/* EUR/USD */}
-              <div className="p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-xs font-medium text-neutral-500">EUR/USD</p>
-                    <p className="text-lg font-bold text-neutral-900">1.0856</p>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50">
-                    <TrendingUp className="w-3 h-3 text-emerald-600" />
-                    <span className="text-xs font-semibold text-emerald-600">+0.21%</span>
-                  </div>
-                </div>
-                <svg width="100%" height="24" className="mt-2">
-                  <polyline
-                    points="0,20 20,18 40,15 60,17 80,12 100,10"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* AAPL */}
-              <div className="p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-xs font-medium text-neutral-500">AAPL</p>
-                    <p className="text-lg font-bold text-neutral-900">$189.95</p>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50">
-                    <TrendingUp className="w-3 h-3 text-emerald-600" />
-                    <span className="text-xs font-semibold text-emerald-600">+1.31%</span>
-                  </div>
-                </div>
-                <svg width="100%" height="24" className="mt-2">
-                  <polyline
-                    points="0,18 20,16 40,14 60,12 80,10 100,8"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* BTC */}
-              <div className="p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-xs font-medium text-neutral-500">BTC</p>
-                    <p className="text-lg font-bold text-neutral-900">$43.5K</p>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50">
-                    <TrendingUp className="w-3 h-3 text-emerald-600" />
-                    <span className="text-xs font-semibold text-emerald-600">+2.92%</span>
-                  </div>
-                </div>
-                <svg width="100%" height="24" className="mt-2">
-                  <polyline
-                    points="0,22 20,20 40,16 60,14 80,10 100,6"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* GOLD */}
-              <div className="p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-xs font-medium text-neutral-500">GOLD</p>
-                    <p className="text-lg font-bold text-neutral-900">$2,034</p>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50">
-                    <TrendingUp className="w-3 h-3 text-emerald-600" />
-                    <span className="text-xs font-semibold text-emerald-600">+0.61%</span>
-                  </div>
-                </div>
-                <svg width="100%" height="24" className="mt-2">
-                  <polyline
-                    points="0,16 20,15 40,13 60,14 80,11 100,10"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* S&P 500 */}
-              <div className="p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-xs font-medium text-neutral-500">S&P 500</p>
-                    <p className="text-lg font-bold text-neutral-900">4,567</p>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50">
-                    <TrendingUp className="w-3 h-3 text-emerald-600" />
-                    <span className="text-xs font-semibold text-emerald-600">+0.52%</span>
-                  </div>
-                </div>
-                <svg width="100%" height="24" className="mt-2">
-                  <polyline
-                    points="0,19 20,17 40,15 60,16 80,13 100,11"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-
-              {/* OIL */}
-              <div className="p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <p className="text-xs font-medium text-neutral-500">OIL</p>
-                    <p className="text-lg font-bold text-neutral-900">$78.45</p>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50">
-                    <TrendingUp className="w-3 h-3 text-emerald-600" />
-                    <span className="text-xs font-semibold text-emerald-600">+1.59%</span>
-                  </div>
-                </div>
-                <svg width="100%" height="24" className="mt-2">
-                  <polyline
-                    points="0,21 20,19 40,17 60,15 80,12 100,9"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </div>
-            </div>
-
-            {/* View All Button */}
-            <div className="mt-6 text-center">
-              <button className="text-sm font-semibold text-purple-700 hover:text-purple-800 transition-colors">
-                View all 50+ markets →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Market Rates Modal */}
-        <MarketRatesModal 
-          isOpen={showMarketRates} 
-          onClose={() => setShowMarketRates(false)} 
-        />
 
         <TransactionHistoryModal 
           isOpen={showTransactionHistory} 

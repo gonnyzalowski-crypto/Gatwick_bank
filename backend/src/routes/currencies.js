@@ -86,12 +86,18 @@ router.get('/rate/:from/:to', verifyAuth, async (req, res) => {
 // Middleware to check admin
 const isAdmin = async (req, res, next) => {
   try {
+    // First check if isAdmin is already set by auth middleware
+    if (req.user?.isAdmin) {
+      return next();
+    }
+    
+    // Otherwise check database
     const user = await prisma.user.findUnique({
       where: { id: req.user.userId },
-      select: { role: true }
+      select: { isAdmin: true, role: true }
     });
     
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || (!user.isAdmin && user.role !== 'ADMIN')) {
       return res.status(403).json({ error: 'Admin access required' });
     }
     

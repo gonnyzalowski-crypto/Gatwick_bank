@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { verifyAuth } from '../middleware/auth.js';
+import prisma from '../config/prisma.js';
 import {
   getUserAccounts,
   getAccountById,
@@ -97,6 +98,58 @@ accountsRouter.get('/type/:type', async (req, res) => {
     res.json({ success: true, accounts });
   } catch (error) {
     console.error('Error in GET /accounts/type/:type:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/accounts/:id/transactions
+ * Get transactions for a specific account with date filtering
+ */
+accountsRouter.get('/:id/transactions', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { startDate, endDate, limit = 100 } = req.query;
+    
+    // Verify account belongs to user
+    const account = await prisma.account.findFirst({
+      where: {
+        id,
+        userId: req.user.userId
+      }
+    });
+    
+    if (!account) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    
+    // Build date filter
+    const dateFilter = {};
+    if (startDate) {
+      dateFilter.gte = new Date(startDate);
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      dateFilter.lte = end;
+    }
+    
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        accountId: id,
+        ...(Object.keys(dateFilter).length > 0 && { createdAt: dateFilter })
+      },
+      orderBy: { createdAt: 'desc' },
+      take: parseInt(limit)
+    });
+    
+    res.json({
+      success: true,
+      transactions,
+      count: transactions.length
+    });
+  } catch (error) {
+    console.error('Error in GET /accounts/:id/transactions:', error);
     res.status(500).json({ error: error.message });
   }
 });

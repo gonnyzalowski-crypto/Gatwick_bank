@@ -21,17 +21,18 @@ supportRouter.use(verifyAuth);
  */
 supportRouter.post('/tickets', async (req, res) => {
   try {
-    const { subject, category, priority, description } = req.body;
+    const { subject, category, priority, description, message } = req.body;
+    const ticketDescription = description || message; // Accept both field names
     
-    if (!subject || !category || !description) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!subject || !category || !ticketDescription) {
+      return res.status(400).json({ error: 'Missing required fields: subject, category, and description/message are required' });
     }
     
     const result = await createSupportTicket(req.user.userId, {
       subject,
       category,
       priority,
-      description
+      description: ticketDescription
     });
     
     res.status(201).json(result);
