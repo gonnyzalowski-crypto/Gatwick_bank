@@ -86,10 +86,12 @@ export const internationalTransfer = async (fromAccountId, userId, { recipientNa
     const account = await tx.account.findFirst({ where: { id: fromAccountId, userId } });
     if (!account) throw new Error('Account not found or unauthorized');
 
-    // Check available balance (not total balance)
-    const availableBalance = Number(account.availableBalance || account.balance);
+    // Check available balance - use balance if availableBalance is 0 or null
+    const availableBalance = Number(account.availableBalance) > 0 
+      ? Number(account.availableBalance) 
+      : Number(account.balance);
     if (availableBalance < amount) {
-      throw new Error('Insufficient funds');
+      throw new Error(`Insufficient funds. Available: $${availableBalance.toFixed(2)}, Requested: $${amount.toFixed(2)}`);
     }
 
     // Move amount from available to pending (don't deduct from total yet)
