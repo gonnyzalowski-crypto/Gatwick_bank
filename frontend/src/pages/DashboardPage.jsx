@@ -22,6 +22,10 @@ import {
   Download,
   Plus,
   Clock,
+  PiggyBank,
+  Receipt,
+  DollarSign,
+  Landmark,
 } from 'lucide-react';
 
 export const DashboardPage = () => {
@@ -388,6 +392,170 @@ export const DashboardPage = () => {
           isOpen={showTransactionHistory} 
           onClose={() => setShowTransactionHistory(false)} 
         />
+
+        {/* Financial Overview - Charts Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Monthly Spending */}
+          <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <Receipt className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">-12%</span>
+            </div>
+            <h3 className="text-sm font-medium text-neutral-600 mb-1">Monthly Spending</h3>
+            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.monthlySpending || 4250)}</p>
+            {/* Mini Bar Chart */}
+            <div className="flex items-end gap-1 h-12">
+              {[65, 45, 80, 55, 70, 40, 60].map((height, i) => (
+                <div 
+                  key={i} 
+                  className="flex-1 bg-blue-200 rounded-t"
+                  style={{ height: `${height}%` }}
+                />
+              ))}
+            </div>
+            <p className="text-xs text-neutral-500 mt-2">Last 7 days</p>
+          </div>
+
+          {/* Monthly Income */}
+          <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-emerald-600" />
+              </div>
+              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+8%</span>
+            </div>
+            <h3 className="text-sm font-medium text-neutral-600 mb-1">Monthly Income</h3>
+            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.monthlyIncome || 12500)}</p>
+            {/* Mini Line Chart */}
+            <div className="h-12 relative">
+              <svg width="100%" height="100%" viewBox="0 0 100 48" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.3"/>
+                    <stop offset="100%" stopColor="#10B981" stopOpacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,40 L15,35 L30,28 L45,32 L60,20 L75,15 L90,18 L100,10 L100,48 L0,48 Z" fill="url(#incomeGradient)"/>
+                <polyline points="0,40 15,35 30,28 45,32 60,20 75,15 90,18 100,10" fill="none" stroke="#10B981" strokeWidth="2"/>
+              </svg>
+            </div>
+            <p className="text-xs text-neutral-500 mt-2">Trend this month</p>
+          </div>
+
+          {/* Savings Growth */}
+          <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                <PiggyBank className="w-5 h-5 text-purple-600" />
+              </div>
+              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+15%</span>
+            </div>
+            <h3 className="text-sm font-medium text-neutral-600 mb-1">Savings Growth</h3>
+            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.savingsBalance || 28750)}</p>
+            {/* Progress Ring */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-12 h-12">
+                <svg className="w-12 h-12 transform -rotate-90">
+                  <circle cx="24" cy="24" r="20" stroke="#E5E7EB" strokeWidth="4" fill="none"/>
+                  <circle cx="24" cy="24" r="20" stroke="#9333EA" strokeWidth="4" fill="none" 
+                    strokeDasharray="125.6" strokeDashoffset="31.4" strokeLinecap="round"/>
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-purple-600">75%</span>
+              </div>
+              <div>
+                <p className="text-xs text-neutral-500">Goal Progress</p>
+                <p className="text-sm font-medium text-neutral-900">$38,333 target</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Loan Status */}
+          <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                <Landmark className="w-5 h-5 text-amber-600" />
+              </div>
+              <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2 py-1 rounded-full">Active</span>
+            </div>
+            <h3 className="text-sm font-medium text-neutral-600 mb-1">Loan Balance</h3>
+            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.loanBalance || 15000)}</p>
+            {/* Payment Progress */}
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-neutral-500">Paid</span>
+                <span className="font-medium text-neutral-900">$10,000 / $25,000</span>
+              </div>
+              <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
+                <div className="h-full bg-amber-500 rounded-full" style={{ width: '40%' }}/>
+              </div>
+              <p className="text-xs text-neutral-500">Next payment: Dec 15</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Expenses Breakdown */}
+        <div className="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="px-6 py-5 border-b border-neutral-100">
+            <h2 className="text-lg font-semibold text-neutral-900">Expenses Breakdown</h2>
+            <p className="text-sm text-neutral-500 mt-0.5">Where your money goes this month</p>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Pie Chart Placeholder */}
+              <div className="flex items-center justify-center">
+                <div className="relative w-48 h-48">
+                  <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                    {/* Housing - 35% */}
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#8B5CF6" strokeWidth="20" 
+                      strokeDasharray="87.96 251.2" strokeDashoffset="0"/>
+                    {/* Food - 25% */}
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#3B82F6" strokeWidth="20" 
+                      strokeDasharray="62.83 251.2" strokeDashoffset="-87.96"/>
+                    {/* Transport - 20% */}
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#10B981" strokeWidth="20" 
+                      strokeDasharray="50.27 251.2" strokeDashoffset="-150.79"/>
+                    {/* Entertainment - 12% */}
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#F59E0B" strokeWidth="20" 
+                      strokeDasharray="30.16 251.2" strokeDashoffset="-201.06"/>
+                    {/* Other - 8% */}
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#6B7280" strokeWidth="20" 
+                      strokeDasharray="20.11 251.2" strokeDashoffset="-231.22"/>
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <p className="text-2xl font-bold text-neutral-900">{formatCurrency(4250)}</p>
+                    <p className="text-xs text-neutral-500">Total</p>
+                  </div>
+                </div>
+              </div>
+              {/* Legend */}
+              <div className="space-y-3">
+                {[
+                  { label: 'Housing & Utilities', amount: 1487.50, percent: 35, color: 'bg-purple-500' },
+                  { label: 'Food & Dining', amount: 1062.50, percent: 25, color: 'bg-blue-500' },
+                  { label: 'Transportation', amount: 850.00, percent: 20, color: 'bg-emerald-500' },
+                  { label: 'Entertainment', amount: 510.00, percent: 12, color: 'bg-amber-500' },
+                  { label: 'Other', amount: 340.00, percent: 8, color: 'bg-neutral-500' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${item.color}`}/>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-neutral-700">{item.label}</span>
+                        <span className="text-sm font-medium text-neutral-900">{formatCurrency(item.amount)}</span>
+                      </div>
+                      <div className="mt-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                        <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.percent}%` }}/>
+                      </div>
+                    </div>
+                    <span className="text-xs text-neutral-500 w-10 text-right">{item.percent}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Recent Activity */}
         <div className="bg-white border border-neutral-200 rounded-xl shadow-sm">

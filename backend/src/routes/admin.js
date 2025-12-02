@@ -2190,8 +2190,7 @@ router.post('/withdrawals/:withdrawalId/approve', verifyAuth, verifyAdmin, async
         data: {
           status: 'COMPLETED',
           processedBy: req.user.userId,
-          processedAt: new Date(),
-          adminNotes: notes || 'Approved by admin'
+          processedAt: new Date()
         }
       });
       
@@ -2285,8 +2284,7 @@ router.post('/withdrawals/:withdrawalId/reject', verifyAuth, verifyAdmin, async 
         status: 'REJECTED',
         processedBy: req.user.userId,
         processedAt: new Date(),
-        rejectionReason: reason,
-        adminNotes: reason
+        rejectionReason: reason
       }
     });
     

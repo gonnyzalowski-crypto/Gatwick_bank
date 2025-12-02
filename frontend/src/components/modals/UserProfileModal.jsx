@@ -1,8 +1,38 @@
-import React from 'react';
-import { X, User, Mail, Phone, Calendar, MapPin, Shield, CreditCard } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, User, Mail, Phone, Calendar, MapPin, Shield, CreditCard, Loader2 } from 'lucide-react';
+import apiClient from '../../lib/apiClient';
 
 const UserProfileModal = ({ isOpen, onClose, user }) => {
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch fresh user profile data when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchProfile();
+    }
+  }, [isOpen]);
+
+  const fetchProfile = async () => {
+    setLoading(true);
+    try {
+      const response = await apiClient.get('/auth/me');
+      if (response.user) {
+        setProfileData(response.user);
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile:', err);
+      // Fall back to passed user data
+      setProfileData(user);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
+
+  // Use fetched profile data or fall back to passed user
+  const userData = profileData || user;
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -40,13 +70,13 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
         <div className="sticky top-0 bg-gradient-to-r from-primary-600 to-primary-500 p-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-2xl font-bold">
-              {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
+              {userData?.firstName?.[0]?.toUpperCase() || userData?.email?.[0]?.toUpperCase() || 'U'}
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white">
-                {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'User Profile'}
+                {userData?.firstName && userData?.lastName ? `${userData.firstName} ${userData.lastName}` : 'User Profile'}
               </h2>
-              <p className="text-primary-100 text-sm">{user?.email}</p>
+              <p className="text-primary-100 text-sm">{userData?.email}</p>
             </div>
           </div>
           <button
@@ -59,6 +89,12 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
 
         {/* Content */}
         <div className="p-6 space-y-6">
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+            </div>
+          ) : (
+            <>
           {/* Account Status */}
           <div className="bg-neutral-50 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
@@ -66,11 +102,11 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
                 <Shield className="w-4 h-4" />
                 Account Status
               </h3>
-              {getStatusBadge(user?.accountStatus || 'ACTIVE')}
+              {getStatusBadge(userData?.accountStatus || 'ACTIVE')}
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-neutral-600">KYC Status</span>
-              {getKYCBadge(user?.kycStatus || 'NOT_SUBMITTED')}
+              {getKYCBadge(userData?.kycStatus || 'NOT_SUBMITTED')}
             </div>
           </div>
 
@@ -84,7 +120,7 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
               <div className="flex items-start justify-between py-2 border-b border-neutral-100">
                 <span className="text-sm text-neutral-600">Full Name</span>
                 <span className="text-sm font-medium text-neutral-900 text-right">
-                  {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : 'Not provided'}
+                  {userData?.firstName && userData?.lastName ? `${userData.firstName} ${userData.lastName}` : 'Not provided'}
                 </span>
               </div>
               <div className="flex items-start justify-between py-2 border-b border-neutral-100">
@@ -92,14 +128,14 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
                   <Mail className="w-4 h-4" />
                   Email
                 </span>
-                <span className="text-sm font-medium text-neutral-900 text-right">{user?.email || 'N/A'}</span>
+                <span className="text-sm font-medium text-neutral-900 text-right">{userData?.email || 'N/A'}</span>
               </div>
               <div className="flex items-start justify-between py-2 border-b border-neutral-100">
                 <span className="text-sm text-neutral-600 flex items-center gap-2">
                   <Phone className="w-4 h-4" />
                   Phone
                 </span>
-                <span className="text-sm font-medium text-neutral-900 text-right">{user?.phone || 'Not provided'}</span>
+                <span className="text-sm font-medium text-neutral-900 text-right">{userData?.phone || 'Not provided'}</span>
               </div>
               <div className="flex items-start justify-between py-2 border-b border-neutral-100">
                 <span className="text-sm text-neutral-600 flex items-center gap-2">
@@ -107,7 +143,7 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
                   Date of Birth
                 </span>
                 <span className="text-sm font-medium text-neutral-900 text-right">
-                  {user?.dateOfBirth ? formatDate(user.dateOfBirth) : 'Not provided'}
+                  {userData?.dateOfBirth ? formatDate(userData.dateOfBirth) : 'Not provided'}
                 </span>
               </div>
               <div className="flex items-start justify-between py-2">
@@ -116,7 +152,7 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
                   Address
                 </span>
                 <span className="text-sm font-medium text-neutral-900 text-right max-w-xs">
-                  {user?.address || 'Not provided'}
+                  {userData?.address || 'Not provided'}
                 </span>
               </div>
             </div>
@@ -132,7 +168,7 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
               <div className="flex items-start justify-between py-2 border-b border-neutral-100">
                 <span className="text-sm text-neutral-600">Account Type</span>
                 <span className="text-sm font-medium text-neutral-900">
-                  {user?.isBusinessAccount ? 'Business Account' : 'Personal Account'}
+                  {userData?.isBusinessAccount ? 'Business Account' : 'Personal Account'}
                 </span>
               </div>
               <div className="flex items-start justify-between py-2">
@@ -159,6 +195,8 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
               <strong>Note:</strong> This information is read-only. To update your profile, please visit the Account Settings page.
             </p>
           </div>
+            </>
+          )}
         </div>
 
         {/* Footer */}

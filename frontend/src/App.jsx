@@ -23,6 +23,7 @@ import SupportPage from './pages/SupportTicketsPage';
 import LoansPage from './pages/LoansPage';
 import ExternalTransfersPage from './pages/ExternalTransfersPage';
 import RecurringPaymentsPage from './pages/RecurringPaymentsPage';
+import StatementPage from './pages/StatementPage';
 
 export default function App() {
   return (
@@ -58,6 +59,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <LoansPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/statements"
+            element={
+              <ProtectedRoute>
+                <StatementPage />
               </ProtectedRoute>
             }
           />
@@ -102,13 +111,30 @@ export default function App() {
             }
           />
           <Route
-            path="/transfers/external"
+            path="/transfers/internal"
+            element={
+              <ProtectedRoute>
+                <DomesticTransferPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/transfers/local"
             element={
               <ProtectedRoute>
                 <ExternalTransfersPage />
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/transfers/international"
+            element={
+              <ProtectedRoute>
+                <InternationalTransferPage />
+              </ProtectedRoute>
+            }
+          />
+          {/* Legacy routes for backward compatibility */}
           <Route
             path="/transfers/domestic"
             element={
@@ -118,10 +144,10 @@ export default function App() {
             }
           />
           <Route
-            path="/transfers/international"
+            path="/transfers/external"
             element={
               <ProtectedRoute>
-                <InternationalTransferPage />
+                <ExternalTransfersPage />
               </ProtectedRoute>
             }
           />

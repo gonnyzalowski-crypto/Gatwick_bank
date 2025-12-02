@@ -96,7 +96,7 @@ export const InternationalTransferPage = () => {
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900 mb-1">International Transfer</h1>
+          <h1 className="text-2xl font-semibold text-neutral-900 mb-1">International Wire</h1>
           <p className="text-sm text-neutral-600">Send money abroad via SWIFT/IBAN</p>
         </div>
 

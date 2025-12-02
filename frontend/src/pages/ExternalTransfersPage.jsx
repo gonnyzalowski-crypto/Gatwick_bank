@@ -274,8 +274,8 @@ const ExternalTransfersPage = () => {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-neutral-900">External Transfers</h1>
-            <p className="text-neutral-500 mt-1">Send money to other banks securely</p>
+            <h1 className="text-2xl font-bold text-neutral-900">Local Transfer</h1>
+            <p className="text-neutral-500 mt-1">Transfer to other banks within the same country</p>
           </div>
           <button
             onClick={() => { resetTransferForm(); setShowTransferModal(true); }}

@@ -169,12 +169,20 @@ const UserDashboardLayout = ({ children }) => {
                   {transfersExpanded && (
                     <div className="ml-8 mt-1 space-y-1">
                       <NavLink
-                        to="/transfers/domestic"
+                        to="/transfers/internal"
                         className={navItemClasses}
                         onClick={closeSidebar}
                       >
                         <Home className="h-4 w-4" />
-                        <span>Domestic</span>
+                        <span>Internal Transfer</span>
+                      </NavLink>
+                      <NavLink
+                        to="/transfers/local"
+                        className={navItemClasses}
+                        onClick={closeSidebar}
+                      >
+                        <Building2 className="h-4 w-4" />
+                        <span>Local Transfer</span>
                       </NavLink>
                       <NavLink
                         to="/transfers/international"
@@ -182,15 +190,7 @@ const UserDashboardLayout = ({ children }) => {
                         onClick={closeSidebar}
                       >
                         <Globe className="h-4 w-4" />
-                        <span>International</span>
-                      </NavLink>
-                      <NavLink
-                        to="/transfers/external"
-                        className={navItemClasses}
-                        onClick={closeSidebar}
-                      >
-                        <Building2 className="h-4 w-4" />
-                        <span>External Bank</span>
+                        <span>International Wire</span>
                       </NavLink>
                     </div>
                   )}

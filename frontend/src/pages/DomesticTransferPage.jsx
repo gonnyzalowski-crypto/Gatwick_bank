@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/apiClient';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import { ActionButton } from '../components/ui/ActionButton';
-import { Home, CheckCircle2, AlertCircle, Info, Shield } from 'lucide-react';
+import { Users, CheckCircle2, AlertCircle, Info, Shield, Star, Plus } from 'lucide-react';
 
 export const DomesticTransferPage = () => {
   const navigate = useNavigate();
   const [accounts, setAccounts] = useState([]);
+  const [beneficiaries, setBeneficiaries] = useState([]);
   const [fromAccount, setFromAccount] = useState('');
-  const [bankName, setBankName] = useState('');
-  const [routingNumber, setRoutingNumber] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [accountHolderName, setAccountHolderName] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState('');
+  const [recipientName, setRecipientName] = useState('');
+  const [recipientAccountNumber, setRecipientAccountNumber] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,31 +21,49 @@ export const DomesticTransferPage = () => {
   const [showBackupCodeModal, setShowBackupCodeModal] = useState(false);
   const [backupCode, setBackupCode] = useState('');
   const [verifying, setVerifying] = useState(false);
+  const [saveBeneficiary, setSaveBeneficiary] = useState(false);
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
 
   useEffect(() => {
-    const fetchAccounts = async () => {
+    const fetchData = async () => {
       try {
-        const response = await apiClient.get('/accounts');
-        if (response.success) {
-          setAccounts(response.accounts);
-          if (response.accounts.length > 0) {
-            setFromAccount(response.accounts[0].id);
+        const [accountsRes, beneficiariesRes] = await Promise.all([
+          apiClient.get('/accounts'),
+          apiClient.get('/beneficiaries').catch(() => ({ success: true, beneficiaries: [] }))
+        ]);
+        
+        if (accountsRes.success) {
+          setAccounts(accountsRes.accounts);
+          if (accountsRes.accounts.length > 0) {
+            setFromAccount(accountsRes.accounts[0].id);
           }
         }
+        
+        if (beneficiariesRes.success) {
+          // Filter for internal beneficiaries only
+          setBeneficiaries((beneficiariesRes.beneficiaries || []).filter(b => b.type === 'INTERNAL'));
+        }
       } catch (err) {
-        console.error('Error fetching accounts:', err);
+        console.error('Error fetching data:', err);
         setError('Unable to load accounts');
       }
     };
 
-    fetchAccounts();
+    fetchData();
   }, []);
+
+  const selectBeneficiary = (beneficiary) => {
+    setSelectedBeneficiary(beneficiary);
+    setRecipientName(beneficiary.accountName || beneficiary.name);
+    setRecipientEmail(beneficiary.email || '');
+    setRecipientAccountNumber(beneficiary.accountNumber || '');
+  };
 
   const handleContinue = (e) => {
     e.preventDefault();
     setError('');
 
-    if (!fromAccount || !bankName || !routingNumber || !accountNumber || !accountHolderName || !amount) {
+    if (!fromAccount || !recipientAccountNumber || !recipientName || !amount) {
       setError('Please fill in all required fields');
       return;
     }
@@ -75,32 +93,33 @@ export const DomesticTransferPage = () => {
       setVerifying(true);
       setError('');
 
-      const response = await apiClient.post('/transfers/domestic', {
+      const response = await apiClient.post('/transfers/internal', {
         fromAccountId: fromAccount,
-        bankName,
-        routingNumber,
-        accountNumber,
-        accountHolderName,
+        recipientAccountNumber,
+        recipientName,
+        recipientEmail,
         amount: parseFloat(amount),
         description,
-        backupCode
+        backupCode,
+        saveBeneficiary
       });
 
       if (response.success) {
-        setSuccess('Domestic transfer request submitted for admin approval');
+        setSuccess('Internal transfer completed successfully!');
         setShowBackupCodeModal(false);
         
         // Reset form
-        setBankName('');
-        setRoutingNumber('');
-        setAccountNumber('');
-        setAccountHolderName('');
+        setRecipientName('');
+        setRecipientEmail('');
+        setRecipientAccountNumber('');
         setAmount('');
         setDescription('');
         setBackupCode('');
+        setSaveBeneficiary(false);
+        setSelectedBeneficiary(null);
         
         setTimeout(() => {
-          navigate('/transfer-history');
+          navigate('/transaction-history');
         }, 2000);
       }
     } catch (err) {
@@ -115,8 +134,8 @@ export const DomesticTransferPage = () => {
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900 mb-1">Domestic Transfer</h1>
-          <p className="text-sm text-neutral-600">Transfer money to external banks within the country</p>
+          <h1 className="text-2xl font-semibold text-neutral-900 mb-1">Internal Transfer</h1>
+          <p className="text-sm text-neutral-600">Transfer money to other Gatwick Bank users instantly</p>
         </div>
 
         {/* Success Message */}
@@ -135,15 +154,41 @@ export const DomesticTransferPage = () => {
           </div>
         )}
 
+        {/* Saved Beneficiaries */}
+        {beneficiaries.length > 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+            <h3 className="text-sm font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+              <Star className="w-4 h-4 text-amber-500" />
+              Saved Beneficiaries
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {beneficiaries.map((ben) => (
+                <button
+                  key={ben.id}
+                  type="button"
+                  onClick={() => selectBeneficiary(ben)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedBeneficiary?.id === ben.id
+                      ? 'bg-primary-100 text-primary-700 border-2 border-primary-500'
+                      : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 border-2 border-transparent'
+                  }`}
+                >
+                  {ben.nickname || ben.accountName}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Transfer Form */}
         <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center">
-              <Home className="w-6 h-6 text-primary-600" />
+              <Users className="w-6 h-6 text-primary-600" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-neutral-900">Transfer Details</h2>
-              <p className="text-sm text-neutral-600">Send money to external bank accounts</p>
+              <p className="text-sm text-neutral-600">Send money to another Gatwick Bank user</p>
             </div>
           </div>
 
@@ -162,69 +207,51 @@ export const DomesticTransferPage = () => {
                 <option value="">Select source account...</option>
                 {accounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
-                    {acc.accountNumber} - ${acc.balance} ({acc.accountType})
+                    {acc.accountNumber} - ${parseFloat(acc.availableBalance || acc.balance).toFixed(2)} ({acc.accountType})
                   </option>
                 ))}
               </select>
             </div>
 
-            {/* Bank Name */}
+            {/* Recipient Name */}
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Bank Name *
+                Recipient Name *
               </label>
               <input
                 type="text"
-                value={bankName}
-                onChange={(e) => setBankName(e.target.value)}
-                placeholder="e.g., Chase Bank, Bank of America"
+                value={recipientName}
+                onChange={(e) => setRecipientName(e.target.value)}
+                placeholder="Full name of the recipient"
                 className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
                 required
               />
             </div>
 
-            {/* Routing Number */}
+            {/* Recipient Email */}
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Routing Number *
+                Recipient Email (Optional)
               </label>
               <input
-                type="text"
-                value={routingNumber}
-                onChange={(e) => setRoutingNumber(e.target.value)}
-                placeholder="9-digit routing number"
-                maxLength="9"
-                pattern="[0-9]{9}"
+                type="email"
+                value={recipientEmail}
+                onChange={(e) => setRecipientEmail(e.target.value)}
+                placeholder="recipient@email.com"
                 className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
-                required
               />
             </div>
 
             {/* Account Number */}
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Account Number *
+                Recipient Account Number *
               </label>
               <input
                 type="text"
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
-                placeholder="Recipient's account number"
-                className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
-                required
-              />
-            </div>
-
-            {/* Account Holder Name */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Account Holder Name *
-              </label>
-              <input
-                type="text"
-                value={accountHolderName}
-                onChange={(e) => setAccountHolderName(e.target.value)}
-                placeholder="Full name on the account"
+                value={recipientAccountNumber}
+                onChange={(e) => setRecipientAccountNumber(e.target.value)}
+                placeholder="10-digit Gatwick Bank account number"
                 className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
                 required
               />
@@ -266,6 +293,20 @@ export const DomesticTransferPage = () => {
               />
             </div>
 
+            {/* Save Beneficiary */}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="saveBeneficiary"
+                checked={saveBeneficiary}
+                onChange={(e) => setSaveBeneficiary(e.target.checked)}
+                className="w-4 h-4 text-primary-600 border-neutral-300 rounded focus:ring-primary-500"
+              />
+              <label htmlFor="saveBeneficiary" className="text-sm text-neutral-700">
+                Save this recipient for future transfers
+              </label>
+            </div>
+
             {/* Actions */}
             <div className="flex gap-3 pt-4">
               <ActionButton
@@ -282,7 +323,7 @@ export const DomesticTransferPage = () => {
                 variant="primary"
                 size="lg"
                 loading={loading}
-                disabled={!fromAccount || !bankName || !routingNumber || !accountNumber || !accountHolderName || !amount}
+                disabled={!fromAccount || !recipientAccountNumber || !recipientName || !amount}
                 fullWidth
               >
                 Continue
@@ -292,13 +333,13 @@ export const DomesticTransferPage = () => {
         </div>
 
         {/* Info Box */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
           <div className="flex gap-3">
-            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <Info className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Domestic Transfers</h3>
-              <p className="text-sm text-blue-700">
-                Transfers to external banks require admin approval and backup code verification for security.
+              <h3 className="text-sm font-semibold text-emerald-900 mb-1">Internal Transfers</h3>
+              <p className="text-sm text-emerald-700">
+                Transfers between Gatwick Bank accounts are instant and free. Backup code verification is required for security.
               </p>
             </div>
           </div>
