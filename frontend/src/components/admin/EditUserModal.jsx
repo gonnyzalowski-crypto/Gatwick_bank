@@ -209,7 +209,7 @@ export const EditUserModal = ({ isOpen, onClose, userId, onSuccess }) => {
 
       // Use fetch directly for FormData
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(`${import.meta.env.MODE === 'production' ? 'https://gatwickbank.up.railway.app/api/v1' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1')}/mybanker/users/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1'}/mybanker/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`

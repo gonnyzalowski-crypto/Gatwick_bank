@@ -424,7 +424,7 @@ export const KYCReview = () => {
                                 </div>
                               </div>
                               <a
-                                href={`${import.meta.env.MODE === 'production' ? 'https://gatwickbank.up.railway.app' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000')}/${doc.filePath.replace(/^\/app\//, '')}`}
+                                href={`${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1').replace('/api/v1', '')}/${doc.filePath.replace(/^\/app\//, '')}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition text-sm"
