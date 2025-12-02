@@ -11,8 +11,10 @@ export const InternationalTransferPage = () => {
   const [fromAccount, setFromAccount] = useState('');
   const [recipientName, setRecipientName] = useState('');
   const [recipientIBAN, setRecipientIBAN] = useState('');
+  const [recipientSWIFT, setRecipientSWIFT] = useState('');
   const [recipientBank, setRecipientBank] = useState('');
   const [recipientCountry, setRecipientCountry] = useState('');
+  const [recipientAddress, setRecipientAddress] = useState('');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -43,8 +45,15 @@ export const InternationalTransferPage = () => {
     setError('');
     setSuccess('');
 
-    if (!fromAccount || !recipientName || !recipientIBAN || !recipientBank || !recipientCountry || !amount) {
-      setError('Please fill in all required fields');
+    if (!fromAccount || !recipientName || !recipientIBAN || !recipientSWIFT || !recipientBank || !recipientCountry || !amount) {
+      setError('Please fill in all required fields including SWIFT/BIC code');
+      return;
+    }
+
+    // Validate SWIFT/BIC code format (8 or 11 characters)
+    const swiftRegex = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/i;
+    if (!swiftRegex.test(recipientSWIFT)) {
+      setError('Invalid SWIFT/BIC code format. Must be 8 or 11 characters (e.g., CHASUS33 or CHASUS33XXX)');
       return;
     }
 
@@ -65,8 +74,10 @@ export const InternationalTransferPage = () => {
         fromAccountId: fromAccount,
         recipientName,
         recipientIBAN,
+        recipientSWIFT: recipientSWIFT.toUpperCase(),
         recipientBank,
         recipientCountry,
+        recipientAddress,
         amount: parseFloat(amount),
         description,
       });
@@ -76,8 +87,10 @@ export const InternationalTransferPage = () => {
         setAmount('');
         setRecipientName('');
         setRecipientIBAN('');
+        setRecipientSWIFT('');
         setRecipientBank('');
         setRecipientCountry('');
+        setRecipientAddress('');
         setDescription('');
         
         setTimeout(() => {
@@ -183,7 +196,7 @@ export const InternationalTransferPage = () => {
               {/* Recipient IBAN */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  IBAN / Account Number
+                  IBAN / Account Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -193,6 +206,23 @@ export const InternationalTransferPage = () => {
                   className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm font-mono"
                   required
                 />
+              </div>
+
+              {/* SWIFT/BIC Code */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  SWIFT/BIC Code <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={recipientSWIFT}
+                  onChange={(e) => setRecipientSWIFT(e.target.value.toUpperCase())}
+                  placeholder="CHASUS33 or CHASUS33XXX"
+                  maxLength={11}
+                  className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm font-mono uppercase"
+                  required
+                />
+                <p className="text-xs text-neutral-500 mt-1">8 or 11 character bank identifier code</p>
               </div>
 
               {/* Recipient Bank */}
@@ -211,9 +241,9 @@ export const InternationalTransferPage = () => {
               </div>
 
               {/* Recipient Country */}
-              <div>
+              <div className="mb-4">
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Country
+                  Country <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -222,6 +252,20 @@ export const InternationalTransferPage = () => {
                   placeholder="e.g., United Kingdom, Germany"
                   className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
                   required
+                />
+              </div>
+
+              {/* Recipient Address */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Recipient Address (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={recipientAddress}
+                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  placeholder="Street address, city, postal code"
+                  className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
                 />
               </div>
             </div>
@@ -279,7 +323,7 @@ export const InternationalTransferPage = () => {
                 variant="primary"
                 size="lg"
                 loading={loading}
-                disabled={!fromAccount || !recipientName || !recipientIBAN || !amount}
+                disabled={!fromAccount || !recipientName || !recipientIBAN || !recipientSWIFT || !amount}
                 fullWidth
               >
                 {loading ? 'Processing...' : 'Initiate Transfer'}

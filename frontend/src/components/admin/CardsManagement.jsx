@@ -13,9 +13,9 @@ export const CardsManagement = () => {
   const [formData, setFormData] = useState({
     cardNumber: '',
     expiryDate: '',
-    dailyLimit: '',
-    monthlyLimit: '',
     creditLimit: '',
+    availableCredit: '',
+    currentBalance: '',
     status: ''
   });
 
@@ -71,9 +71,9 @@ export const CardsManagement = () => {
     setFormData({
       cardNumber: decodedCardNumber,
       expiryDate: card.expiryDate ? new Date(card.expiryDate).toISOString().split('T')[0] : '',
-      dailyLimit: card.dailyLimit || '',
-      monthlyLimit: card.monthlyLimit || '',
       creditLimit: card.creditLimit || '',
+      availableCredit: card.availableCredit || '',
+      currentBalance: card.currentBalance || '',
       status: card.status || 'ACTIVE'
     });
   };
@@ -373,50 +373,33 @@ export const CardsManagement = () => {
                   className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
                 />
               </div>
-              {editingCard?.cardType === 'CREDIT' ? (
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Credit Limit ($)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.creditLimit}
-                    onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-                  />
-                  <p className="text-xs text-slate-400 mt-1">
-                    Available Credit = Credit Limit - Current Balance
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Daily Limit ($)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.dailyLimit}
-                      onChange={(e) => setFormData({ ...formData, dailyLimit: e.target.value })}
-                      className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      Monthly Limit ($)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={formData.monthlyLimit}
-                      onChange={(e) => setFormData({ ...formData, monthlyLimit: e.target.value })}
-                      className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                </>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Credit Limit ($)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.creditLimit}
+                  onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  Available Credit ($)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.availableCredit}
+                  onChange={(e) => setFormData({ ...formData, availableCredit: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-indigo-500"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Available Credit = Credit Limit - Current Balance
+                </p>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Status

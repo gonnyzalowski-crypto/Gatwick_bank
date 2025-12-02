@@ -211,7 +211,7 @@ paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, checkDebitEli
  */
 paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
   try {
-    const { fromAccountId, recipientName, recipientIBAN, recipientSWIFT, recipientBank, recipientCountry, amount, description } = req.body;
+    const { fromAccountId, recipientName, recipientIBAN, recipientSWIFT, recipientBank, recipientCountry, recipientAddress, amount, description } = req.body;
 
     // Validate required fields
     if (!fromAccountId) {
@@ -222,13 +222,23 @@ paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Amount must be greater than 0' });
     }
 
-    // TEST PROJECT: Simplified validation - just check fields are present
     if (!recipientName || recipientName.trim().length < 2) {
       return res.status(400).json({ success: false, message: 'Recipient name is required (min 2 characters)' });
     }
 
     if (!recipientIBAN || recipientIBAN.trim().length < 5) {
       return res.status(400).json({ success: false, message: 'IBAN/Account number is required' });
+    }
+
+    // Validate SWIFT/BIC code - required for international transfers
+    if (!recipientSWIFT || recipientSWIFT.trim().length < 8) {
+      return res.status(400).json({ success: false, message: 'SWIFT/BIC code is required (8-11 characters)' });
+    }
+
+    // Validate SWIFT format (8 or 11 alphanumeric characters)
+    const swiftRegex = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/i;
+    if (!swiftRegex.test(recipientSWIFT.trim())) {
+      return res.status(400).json({ success: false, message: 'Invalid SWIFT/BIC code format' });
     }
 
     if (!recipientBank || recipientBank.trim().length < 2) {
@@ -242,9 +252,10 @@ paymentsRouter.post('/international-transfer', verifyAuth, async (req, res) => {
     const result = await paymentService.internationalTransfer(fromAccountId, req.user.userId, {
       recipientName: recipientName.trim(),
       recipientIBAN: recipientIBAN.trim().toUpperCase(),
-      recipientSWIFT: recipientSWIFT ? recipientSWIFT.trim().toUpperCase() : null,
+      recipientSWIFT: recipientSWIFT.trim().toUpperCase(),
       recipientBank: recipientBank.trim(),
       recipientCountry: recipientCountry.trim(),
+      recipientAddress: recipientAddress ? recipientAddress.trim() : null,
       amount: parseFloat(amount),
       description: description || 'International transfer',
     });
