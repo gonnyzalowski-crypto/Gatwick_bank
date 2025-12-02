@@ -50,6 +50,18 @@ export const LoginPage = () => {
         }
         
         setStep(2);
+      } else if (response.accessToken) {
+        // Direct login (user has no security questions)
+        localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('refreshToken', response.refreshToken);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        
+        // Redirect based on user role
+        if (response.user.isAdmin) {
+          navigate('/mybanker');
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       // Check if account is suspended
