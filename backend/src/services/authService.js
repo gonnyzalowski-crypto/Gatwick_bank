@@ -33,6 +33,8 @@ export const registerUser = async (email, password, firstName, lastName, additio
       firstName,
       lastName,
       routingNumber,
+      // Make the very first registered user an admin after a fresh reset
+      isAdmin: userCount === 0,
       ...restData
     },
   });
