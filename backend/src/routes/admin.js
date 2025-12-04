@@ -58,6 +58,18 @@ router.get('/stats', verifyAuth, verifyAdmin, async (req, res) => {
   }
 });
 
+// Dev-only: reset all user data (users and all dependent tables via cascade)
+// POST /api/v1/mybanker/dev/reset-users
+router.post('/dev/reset-users', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    await prisma.user.deleteMany();
+    return res.json({ message: 'All user data reset successfully' });
+  } catch (error) {
+    console.error('Dev reset users error:', error);
+    return res.status(500).json({ error: 'Failed to reset users' });
+  }
+});
+
 // Create new user (Admin only)
 // POST /api/v1/mybanker/users
 router.post('/users', verifyAuth, verifyAdmin, async (req, res) => {
