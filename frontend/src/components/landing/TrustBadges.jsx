@@ -11,9 +11,15 @@ export const TrustBadges = () => {
     { name: 'FDIC Insured', desc: 'Protection', icon: Shield },
   ];
 
+  const banks = [
+    'JPMorgan Chase', 'Bank of America', 'HSBC', 'Citigroup', 'Wells Fargo',
+    'Barclays', 'UBS', 'Deutsche Bank', 'BNP Paribas', 'Goldman Sachs'
+  ];
+
   return (
-    <section className="py-12 border-b border-slate-100 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 border-b border-slate-100 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+        {/* Payment Networks */}
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
           {networks.map((net, i) => (
             <div key={i} className="flex items-center gap-3 group">
@@ -28,6 +34,37 @@ export const TrustBadges = () => {
           ))}
         </div>
       </div>
+
+      {/* Trusted Banks Marquee */}
+      <div className="relative py-6 bg-slate-50/50 border-t border-slate-100">
+        <p className="text-center text-xs font-semibold text-slate-400 uppercase tracking-widest mb-6">Trusted by Leading Global Institutions</p>
+        
+        <div className="flex overflow-hidden whitespace-nowrap relative">
+          {/* Gradient masks for smooth fade */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10"></div>
+
+          {/* Marquee Animation Container */}
+          <div className="flex animate-marquee">
+            {[...banks, ...banks, ...banks].map((bank, i) => (
+              <div key={i} className="flex items-center mx-8 opacity-50 hover:opacity-100 transition-opacity">
+                <Landmark className="w-4 h-4 text-slate-400 mr-2" />
+                <span className="text-lg font-bold text-slate-600 whitespace-nowrap font-serif tracking-tight">{bank}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-33.33%); }
+        }
+        .animate-marquee {
+          animation: marquee 40s linear infinite;
+        }
+      `}</style>
     </section>
   );
 };
