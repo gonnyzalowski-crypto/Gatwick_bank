@@ -1,12 +1,18 @@
-import React, { createContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useRef } from 'react';
 import { apiClient } from '../lib/apiClient';
 
 export const AuthContext = createContext();
+
+// Inactivity timeout: 5 minutes (in milliseconds)
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showInactivityWarning, setShowInactivityWarning] = useState(false);
+  const inactivityTimerRef = useRef(null);
+  const warningTimerRef = useRef(null);
 
   // Initialize auth state from localStorage
   useEffect(() => {
@@ -24,6 +30,76 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   }, []);
+
+  // Auto-logout after inactivity (for non-admin users only)
+  const resetInactivityTimer = useCallback(() => {
+    // Clear existing timers
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+    setShowInactivityWarning(false);
+
+    // Only set timer for authenticated non-admin users
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) return;
+    
+    try {
+      const userData = JSON.parse(storedUser);
+      if (userData.isAdmin) return; // Skip for admins
+    } catch (e) {
+      return;
+    }
+
+    // Show warning 1 minute before logout
+    warningTimerRef.current = setTimeout(() => {
+      setShowInactivityWarning(true);
+    }, INACTIVITY_TIMEOUT - 60000);
+
+    // Auto-logout after full timeout
+    inactivityTimerRef.current = setTimeout(() => {
+      console.log('Auto-logout due to inactivity');
+      setShowInactivityWarning(false);
+      performLogout();
+    }, INACTIVITY_TIMEOUT);
+  }, []);
+
+  // Perform logout without API call (for inactivity)
+  const performLogout = useCallback(() => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+    setUser(null);
+    setError(null);
+    // Redirect to login
+    window.location.href = '/login?reason=inactivity';
+  }, []);
+
+  // Set up activity listeners when user is logged in
+  useEffect(() => {
+    if (!user || user.isAdmin) return;
+
+    const activityEvents = ['mousedown', 'mousemove', 'keydown', 'scroll', 'touchstart', 'click'];
+    
+    const handleActivity = () => {
+      resetInactivityTimer();
+    };
+
+    // Add event listeners
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleActivity, { passive: true });
+    });
+
+    // Start the timer
+    resetInactivityTimer();
+
+    // Cleanup
+    return () => {
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleActivity);
+      });
+      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+      if (warningTimerRef.current) clearTimeout(warningTimerRef.current);
+    };
+  }, [user, resetInactivityTimer]);
 
   const login = useCallback(async (email, password) => {
     try {
@@ -173,6 +249,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  // Dismiss inactivity warning and reset timer
+  const dismissInactivityWarning = useCallback(() => {
+    setShowInactivityWarning(false);
+    resetInactivityTimer();
+  }, [resetInactivityTimer]);
+
   const value = {
     user,
     loading,
@@ -186,9 +268,39 @@ export const AuthProvider = ({ children }) => {
     changePassword,
     devLogin,
     isAuthenticated: !!user,
+    showInactivityWarning,
+    dismissInactivityWarning,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      {/* Inactivity Warning Modal */}
+      {showInactivityWarning && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-2xl p-6 max-w-sm mx-4 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-neutral-900 mb-2">Session Expiring Soon</h3>
+              <p className="text-neutral-600 text-sm mb-6">
+                You will be logged out in 1 minute due to inactivity. Click below to stay logged in.
+              </p>
+              <button
+                onClick={dismissInactivityWarning}
+                className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-medium hover:from-purple-700 hover:to-purple-800 transition-all"
+              >
+                Stay Logged In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </AuthContext.Provider>
+  );
 };
 
 export default AuthContext;

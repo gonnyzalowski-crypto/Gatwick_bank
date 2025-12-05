@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Building2, Lock, Mail, ArrowRight, Shield, Eye, EyeOff, Loader2, Fingerprint, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Building2, Lock, Mail, ArrowRight, Shield, Eye, EyeOff, Loader2, Fingerprint, CheckCircle2, Clock } from 'lucide-react';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 
 export const LoginPage = () => {
   const { user: authUser } = useAuth();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(1); // 1: email/password, 2: verification
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [userId, setUserId] = useState('');
@@ -18,7 +19,19 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [inactivityLogout, setInactivityLogout] = useState(false);
   const navigate = useNavigate();
+
+  // Check if user was logged out due to inactivity
+  useEffect(() => {
+    if (searchParams.get('reason') === 'inactivity') {
+      setInactivityLogout(true);
+      // Clear the URL param after showing the message
+      setTimeout(() => {
+        window.history.replaceState({}, '', '/login');
+      }, 100);
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -221,6 +234,16 @@ export const LoginPage = () => {
                 </div>
 
                 <form onSubmit={handleStep1Submit} className="space-y-5">
+                  {inactivityLogout && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-amber-800 text-sm font-medium">Session Expired</p>
+                        <p className="text-amber-700 text-xs mt-0.5">You were logged out due to inactivity. Please sign in again.</p>
+                      </div>
+                    </div>
+                  )}
+                  
                   {error && (
                     <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
                       <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
