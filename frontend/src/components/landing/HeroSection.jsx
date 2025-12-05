@@ -1,234 +1,184 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, ArrowRight, Globe, CreditCard, Send, Wallet, Lock, CheckCircle, Zap, TrendingUp, Users, Sparkles } from 'lucide-react';
+import { Shield, ArrowRight, Globe, CreditCard, Send, Wallet, Lock, CheckCircle, Zap, TrendingUp, Users, ChevronRight } from 'lucide-react';
 
 export const HeroSection = () => {
   return (
-    <section className="relative min-h-screen pt-20 overflow-hidden">
-      {/* Premium gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-purple-900 to-violet-900"></div>
+    <section className="relative min-h-screen pt-28 lg:pt-32 pb-16 lg:pb-24 overflow-hidden bg-white">
+      {/* Subtle modern background */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.4]"></div>
       
-      {/* Animated mesh gradient overlay */}
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-purple-500/40 via-transparent to-transparent"></div>
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-violet-500/30 via-transparent to-transparent"></div>
-      </div>
-      
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.02]" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-      }}></div>
+      {/* Gradient Accents */}
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-purple-100/40 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-slate-100/60 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3 pointer-events-none"></div>
 
-      {/* Floating orbs */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-violet-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-      <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+          
           {/* Left Content */}
-          <div className="space-y-8 text-center lg:text-left">
-            {/* Animated badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
-              <Sparkles className="w-4 h-4 text-yellow-400" />
-              <span className="text-sm font-medium text-white/90">Next-Gen Digital Banking</span>
-              <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full text-xs font-bold text-white">NEW</span>
+          <div className="flex-1 w-full text-center lg:text-left space-y-8 z-10">
+            
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-200 rounded-full shadow-sm mx-auto lg:mx-0 hover:bg-white transition-colors cursor-default">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="text-sm font-semibold text-slate-600 tracking-wide uppercase text-[10px] sm:text-xs">Banking for the Future</span>
             </div>
             
-            {/* Headline with gradient text */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black leading-[1.05] tracking-tight">
-              <span className="text-white">Banking</span>
-              <br />
-              <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-                Reimagined
+            {/* Headline */}
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 tracking-tight leading-[1.1]">
+              Banking, but <br className="hidden sm:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-indigo-800">
+                Brilliantly Simple.
               </span>
-              <br />
-              <span className="text-white">For Tomorrow</span>
             </h1>
             
             {/* Subheadline */}
-            <p className="text-lg md:text-xl text-purple-200/80 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Experience seamless global transactions, instant multi-currency accounts, and enterprise security—all in one powerful platform.
+            <p className="text-lg sm:text-xl text-slate-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              Experience the elegance of modern finance. Instant global transfers, multi-currency accounts, and concierge-level support—without the fees.
             </p>
 
-            {/* Stats row */}
-            <div className="flex flex-wrap justify-center lg:justify-start gap-8 py-4">
-              {[
-                { value: '150+', label: 'Countries', icon: Globe },
-                { value: '$2.5B+', label: 'Processed', icon: TrendingUp },
-                { value: '50K+', label: 'Users', icon: Users },
-              ].map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <stat.icon className="w-5 h-5 text-purple-400" />
-                    <span className="text-2xl md:text-3xl font-bold text-white">{stat.value}</span>
-                  </div>
-                  <span className="text-sm text-purple-300/70">{stat.label}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* CTA buttons */}
+            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
               <Link 
                 to="/register" 
-                className="group relative px-8 py-4 bg-white text-purple-900 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/25"
+                className="group px-8 py-4 bg-slate-900 text-white rounded-xl font-semibold text-lg shadow-lg shadow-slate-900/20 hover:bg-slate-800 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
               >
-                <span>Get Started Free</span>
+                Open Account
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link 
                 to="/login" 
-                className="group px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-2xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2 hover:bg-white/20"
+                className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-xl font-semibold text-lg hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2"
               >
-                <Lock className="w-5 h-5" />
-                <span>Sign In</span>
+                Sign In
               </Link>
             </div>
 
-            {/* Trust badges */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-6">
-              {[
-                { icon: Shield, text: '256-bit SSL' },
-                { icon: Zap, text: 'Instant Transfers' },
-                { icon: CheckCircle, text: 'FDIC Insured' },
-              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-                  <badge.icon className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-white/70">{badge.text}</span>
-                </div>
-              ))}
+            {/* Trust Badges */}
+            <div className="pt-8 flex flex-wrap items-center justify-center lg:justify-start gap-x-8 gap-y-4 opacity-80 grayscale hover:grayscale-0 transition-all duration-500">
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-slate-400" />
+                <span className="text-sm font-medium text-slate-500">FDIC Insured</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-slate-400" />
+                <span className="text-sm font-medium text-slate-500">256-bit Encryption</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-slate-400" />
+                <span className="text-sm font-medium text-slate-500">Global Access</span>
+              </div>
             </div>
           </div>
 
-          {/* Right Content - Dashboard Preview */}
-          <div className="relative hidden lg:block">
-            <DashboardPreview />
+          {/* Right Content - 3D/Dashboard Preview */}
+          <div className="flex-1 w-full relative lg:h-[600px] flex items-center justify-center perspective-1000">
+            {/* Main Card - Tilted slightly for premium feel */}
+            <div className="relative w-full max-w-md lg:max-w-none bg-slate-900 rounded-3xl p-1 shadow-2xl shadow-purple-900/20 rotate-y-[-5deg] rotate-x-[5deg] hover:rotate-0 transition-transform duration-700 ease-out">
+              <div className="bg-slate-900 rounded-[22px] overflow-hidden border border-slate-800">
+                {/* Fake Browser Header */}
+                <div className="bg-slate-950 px-4 py-3 flex items-center gap-2 border-b border-slate-800">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                  </div>
+                  <div className="ml-4 px-3 py-1 bg-slate-800 rounded-md text-[10px] text-slate-400 font-mono flex-1 text-center">
+                    gatwickbank.com/dashboard
+                  </div>
+                </div>
+
+                {/* Dashboard Content */}
+                <div className="p-6 space-y-6">
+                  {/* Balance Header */}
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-slate-400 text-sm font-medium">Total Balance</p>
+                      <h3 className="text-3xl font-bold text-white mt-1">$84,250.50</h3>
+                      <p className="text-emerald-400 text-xs mt-1 flex items-center gap-1">
+                        <TrendingUp className="w-3 h-3" /> +2.4% this month
+                      </p>
+                    </div>
+                    <div className="p-2 bg-slate-800 rounded-lg border border-slate-700">
+                      <Wallet className="w-6 h-6 text-purple-400" />
+                    </div>
+                  </div>
+
+                  {/* Cards Grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gradient-to-br from-purple-600 to-indigo-700 p-4 rounded-xl text-white relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-2 opacity-20">
+                        <CreditCard className="w-12 h-12" />
+                      </div>
+                      <p className="text-purple-200 text-xs mb-4">Business Elite</p>
+                      <p className="font-mono text-sm mb-1">•••• 4242</p>
+                      <div className="flex justify-between items-end">
+                        <p className="text-xs opacity-80">Exp 12/28</p>
+                        <div className="w-8 h-5 bg-white/20 rounded"></div>
+                      </div>
+                    </div>
+                    <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col justify-center items-center gap-2 text-slate-400 hover:bg-slate-750 transition-colors cursor-pointer">
+                      <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center border border-slate-700">
+                        <Plus className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-medium">Add Card</span>
+                    </div>
+                  </div>
+
+                  {/* Transactions List */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Recent Activity</p>
+                    {[
+                      { name: 'Apple Store', date: 'Today', amount: '-$1,299.00', icon: ShoppingBag },
+                      { name: 'Deposit Received', date: 'Yesterday', amount: '+$5,400.00', icon: ArrowDownLeft, green: true },
+                      { name: 'Uber Trip', date: 'Yesterday', amount: '-$24.50', icon: Car },
+                    ].map((tx, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:bg-slate-800 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${tx.green ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-700 text-slate-300'}`}>
+                            <tx.icon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">{tx.name}</p>
+                            <p className="text-[10px] text-slate-500">{tx.date}</p>
+                          </div>
+                        </div>
+                        <span className={`text-sm font-semibold ${tx.green ? 'text-emerald-400' : 'text-white'}`}>
+                          {tx.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Floating Elements */}
+              <div className="absolute -right-6 top-12 bg-white p-4 rounded-xl shadow-xl animate-bounce duration-[3000ms]">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500">Transfer Complete</p>
+                    <p className="text-sm font-bold text-slate-900">+$5,400.00</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Bottom wave */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
-          <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
-        </svg>
       </div>
     </section>
   );
 };
 
-const DashboardPreview = () => (
-  <div className="relative">
-    {/* Glow effect */}
-    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-violet-500/30 rounded-3xl blur-3xl scale-95"></div>
-    
-    {/* Main dashboard card */}
-    <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-1 border border-white/20 shadow-2xl">
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[22px] p-6 space-y-5">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-slate-400 text-sm">Total Balance</p>
-            <p className="text-3xl font-bold text-white">$124,580.00</p>
-          </div>
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center">
-            <Wallet className="w-6 h-6 text-white" />
-          </div>
-        </div>
+// Helper icons
+const Plus = ({ className }) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>;
+const ShoppingBag = ({ className }) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>;
+const ArrowDownLeft = ({ className }) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 5l-7 7-7-7" /></svg>; // Simplified for visual
+const Car = ({ className }) => <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>; // Placeholder
 
-        {/* Currency cards */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { currency: 'USD', amount: '$84,250', flag: '🇺🇸', change: '+2.4%' },
-            { currency: 'EUR', amount: '€32,100', flag: '🇪🇺', change: '+1.2%' },
-            { currency: 'GBP', amount: '£8,230', flag: '🇬🇧', change: '+0.8%' },
-          ].map((item, i) => (
-            <div key={i} className="bg-white/5 rounded-xl p-3 border border-white/10">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-lg">{item.flag}</span>
-                <span className="text-slate-400 text-xs">{item.currency}</span>
-              </div>
-              <p className="text-white font-semibold text-sm">{item.amount}</p>
-              <p className="text-green-400 text-xs">{item.change}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Quick actions */}
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { icon: Send, label: 'Send', color: 'from-purple-500 to-violet-500' },
-            { icon: Wallet, label: 'Receive', color: 'from-blue-500 to-cyan-500' },
-            { icon: CreditCard, label: 'Cards', color: 'from-pink-500 to-rose-500' },
-            { icon: Globe, label: 'Exchange', color: 'from-amber-500 to-orange-500' },
-          ].map((action, i) => (
-            <div key={i} className="text-center group cursor-pointer">
-              <div className={`w-12 h-12 mx-auto bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform shadow-lg`}>
-                <action.icon className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xs text-slate-400">{action.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Recent transactions */}
-        <div className="space-y-3">
-          <p className="text-slate-400 text-sm font-medium">Recent Activity</p>
-          {[
-            { name: 'Netflix Subscription', amount: '-$15.99', type: 'debit', time: '2m ago' },
-            { name: 'Salary Deposit', amount: '+$5,400.00', type: 'credit', time: '1h ago' },
-            { name: 'Transfer to Sarah', amount: '-$250.00', type: 'debit', time: '3h ago' },
-          ].map((tx, i) => (
-            <div key={i} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  tx.type === 'credit' ? 'bg-green-500/20' : 'bg-slate-700'
-                }`}>
-                  <ArrowRight className={`w-4 h-4 ${
-                    tx.type === 'credit' ? 'text-green-400 rotate-[-135deg]' : 'text-slate-400 rotate-45'
-                  }`} />
-                </div>
-                <div>
-                  <p className="text-white text-sm font-medium">{tx.name}</p>
-                  <p className="text-slate-500 text-xs">{tx.time}</p>
-                </div>
-              </div>
-              <span className={`font-semibold ${
-                tx.type === 'credit' ? 'text-green-400' : 'text-white'
-              }`}>{tx.amount}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    {/* Floating notification cards */}
-    <div className="absolute -right-4 top-16 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100 animate-bounce" style={{animationDuration: '3s'}}>
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-          <CheckCircle className="w-5 h-5 text-green-600" />
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Payment Received</p>
-          <p className="text-sm font-bold text-gray-900">+$3,500.00</p>
-        </div>
-      </div>
-    </div>
-
-    <div className="absolute -left-4 bottom-24 bg-white rounded-2xl p-4 shadow-2xl border border-gray-100 animate-bounce" style={{animationDuration: '4s', animationDelay: '1s'}}>
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-          <Zap className="w-5 h-5 text-purple-600" />
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Instant Transfer</p>
-          <p className="text-sm font-bold text-gray-900">Completed</p>
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 const PhoneMockup = () => (
   <div className="relative mx-auto max-w-sm lg:max-w-md">
