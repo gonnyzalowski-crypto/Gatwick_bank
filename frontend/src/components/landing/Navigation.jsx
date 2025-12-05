@@ -31,10 +31,12 @@ export const Navigation = () => {
         <div className="flex justify-between items-center h-18 py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200 ${
+              scrolled ? 'bg-gradient-to-br from-purple-600 to-purple-800' : 'bg-white/10 backdrop-blur-sm border border-white/20'
+            }`}>
               <Building2 className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">
+            <span className={`text-xl font-bold transition-colors ${scrolled ? 'text-gray-900' : 'text-white'}`}>
               Gatwick Bank
             </span>
           </Link>
@@ -45,7 +47,9 @@ export const Navigation = () => {
               <a 
                 key={link.href}
                 href={link.href} 
-                className="text-gray-600 hover:text-purple-700 font-medium transition-colors duration-200"
+                className={`font-medium transition-colors duration-200 ${
+                  scrolled ? 'text-gray-600 hover:text-purple-700' : 'text-white/80 hover:text-white'
+                }`}
               >
                 {link.label}
               </a>
@@ -56,13 +60,19 @@ export const Navigation = () => {
           <div className="hidden md:flex items-center gap-3">
             <Link 
               to="/login" 
-              className="px-5 py-2.5 text-gray-700 hover:text-purple-700 font-medium transition-colors duration-200"
+              className={`px-5 py-2.5 font-medium transition-colors duration-200 ${
+                scrolled ? 'text-gray-700 hover:text-purple-700' : 'text-white/90 hover:text-white'
+              }`}
             >
               Sign In
             </Link>
             <Link 
               to="/register" 
-              className="group px-6 py-2.5 bg-purple-700 hover:bg-purple-800 text-white rounded-full font-semibold transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg"
+              className={`group px-6 py-2.5 rounded-full font-semibold transition-all duration-200 flex items-center gap-2 ${
+                scrolled 
+                  ? 'bg-purple-700 hover:bg-purple-800 text-white shadow-md hover:shadow-lg' 
+                  : 'bg-white text-purple-900 hover:bg-white/90 shadow-lg'
+              }`}
             >
               Get Started
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -72,10 +82,15 @@ export const Navigation = () => {
           {/* Mobile Menu Button */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className={`md:hidden p-2 rounded-lg transition-colors ${
+              scrolled ? 'hover:bg-gray-100' : 'hover:bg-white/10'
+            }`}
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6 text-gray-700" /> : <Menu className="w-6 h-6 text-gray-700" />}
+            {mobileMenuOpen 
+              ? <X className={`w-6 h-6 ${scrolled ? 'text-gray-700' : 'text-white'}`} /> 
+              : <Menu className={`w-6 h-6 ${scrolled ? 'text-gray-700' : 'text-white'}`} />
+            }
           </button>
         </div>
       </div>
