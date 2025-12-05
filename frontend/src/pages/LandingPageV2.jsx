@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HeroSection } from '../components/landing/HeroSection';
 import { TrustBadges } from '../components/landing/TrustBadges';
 import { FeaturesSection } from '../components/landing/FeaturesSection';
+import { ServicesSection } from '../components/landing/ServicesSection';
 import { TestimonialsSection } from '../components/landing/TestimonialsSection';
 import { ComparisonSection } from '../components/landing/ComparisonSection';
 import { NewsSection } from '../components/landing/NewsSection';
@@ -100,10 +101,11 @@ export const LandingPageV2 = () => {
       <Navigation />
       <HeroSection />
       <TrustBadges />
-      <ComparisonSection />
+      <ServicesSection />
       <FeaturesSection activeFeature={activeFeature} setActiveFeature={setActiveFeature} />
-      <NewsSection />
+      <ComparisonSection />
       <TestimonialsSection />
+      <NewsSection />
       <FAQSection />
       <CTASection />
       <Footer />
