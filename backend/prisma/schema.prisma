@@ -750,16 +750,18 @@ model RecurringPayment {
 model RecurringPaymentExecution {
   id                  String   @id @default(cuid())
   recurringPaymentId  String
-  executionDate       DateTime
+  executionDate       DateTime @default(now())
   amount              Decimal  @db.Decimal(15, 2)
-  status              String   // "SUCCESS" | "FAILED" | "PENDING"
+  status              String   @default("PENDING") // "SUCCESS" | "FAILED" | "PENDING"
   transactionId       String?  // Reference to created transaction
   errorMessage        String?
+  retryCount          Int      @default(0)
   createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
   
   recurringPayment    RecurringPayment @relation(fields: [recurringPaymentId], references: [id], onDelete: Cascade)
   
   @@index([recurringPaymentId])
-  @@index([executionDate])
+  @@index([status])
   @@map("recurring_payment_executions")
 }
