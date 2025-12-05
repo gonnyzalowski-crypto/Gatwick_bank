@@ -36,35 +36,25 @@ export const TrustBadges = () => {
       </div>
 
       {/* Trusted Banks Marquee */}
-      <div className="relative py-6 bg-slate-50/50 border-t border-slate-100">
-        <p className="text-center text-xs font-semibold text-slate-400 uppercase tracking-widest mb-6">Trusted by Leading Global Institutions</p>
+      <div className="relative py-8 bg-slate-50/50 border-t border-slate-100">
+        <p className="text-center text-xs font-bold text-slate-500 uppercase tracking-widest mb-8">Trusted by Leading Global Institutions</p>
         
         <div className="flex overflow-hidden whitespace-nowrap relative">
           {/* Gradient masks for smooth fade */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10"></div>
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-10"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10"></div>
 
           {/* Marquee Animation Container */}
-          <div className="flex animate-marquee">
-            {[...banks, ...banks, ...banks].map((bank, i) => (
-              <div key={i} className="flex items-center mx-8 opacity-50 hover:opacity-100 transition-opacity">
-                <Landmark className="w-4 h-4 text-slate-400 mr-2" />
-                <span className="text-lg font-bold text-slate-600 whitespace-nowrap font-serif tracking-tight">{bank}</span>
+          <div className="flex animate-marquee items-center">
+            {[...banks, ...banks, ...banks, ...banks].map((bank, i) => (
+              <div key={i} className="flex items-center mx-12 opacity-60 hover:opacity-100 transition-opacity">
+                <Landmark className="w-5 h-5 text-slate-400 mr-3" />
+                <span className="text-xl font-bold text-slate-700 whitespace-nowrap font-serif tracking-tight">{bank}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-33.33%); }
-        }
-        .animate-marquee {
-          animation: marquee 40s linear infinite;
-        }
-      `}</style>
     </section>
   );
 };
