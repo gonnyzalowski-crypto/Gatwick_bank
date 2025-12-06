@@ -240,8 +240,21 @@ const UserDashboardLayout = ({ children }) => {
           {/* User Profile Footer */}
           <div className="border-t border-neutral-100 p-4">
             <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors cursor-pointer group">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-bold shadow-sm">
-                {user?.email?.[0]?.toUpperCase() || 'U'}
+              {user?.profilePhoto ? (
+                <img 
+                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
+                  alt="Profile"
+                  className="h-10 w-10 rounded-full object-cover shadow-sm"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div 
+                className={`h-10 w-10 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white text-sm font-bold shadow-sm ${user?.profilePhoto ? 'hidden' : ''}`}
+              >
+                {user?.firstName?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-semibold text-neutral-900 truncate">

@@ -9,7 +9,6 @@ import { ErrorState } from '../components/ui/ErrorState';
 import { LoadingSkeleton } from '../components/ui/LoadingSkeleton';
 import { TransactionHistoryModal } from '../components/TransactionHistoryModal';
 import AccountCreationModal from '../components/modals/AccountCreationModal';
-import SendMoneyModal from '../components/modals/SendMoneyModal';
 import { formatDate } from '../utils/dateFormatter';
 import {
   Wallet,
@@ -17,7 +16,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   TrendingUp,
-  Send,
   Download,
   Plus,
   Clock,
@@ -35,7 +33,6 @@ export const DashboardPage = () => {
   const [kyc, setKyc] = useState(null);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
-  const [showSendMoneyModal, setShowSendMoneyModal] = useState(false);
 
   useEffect(() => {
     const fetchDashboardAndKyc = async () => {
@@ -164,14 +161,6 @@ export const DashboardPage = () => {
 
               {/* Quick Actions */}
               <div className="flex flex-wrap gap-3">
-                <ActionButton
-                  variant="secondary"
-                  size="md"
-                  icon={Send}
-                  onClick={() => setShowSendMoneyModal(true)}
-                >
-                  Send Money
-                </ActionButton>
                 <ActionButton
                   variant="outline"
                   size="md"
@@ -489,12 +478,6 @@ export const DashboardPage = () => {
         }}
       />
 
-      {/* Send Money Modal */}
-      <SendMoneyModal
-        isOpen={showSendMoneyModal}
-        onClose={() => setShowSendMoneyModal(false)}
-        userAccounts={dashboard?.accounts || []}
-      />
     </UserDashboardLayout>
   );
 };
