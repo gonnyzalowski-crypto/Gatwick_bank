@@ -16,6 +16,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   TrendingUp,
+  Send,
   Download,
   Plus,
   Clock,
