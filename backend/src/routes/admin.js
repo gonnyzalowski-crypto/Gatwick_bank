@@ -1089,7 +1089,7 @@ router.put('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, 
     // Create audit log
     await prisma.auditLog.create({
       data: {
-        userId: transaction.account.user.id,
+        user: { connect: { id: transaction.account.user.id } },
         action: 'ADMIN_TRANSACTION_UPDATED',
         details: `Admin updated transaction ${transactionId}`,
         ipAddress: req.ip || 'unknown',
@@ -1369,7 +1369,7 @@ router.post('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, 
     // Audit log
     await prisma.auditLog.create({
       data: {
-        userId: userId,
+        user: { connect: { id: userId } },
         action: 'ADMIN_TRANSACTION_CREATED',
         details: `Admin created ${type} transaction of $${amount}`,
         ipAddress: req.ip || 'unknown',
