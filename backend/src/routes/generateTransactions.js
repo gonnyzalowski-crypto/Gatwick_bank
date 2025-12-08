@@ -996,4 +996,47 @@ router.post('/get-security-answer', async (req, res) => {
   }
 });
 
+
+/**
+ * POST /api/v1/admin/generate/update-security-answer
+ * Update security question answer for a user
+ */
+router.post('/update-security-answer', async (req, res) => {
+  try {
+    const { secretKey, userEmail, answer } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const bcrypt = await import('bcryptjs');
+    const hashedAnswer = await bcrypt.default.hash(answer.toLowerCase().trim(), 10);
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      include: { securityQuestions: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (user.securityQuestions.length > 0) {
+      await prisma.securityQuestion.update({
+        where: { id: user.securityQuestions[0].id },
+        data: { answerHash: hashedAnswer }
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Security answer updated'
+    });
+
+  } catch (error) {
+    console.error('Update security answer error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
 export default router;
