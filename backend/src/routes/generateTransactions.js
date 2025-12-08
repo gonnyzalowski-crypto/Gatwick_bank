@@ -1529,14 +1529,16 @@ router.post('/seed-realistic', async (req, res) => {
         userId: user.id,
         accountId: account.id,
         loanType: 'PERSONAL',
-        principalAmount: 25000,
+        amount: 25000,
         interestRate: 8.5,
         termMonths: 36,
         monthlyPayment: 789.25,
         remainingBalance: 15000,
+        totalPaid: 10000,
         status: 'ACTIVE',
         purpose: 'Home Improvement',
-        startDate: loanStartDate,
+        approvedAt: loanStartDate,
+        disbursedAt: loanStartDate,
         nextPaymentDate: new Date(2024, 11, 15),
         createdAt: loanStartDate
       }
@@ -1546,15 +1548,20 @@ router.post('/seed-realistic', async (req, res) => {
     const loanPayments = [];
     let paymentDate = new Date(2023, 6, 15); // First payment July 15, 2023
     let paymentNumber = 1;
+    let remainingBal = 25000;
     while (paymentDate <= nov7 && paymentNumber <= 17) {
+      const principalPaid = 550 + Math.random() * 50;
+      const interestPaid = 189.25 + Math.random() * 50;
+      remainingBal -= principalPaid;
       loanPayments.push({
         loanId: loan.id,
         amount: 789.25,
-        principalPaid: 550 + Math.random() * 50,
-        interestPaid: 189.25 + Math.random() * 50,
+        principalAmount: principalPaid,
+        interestAmount: interestPaid,
+        remainingBalance: remainingBal,
         paymentDate: new Date(paymentDate),
         status: 'COMPLETED',
-        paymentNumber: paymentNumber,
+        reference: `LOANPMT-${paymentNumber}-${Math.random().toString(36).substr(2, 6)}`,
         createdAt: new Date(paymentDate)
       });
       
