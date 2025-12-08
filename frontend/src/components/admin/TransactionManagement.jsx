@@ -26,7 +26,7 @@ export const TransactionManagement = () => {
   // Transactions state
   const [transactions, setTransactions] = useState([]);
   const [txLoading, setTxLoading] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, limit: 25, total: 0, pages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, limit: 100, total: 0, pages: 0 });
   
   // Filters
   const [filterType, setFilterType] = useState('all');

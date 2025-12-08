@@ -1196,7 +1196,7 @@ router.get('/users-with-transactions', verifyAuth, verifyAdmin, async (req, res)
 router.get('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { type, category, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const { type, category, startDate, endDate, page = 1, limit = 100 } = req.query;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -1368,9 +1368,9 @@ router.post('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, 
     // Audit log
     await prisma.auditLog.create({
       data: {
-        userId: user.id,
+        userId: userId,
         action: 'ADMIN_TRANSACTION_CREATED',
-        details: `Admin created ${type} transaction of $${amount} for ${user.email}`,
+        details: `Admin created ${type} transaction of $${amount}`,
         ipAddress: req.ip || 'unknown',
         userAgent: req.headers['user-agent'] || 'unknown'
       }
