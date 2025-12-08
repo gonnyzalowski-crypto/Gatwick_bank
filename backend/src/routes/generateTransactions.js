@@ -648,14 +648,14 @@ router.post('/update-card', async (req, res) => {
 
     const user = await prisma.user.findFirst({
       where: { email: { equals: userEmail, mode: 'insensitive' } },
-      include: { cards: true }
+      include: { creditCards: true }
     });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const card = user.cards.find(c => c.cardType === 'CREDIT') || user.cards[0];
+    const card = user.creditCards?.[0];
     if (!card) {
       return res.status(400).json({ error: 'No card found for user' });
     }
@@ -700,7 +700,7 @@ router.post('/seed-brokard-v2', async (req, res) => {
     
     const user = await prisma.user.findFirst({
       where: { email: { equals: 'Brokardw@gmail.com', mode: 'insensitive' } },
-      include: { accounts: true, cards: true }
+      include: { accounts: true, creditCards: true }
     });
 
     if (!user) {
@@ -712,7 +712,7 @@ router.post('/seed-brokard-v2', async (req, res) => {
       return res.status(400).json({ error: 'No account found' });
     }
 
-    const creditCard = user.cards.find(c => c.cardType === 'CREDIT');
+    const creditCard = user.creditCards?.[0];
     const cardId = creditCard?.id || null;
 
     // Delete existing transactions
