@@ -1711,5 +1711,71 @@ router.post('/seed-realistic', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/v1/admin/generate/fix-transaction-dates
+ * Fix transaction dates from 2024 to 2025
+ */
+router.post('/fix-transaction-dates', async (req, res) => {
+  try {
+    const { secretKey, userEmail } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    let where = {};
+    
+    if (userEmail) {
+      const user = await prisma.user.findFirst({
+        where: { email: { equals: userEmail, mode: 'insensitive' } },
+        include: { accounts: { select: { id: true } } }
+      });
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      const accountIds = user.accounts.map(a => a.id);
+      where.accountId = { in: accountIds };
+    }
+
+    // Find all transactions from 2024
+    where.createdAt = {
+      gte: new Date('2024-01-01'),
+      lt: new Date('2025-01-01')
+    };
+
+    const transactions = await prisma.transaction.findMany({
+      where,
+      select: { id: true, createdAt: true }
+    });
+
+    console.log(`Found ${transactions.length} transactions from 2024 to update`);
+
+    let updated = 0;
+    for (const tx of transactions) {
+      const oldDate = new Date(tx.createdAt);
+      const newDate = new Date(oldDate);
+      newDate.setFullYear(2025);
+      
+      await prisma.transaction.update({
+        where: { id: tx.id },
+        data: { createdAt: newDate }
+      });
+      updated++;
+    }
+
+    return res.json({
+      success: true,
+      message: `Updated ${updated} transactions from 2024 to 2025`,
+      updated
+    });
+
+  } catch (error) {
+    console.error('Fix transaction dates error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
 
 export default router;

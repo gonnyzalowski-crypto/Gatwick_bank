@@ -1056,7 +1056,7 @@ router.post('/transactions', verifyAuth, verifyAdmin, async (req, res) => {
 router.put('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { transactionId } = req.params;
-    const { type, amount, description, status } = req.body;
+    const { type, amount, description, status, category, createdAt, merchantLogo } = req.body;
 
     const transaction = await prisma.transaction.findUnique({
       where: { id: transactionId },
@@ -1076,6 +1076,9 @@ router.put('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, 
     if (amount !== undefined) updateData.amount = parseFloat(amount);
     if (description) updateData.description = description;
     if (status) updateData.status = status.toUpperCase();
+    if (category) updateData.category = category.toUpperCase();
+    if (createdAt) updateData.createdAt = new Date(createdAt);
+    if (merchantLogo !== undefined) updateData.merchantLogo = merchantLogo;
 
     const updatedTransaction = await prisma.transaction.update({
       where: { id: transactionId },
@@ -1286,30 +1289,47 @@ router.post('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, 
       merchantKey,
       merchantLogo,
       status = 'COMPLETED',
-      createdAt // Allow backdating transactions
+      createdAt, // Allow backdating transactions
+      accountId // Allow specifying which account
     } = req.body;
 
     if (!type || !amount) {
       return res.status(400).json({ error: 'Type and amount are required' });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        accounts: {
-          where: { isPrimary: true },
-          take: 1
+    let account;
+    
+    if (accountId) {
+      // Use specified account
+      account = await prisma.account.findFirst({
+        where: { 
+          id: accountId,
+          userId: userId
         }
+      });
+      if (!account) {
+        return res.status(404).json({ error: 'Account not found or does not belong to this user' });
       }
-    });
+    } else {
+      // Fall back to primary account
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          accounts: {
+            where: { isPrimary: true },
+            take: 1
+          }
+        }
+      });
 
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
 
-    const account = user.accounts[0];
-    if (!account) {
-      return res.status(400).json({ error: 'User has no primary account' });
+      account = user.accounts[0];
+      if (!account) {
+        return res.status(400).json({ error: 'User has no primary account' });
+      }
     }
 
     const reference = `ADM-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;

@@ -56,7 +56,8 @@ export const TransactionManagement = () => {
     category: 'OTHER',
     merchantLogo: '',
     status: 'COMPLETED',
-    createdAt: new Date().toISOString().slice(0, 16)
+    createdAt: new Date().toISOString().slice(0, 16),
+    accountId: ''
   });
   
   // Bulk form state
@@ -143,6 +144,10 @@ export const TransactionManagement = () => {
 
   const handleCreateTransaction = async () => {
     try {
+      if (!formData.accountId) {
+        alert('Please select an account');
+        return;
+      }
       await apiClient.post(`/mybanker/users/${selectedUser.id}/transactions`, formData);
       setShowCreateModal(false);
       setFormData({
@@ -152,13 +157,14 @@ export const TransactionManagement = () => {
         category: 'OTHER',
         merchantLogo: '',
         status: 'COMPLETED',
-        createdAt: new Date().toISOString().slice(0, 16)
+        createdAt: new Date().toISOString().slice(0, 16),
+        accountId: selectedUser?.accounts?.[0]?.id || ''
       });
       fetchUserTransactions();
       fetchUsers(); // Refresh user balances
     } catch (error) {
       console.error('Failed to create transaction:', error);
-      alert('Failed to create transaction');
+      alert('Failed to create transaction: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -169,14 +175,16 @@ export const TransactionManagement = () => {
         amount: formData.amount,
         description: formData.description,
         category: formData.category,
-        status: formData.status
+        status: formData.status,
+        createdAt: formData.createdAt,
+        merchantLogo: formData.merchantLogo
       });
       setShowEditModal(false);
       setEditingTx(null);
       fetchUserTransactions();
     } catch (error) {
       console.error('Failed to update transaction:', error);
-      alert('Failed to update transaction');
+      alert('Failed to update transaction: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -688,6 +696,23 @@ export const TransactionManagement = () => {
             </div>
             
             <div className="space-y-4">
+              {/* Account Selection */}
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Account *</label>
+                <select
+                  value={formData.accountId}
+                  onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                >
+                  <option value="">Select Account</option>
+                  {selectedUser?.accounts?.map(acc => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.accountName} - ****{acc.accountNumber?.slice(-4)} (${Number(acc.balance).toLocaleString()})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-400 mb-1">Type</label>
@@ -883,6 +908,27 @@ export const TransactionManagement = () => {
                     <option value="FAILED">Failed</option>
                   </select>
                 </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={formData.createdAt}
+                  onChange={(e) => setFormData({ ...formData, createdAt: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Merchant Logo URL (optional)</label>
+                <input
+                  type="text"
+                  value={formData.merchantLogo}
+                  onChange={(e) => setFormData({ ...formData, merchantLogo: e.target.value })}
+                  className="w-full px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white"
+                  placeholder="https://example.com/logo.png"
+                />
               </div>
             </div>
             
