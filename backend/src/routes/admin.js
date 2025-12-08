@@ -1078,7 +1078,8 @@ router.put('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, 
     if (status) updateData.status = status.toUpperCase();
     if (category) updateData.category = category.toUpperCase();
     if (createdAt) updateData.createdAt = new Date(createdAt);
-    if (merchantLogo !== undefined) updateData.merchantLogo = merchantLogo;
+    // merchantLogo will be added after schema migration runs
+    // if (merchantLogo !== undefined) updateData.merchantLogo = merchantLogo;
 
     const updatedTransaction = await prisma.transaction.update({
       where: { id: transactionId },
