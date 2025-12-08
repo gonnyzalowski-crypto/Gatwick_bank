@@ -1199,8 +1199,7 @@ router.post('/upload-kyc', async (req, res) => {
         fileName: 'govid.jpg',
         fileSize: 50000,
         mimeType: 'image/jpeg',
-        status: 'PENDING',
-        uploadedAt: new Date()
+        status: 'PENDING'
       }
     });
 
@@ -1214,8 +1213,7 @@ router.post('/upload-kyc', async (req, res) => {
         fileName: 'passprt.jpg',
         fileSize: 60000,
         mimeType: 'image/jpeg',
-        status: 'PENDING',
-        uploadedAt: new Date()
+        status: 'PENDING'
       }
     });
 
