@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Mail, Phone, Calendar, MapPin, Shield, CreditCard, Loader2 } from 'lucide-react';
+import { X, User, Mail, Phone, MapPin, Shield, CreditCard, Loader2 } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 
 const UserProfileModal = ({ isOpen, onClose, user }) => {
@@ -151,15 +151,6 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
                 <span className="text-sm font-medium text-neutral-900 text-right">{userData?.phone || 'Not provided'}</span>
               </div>
               <div className="flex items-start justify-between py-2 border-b border-neutral-100">
-                <span className="text-sm text-neutral-600 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Date of Birth
-                </span>
-                <span className="text-sm font-medium text-neutral-900 text-right">
-                  {userData?.dateOfBirth ? formatDate(userData.dateOfBirth) : 'Not provided'}
-                </span>
-              </div>
-              <div className="flex items-start justify-between py-2">
                 <span className="text-sm text-neutral-600 flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
                   Address

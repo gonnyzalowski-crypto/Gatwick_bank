@@ -1164,4 +1164,452 @@ router.post('/update-profile-photo', async (req, res) => {
   }
 });
 
+
+/**
+ * POST /api/v1/admin/generate/seed-realistic
+ * Generate realistic balanced transaction history with proper credits/debits
+ * Last transaction on Nov 7th, only Netflix and avasflowers after that
+ */
+router.post('/seed-realistic', async (req, res) => {
+  try {
+    const { secretKey, userEmail, targetBalance = 1725916 } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      include: { accounts: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const account = user.accounts.find(a => a.isPrimary) || user.accounts[0];
+    if (!account) {
+      return res.status(400).json({ error: 'User has no accounts' });
+    }
+
+    // Delete existing transactions and loans
+    await prisma.transaction.deleteMany({ where: { accountId: account.id } });
+    await prisma.loan.deleteMany({ where: { userId: user.id } });
+
+    const transactions = [];
+    const now = new Date();
+    const nov7 = new Date(2024, 10, 7); // Nov 7, 2024
+    const startDate = new Date(2021, 0, 1); // Jan 1, 2021
+
+    // ========== CREDIT TRANSACTIONS (Income) ==========
+    
+    // 1. ConocoPhillips - Monthly Salary ($18,500/month)
+    let salaryDate = new Date(startDate);
+    while (salaryDate <= nov7) {
+      const payDay = new Date(salaryDate.getFullYear(), salaryDate.getMonth(), 15);
+      if (payDay <= nov7) {
+        transactions.push({
+          accountId: account.id,
+          amount: 18500 + Math.random() * 500,
+          type: 'CREDIT',
+          description: 'ConocoPhillips - Direct Deposit Payroll',
+          category: 'SALARY',
+          merchantName: 'ConocoPhillips Company',
+          merchantCategory: 'Oil & Gas',
+          status: 'COMPLETED',
+          reference: `COP-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          createdAt: payDay
+        });
+      }
+      salaryDate.setMonth(salaryDate.getMonth() + 1);
+    }
+
+    // 2. Tax Refunds (Annual in April)
+    for (let year = 2021; year <= 2024; year++) {
+      const taxDate = new Date(year, 3, Math.floor(Math.random() * 15) + 5);
+      if (taxDate <= nov7) {
+        transactions.push({
+          accountId: account.id,
+          amount: 8500 + Math.random() * 4000,
+          type: 'CREDIT',
+          description: `IRS Tax Refund - Tax Year ${year - 1}`,
+          category: 'TAX_REFUND',
+          merchantName: 'Internal Revenue Service',
+          merchantCategory: 'Government',
+          status: 'COMPLETED',
+          reference: `IRS-${year}-${Math.random().toString(36).substr(2, 6)}`,
+          createdAt: taxDate
+        });
+      }
+    }
+
+    // 3. Investment Returns - Quarterly from Bitenders LLC
+    let investDate = new Date(2021, 2, 15);
+    while (investDate <= nov7) {
+      transactions.push({
+        accountId: account.id,
+        amount: 2500 + Math.random() * 1500,
+        type: 'CREDIT',
+        description: 'Bitenders LLC - Quarterly Dividend',
+        category: 'INVESTMENT',
+        merchantName: 'Bitenders LLC',
+        merchantCategory: 'Investment',
+        status: 'COMPLETED',
+        reference: `BIT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(investDate)
+      });
+      investDate.setMonth(investDate.getMonth() + 3);
+    }
+
+    // 4. Savings Interest - Monthly
+    let interestDate = new Date(2021, 0, 28);
+    while (interestDate <= nov7) {
+      transactions.push({
+        accountId: account.id,
+        amount: 150 + Math.random() * 100,
+        type: 'CREDIT',
+        description: 'Gatwick Bank - Savings Interest',
+        category: 'INTEREST',
+        merchantName: 'Gatwick Bank',
+        merchantCategory: 'Banking',
+        status: 'COMPLETED',
+        reference: `INT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(interestDate)
+      });
+      interestDate.setMonth(interestDate.getMonth() + 1);
+    }
+
+    // 5. Freelance Income - Occasional
+    const freelanceDates = [
+      new Date(2021, 5, 10), new Date(2021, 9, 22), new Date(2022, 1, 15),
+      new Date(2022, 6, 8), new Date(2022, 11, 3), new Date(2023, 3, 18),
+      new Date(2023, 7, 25), new Date(2024, 0, 12), new Date(2024, 4, 20),
+      new Date(2024, 8, 5)
+    ];
+    for (const fDate of freelanceDates) {
+      if (fDate <= nov7) {
+        transactions.push({
+          accountId: account.id,
+          amount: 3000 + Math.random() * 5000,
+          type: 'CREDIT',
+          description: 'Consulting Services Payment',
+          category: 'FREELANCE',
+          merchantName: 'Various Clients',
+          merchantCategory: 'Professional Services',
+          status: 'COMPLETED',
+          reference: `FRL-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+          createdAt: fDate
+        });
+      }
+    }
+
+    // ========== DEBIT TRANSACTIONS (Expenses) ==========
+    
+    // Monthly recurring bills
+    let billDate = new Date(2021, 0, 5);
+    while (billDate <= nov7) {
+      const month = billDate.getMonth();
+      const year = billDate.getFullYear();
+      
+      // Rent/Mortgage - 1st of month
+      transactions.push({
+        accountId: account.id,
+        amount: 2200,
+        type: 'DEBIT',
+        description: 'Jefferson City Housing - Monthly Rent',
+        category: 'HOUSING',
+        merchantName: 'Jefferson City Housing Authority',
+        merchantCategory: 'Real Estate',
+        status: 'COMPLETED',
+        reference: `RENT-${year}${month}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(year, month, 1)
+      });
+
+      // Utilities - 5th of month
+      transactions.push({
+        accountId: account.id,
+        amount: 180 + Math.random() * 60,
+        type: 'DEBIT',
+        description: 'Ameren Missouri - Electric Bill',
+        category: 'UTILITIES',
+        merchantName: 'Ameren Missouri',
+        merchantCategory: 'Utilities',
+        status: 'COMPLETED',
+        reference: `UTIL-${year}${month}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(year, month, 5)
+      });
+
+      // Water - 10th of month
+      transactions.push({
+        accountId: account.id,
+        amount: 65 + Math.random() * 25,
+        type: 'DEBIT',
+        description: 'Jefferson City Water - Water & Sewer',
+        category: 'UTILITIES',
+        merchantName: 'Jefferson City Water',
+        merchantCategory: 'Utilities',
+        status: 'COMPLETED',
+        reference: `WATER-${year}${month}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(year, month, 10)
+      });
+
+      // Internet - 15th of month
+      transactions.push({
+        accountId: account.id,
+        amount: 89.99,
+        type: 'DEBIT',
+        description: 'Spectrum - Internet Service',
+        category: 'UTILITIES',
+        merchantName: 'Spectrum',
+        merchantCategory: 'Telecommunications',
+        status: 'COMPLETED',
+        reference: `NET-${year}${month}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(year, month, 15)
+      });
+
+      // Netflix - 18th of month
+      transactions.push({
+        accountId: account.id,
+        amount: 15.99,
+        type: 'DEBIT',
+        description: 'Netflix - Monthly Subscription',
+        category: 'ENTERTAINMENT',
+        merchantName: 'Netflix',
+        merchantCategory: 'Streaming',
+        status: 'COMPLETED',
+        reference: `NFLX-${year}${month}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(year, month, 18)
+      });
+
+      // Car Insurance - 20th of month
+      transactions.push({
+        accountId: account.id,
+        amount: 145,
+        type: 'DEBIT',
+        description: 'State Farm - Auto Insurance',
+        category: 'INSURANCE',
+        merchantName: 'State Farm',
+        merchantCategory: 'Insurance',
+        status: 'COMPLETED',
+        reference: `INS-${year}${month}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(year, month, 20)
+      });
+
+      billDate.setMonth(billDate.getMonth() + 1);
+    }
+
+    // Groceries - Weekly
+    let groceryDate = new Date(2021, 0, 3);
+    while (groceryDate <= nov7) {
+      const stores = ['Walmart', 'Costco', 'Hy-Vee', 'Target', 'Aldi'];
+      const store = stores[Math.floor(Math.random() * stores.length)];
+      transactions.push({
+        accountId: account.id,
+        amount: 80 + Math.random() * 150,
+        type: 'DEBIT',
+        description: `${store} - Groceries`,
+        category: 'GROCERIES',
+        merchantName: store,
+        merchantCategory: 'Retail',
+        status: 'COMPLETED',
+        reference: `GRC-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(groceryDate)
+      });
+      groceryDate.setDate(groceryDate.getDate() + 7);
+    }
+
+    // Gas - Every 10 days
+    let gasDate = new Date(2021, 0, 8);
+    while (gasDate <= nov7) {
+      const stations = ['Shell', 'BP', 'QuikTrip', 'Casey\'s'];
+      const station = stations[Math.floor(Math.random() * stations.length)];
+      transactions.push({
+        accountId: account.id,
+        amount: 45 + Math.random() * 35,
+        type: 'DEBIT',
+        description: `${station} Gas Station - Fuel`,
+        category: 'TRANSPORTATION',
+        merchantName: station,
+        merchantCategory: 'Gas Station',
+        status: 'COMPLETED',
+        reference: `GAS-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(gasDate)
+      });
+      gasDate.setDate(gasDate.getDate() + 10);
+    }
+
+    // Dining - 2-3 times per month
+    let diningDate = new Date(2021, 0, 12);
+    while (diningDate <= nov7) {
+      const restaurants = ['Olive Garden', 'Applebee\'s', 'Chili\'s', 'Panera Bread', 'Chipotle', 'Starbucks'];
+      const restaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
+      transactions.push({
+        accountId: account.id,
+        amount: 25 + Math.random() * 75,
+        type: 'DEBIT',
+        description: `${restaurant} - Dining`,
+        category: 'DINING',
+        merchantName: restaurant,
+        merchantCategory: 'Restaurant',
+        status: 'COMPLETED',
+        reference: `DIN-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(diningDate)
+      });
+      diningDate.setDate(diningDate.getDate() + Math.floor(Math.random() * 7) + 10);
+    }
+
+    // ========== POST NOV 7 - Only Netflix and avasflowers.net ==========
+    
+    // Netflix - Nov 18, 2024
+    transactions.push({
+      accountId: account.id,
+      amount: 15.99,
+      type: 'DEBIT',
+      description: 'Netflix - Monthly Subscription',
+      category: 'ENTERTAINMENT',
+      merchantName: 'Netflix',
+      merchantCategory: 'Streaming',
+      status: 'COMPLETED',
+      reference: `NFLX-202411-${Math.random().toString(36).substr(2, 6)}`,
+      createdAt: new Date(2024, 10, 18)
+    });
+
+    // avasflowers.net - Nov 25, 2024
+    transactions.push({
+      accountId: account.id,
+      amount: 89.99,
+      type: 'DEBIT',
+      description: 'avasflowers.net - Flower Delivery',
+      category: 'SHOPPING',
+      merchantName: 'avasflowers.net',
+      merchantCategory: 'Florist',
+      status: 'COMPLETED',
+      reference: `AVAS-202411-${Math.random().toString(36).substr(2, 6)}`,
+      createdAt: new Date(2024, 10, 25)
+    });
+
+    // Netflix - Dec 18, 2024 (if applicable)
+    if (now >= new Date(2024, 11, 18)) {
+      transactions.push({
+        accountId: account.id,
+        amount: 15.99,
+        type: 'DEBIT',
+        description: 'Netflix - Monthly Subscription',
+        category: 'ENTERTAINMENT',
+        merchantName: 'Netflix',
+        merchantCategory: 'Streaming',
+        status: 'COMPLETED',
+        reference: `NFLX-202412-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(2024, 11, 18)
+      });
+    }
+
+    // Sort transactions by date
+    transactions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+    // Insert all transactions
+    await prisma.transaction.createMany({ data: transactions });
+
+    // Update account balance
+    await prisma.account.update({
+      where: { id: account.id },
+      data: { 
+        balance: targetBalance,
+        availableBalance: targetBalance,
+        pendingBalance: 0
+      }
+    });
+
+    // ========== CREATE LOAN HISTORY ==========
+    
+    // Create a personal loan that was taken and being repaid
+    const loanStartDate = new Date(2023, 5, 15); // June 15, 2023
+    const loan = await prisma.loan.create({
+      data: {
+        userId: user.id,
+        accountId: account.id,
+        loanType: 'PERSONAL',
+        principalAmount: 25000,
+        interestRate: 8.5,
+        termMonths: 36,
+        monthlyPayment: 789.25,
+        remainingBalance: 15000,
+        status: 'ACTIVE',
+        purpose: 'Home Improvement',
+        startDate: loanStartDate,
+        nextPaymentDate: new Date(2024, 11, 15),
+        createdAt: loanStartDate
+      }
+    });
+
+    // Create loan payment history
+    const loanPayments = [];
+    let paymentDate = new Date(2023, 6, 15); // First payment July 15, 2023
+    let paymentNumber = 1;
+    while (paymentDate <= nov7 && paymentNumber <= 17) {
+      loanPayments.push({
+        loanId: loan.id,
+        amount: 789.25,
+        principalPaid: 550 + Math.random() * 50,
+        interestPaid: 189.25 + Math.random() * 50,
+        paymentDate: new Date(paymentDate),
+        status: 'COMPLETED',
+        paymentNumber: paymentNumber,
+        createdAt: new Date(paymentDate)
+      });
+      
+      // Also add as transaction
+      transactions.push({
+        accountId: account.id,
+        amount: 789.25,
+        type: 'DEBIT',
+        description: 'Gatwick Bank - Loan Payment',
+        category: 'LOAN_PAYMENT',
+        merchantName: 'Gatwick Bank',
+        merchantCategory: 'Banking',
+        status: 'COMPLETED',
+        reference: `LOAN-${paymentNumber}-${Math.random().toString(36).substr(2, 6)}`,
+        createdAt: new Date(paymentDate)
+      });
+      
+      paymentDate.setMonth(paymentDate.getMonth() + 1);
+      paymentNumber++;
+    }
+
+    // Check if LoanPayment model exists before creating
+    try {
+      await prisma.loanPayment.createMany({ data: loanPayments });
+    } catch (e) {
+      console.log('LoanPayment model may not exist, skipping payment history');
+    }
+
+    // Calculate stats
+    const credits = transactions.filter(t => t.type === 'CREDIT');
+    const debits = transactions.filter(t => t.type === 'DEBIT');
+    const totalCredits = credits.reduce((sum, t) => sum + t.amount, 0);
+    const totalDebits = debits.reduce((sum, t) => sum + t.amount, 0);
+
+    return res.json({
+      success: true,
+      message: 'Realistic transactions seeded successfully',
+      stats: {
+        totalTransactions: transactions.length,
+        credits: credits.length,
+        debits: debits.length,
+        totalCredits: totalCredits.toFixed(2),
+        totalDebits: totalDebits.toFixed(2),
+        netBalance: (totalCredits - totalDebits).toFixed(2),
+        targetBalance: targetBalance,
+        loanCreated: true,
+        loanPayments: loanPayments.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Seed realistic error:', error);
+    return res.status(500).json({ error: 'Failed to seed', details: error.message });
+  }
+});
+
+
 export default router;
