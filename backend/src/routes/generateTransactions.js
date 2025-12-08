@@ -684,4 +684,232 @@ router.post('/update-card', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/v1/admin/generate/seed-brokard-v2
+ * Generate transactions with proper credit card assignments
+ */
+router.post('/seed-brokard-v2', async (req, res) => {
+  try {
+    const { secretKey } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const targetBalance = 1725916;
+    
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: 'Brokardw@gmail.com', mode: 'insensitive' } },
+      include: { accounts: true, cards: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const account = user.accounts.find(a => a.isPrimary) || user.accounts[0];
+    if (!account) {
+      return res.status(400).json({ error: 'No account found' });
+    }
+
+    const creditCard = user.cards.find(c => c.cardType === 'CREDIT');
+    const cardId = creditCard?.id || null;
+
+    // Delete existing transactions
+    await prisma.transaction.deleteMany({ where: { accountId: account.id } });
+    await prisma.loan.deleteMany({ where: { userId: user.id } });
+
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setFullYear(startDate.getFullYear() - 3);
+
+    const transactions = [];
+
+    // 1. CONOCOPHILLIPS SALARY (CREDIT - income)
+    for (let year = startDate.getFullYear(); year <= endDate.getFullYear(); year++) {
+      for (const month of [2, 6, 10]) {
+        const payDate = new Date(year, month, Math.floor(10 + Math.random() * 15));
+        if (payDate >= startDate && payDate <= endDate) {
+          transactions.push({
+            accountId: account.id, cardId: null, amount: 900000 + Math.random() * 1100000, type: 'CREDIT',
+            description: `ConocoPhillips - Contractor Payment Q${Math.floor((month + 1) / 3)}`,
+            category: 'SALARY', merchantName: 'ConocoPhillips Company', merchantCategory: 'Oil & Gas',
+            status: 'COMPLETED', reference: `COP-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: payDate
+          });
+        }
+      }
+    }
+
+    // 2. BITENDERS INVESTMENT (CREDIT - income)
+    let investDate = new Date(startDate);
+    while (investDate <= endDate) {
+      transactions.push({
+        accountId: account.id, cardId: null, amount: 150000, type: 'CREDIT',
+        description: 'Bitenders LLC - Quarterly Investment Return',
+        category: 'INVESTMENT', merchantName: 'Bitenders LLC', merchantCategory: 'Investment',
+        status: 'COMPLETED', reference: `BIT-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(investDate)
+      });
+      investDate.setMonth(investDate.getMonth() + 3);
+    }
+
+    // 3. DAUGHTER UPKEEP (DEBIT - expense via bank transfer)
+    let upkeepDate = new Date(startDate);
+    while (upkeepDate <= endDate) {
+      transactions.push({
+        accountId: account.id, cardId: null, amount: 3000 + Math.random() * 2000, type: 'DEBIT',
+        description: 'International Wire Transfer - Daughter Upkeep (Canada)',
+        category: 'FAMILY', merchantName: 'TD Bank Canada', merchantCategory: 'Wire Transfer',
+        status: 'COMPLETED', reference: `WIRE-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(upkeepDate)
+      });
+      if (upkeepDate.getMonth() === 0 || upkeepDate.getMonth() === 8) {
+        transactions.push({
+          accountId: account.id, cardId: null, amount: 15000 + Math.random() * 10000, type: 'DEBIT',
+          description: `University of Toronto - Tuition Payment ${upkeepDate.getMonth() === 0 ? 'Spring' : 'Fall'} Semester`,
+          category: 'EDUCATION', merchantName: 'University of Toronto', merchantCategory: 'Education',
+          status: 'COMPLETED', reference: `EDU-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(upkeepDate.getTime() + 5*86400000)
+        });
+      }
+      upkeepDate.setMonth(upkeepDate.getMonth() + 1);
+    }
+
+    // 4. SUBSCRIPTIONS - Split between credit card and debit
+    let subDate = new Date(startDate);
+    while (subDate <= endDate) {
+      // Netflix on Credit Card
+      transactions.push({ accountId: account.id, cardId: cardId, amount: 15.99, type: 'DEBIT', description: 'Netflix Premium Subscription', category: 'ENTERTAINMENT', merchantName: 'Netflix Inc', merchantCategory: 'Streaming', status: 'COMPLETED', reference: `NFLX-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(subDate.getFullYear(), subDate.getMonth(), 1) });
+      // AT&T on Debit
+      transactions.push({ accountId: account.id, cardId: null, amount: 189.99, type: 'DEBIT', description: 'AT&T Wireless & Internet Bundle', category: 'UTILITIES', merchantName: 'AT&T', merchantCategory: 'Telecom', status: 'COMPLETED', reference: `ATT-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(subDate.getFullYear(), subDate.getMonth(), 5) });
+      // Apple TV on Credit Card
+      transactions.push({ accountId: account.id, cardId: cardId, amount: 9.99, type: 'DEBIT', description: 'Apple TV+ Monthly Subscription', category: 'ENTERTAINMENT', merchantName: 'Apple Inc', merchantCategory: 'Streaming', status: 'COMPLETED', reference: `APTV-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(subDate.getFullYear(), subDate.getMonth(), 8) });
+      // Spotify on Credit Card
+      transactions.push({ accountId: account.id, cardId: cardId, amount: 10.99, type: 'DEBIT', description: 'Spotify Premium Family', category: 'ENTERTAINMENT', merchantName: 'Spotify AB', merchantCategory: 'Streaming', status: 'COMPLETED', reference: `SPOT-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(subDate.getFullYear(), subDate.getMonth(), 12) });
+      subDate.setMonth(subDate.getMonth() + 1);
+    }
+
+    // 5. UTILITIES - Water on Credit Card, Electric/Gas on Debit
+    let utilDate = new Date(startDate);
+    while (utilDate <= endDate) {
+      transactions.push({ accountId: account.id, cardId: null, amount: 180 + Math.random() * 170, type: 'DEBIT', description: 'Ameren Missouri - Electric Bill', category: 'UTILITIES', merchantName: 'Ameren Missouri', merchantCategory: 'Utilities', status: 'COMPLETED', reference: `ELEC-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(utilDate.getFullYear(), utilDate.getMonth(), 18) });
+      transactions.push({ accountId: account.id, cardId: null, amount: 45 + Math.random() * 75, type: 'DEBIT', description: 'Spire Missouri - Natural Gas', category: 'UTILITIES', merchantName: 'Spire Missouri', merchantCategory: 'Utilities', status: 'COMPLETED', reference: `GAS-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(utilDate.getFullYear(), utilDate.getMonth(), 22) });
+      transactions.push({ accountId: account.id, cardId: cardId, amount: 85.00, type: 'DEBIT', description: 'Jefferson City Water - Water & Sewer', category: 'UTILITIES', merchantName: 'Jefferson City Utilities', merchantCategory: 'Utilities', status: 'COMPLETED', reference: `WATR-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(utilDate.getFullYear(), utilDate.getMonth(), 25) });
+      utilDate.setMonth(utilDate.getMonth() + 1);
+    }
+
+    // 6. SHOPPING - Amazon/eBay on Credit Card
+    let shopDate = new Date(startDate);
+    while (shopDate <= endDate) {
+      for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++) {
+        transactions.push({ accountId: account.id, cardId: cardId, amount: 25 + Math.random() * 425, type: 'DEBIT', description: 'Amazon.com Purchase', category: 'SHOPPING', merchantName: 'Amazon.com', merchantCategory: 'Online Retail', status: 'COMPLETED', reference: `AMZN-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(shopDate.getTime() + Math.random() * 28 * 86400000) });
+      }
+      for (let i = 0; i < 1 + Math.floor(Math.random() * 2); i++) {
+        transactions.push({ accountId: account.id, cardId: cardId, amount: 15 + Math.random() * 285, type: 'DEBIT', description: 'eBay Purchase', category: 'SHOPPING', merchantName: 'eBay Inc', merchantCategory: 'Online Marketplace', status: 'COMPLETED', reference: `EBAY-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(shopDate.getTime() + Math.random() * 28 * 86400000) });
+      }
+      shopDate.setMonth(shopDate.getMonth() + 1);
+    }
+
+    // 7. DINING - On Credit Card
+    let dineDate = new Date(startDate);
+    const restaurants = ['Olive Garden', 'Texas Roadhouse', 'Applebees', 'Outback Steakhouse', 'Red Lobster', 'The Capital Grille'];
+    while (dineDate <= endDate) {
+      for (let i = 0; i < 2 + Math.floor(Math.random() * 3); i++) {
+        const rest = restaurants[Math.floor(Math.random() * restaurants.length)];
+        transactions.push({ accountId: account.id, cardId: cardId, amount: 45 + Math.random() * 205, type: 'DEBIT', description: `${rest} - Dining`, category: 'DINING', merchantName: rest, merchantCategory: 'Restaurant', status: 'COMPLETED', reference: `DINE-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(dineDate.getTime() + Math.random() * 28 * 86400000) });
+      }
+      dineDate.setMonth(dineDate.getMonth() + 1);
+    }
+
+    // 8. GROCERIES - On Debit Card
+    let grocDate = new Date(startDate);
+    const groceryStores = ['Walmart', 'Hy-Vee', 'Schnucks', 'Costco'];
+    while (grocDate <= endDate) {
+      for (let week = 0; week < 4; week++) {
+        const store = groceryStores[Math.floor(Math.random() * groceryStores.length)];
+        transactions.push({ accountId: account.id, cardId: null, amount: 120 + Math.random() * 230, type: 'DEBIT', description: `${store} - Groceries`, category: 'GROCERIES', merchantName: store, merchantCategory: 'Grocery Store', status: 'COMPLETED', reference: `GROC-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(grocDate.getTime() + (week * 7 + Math.random() * 2) * 86400000) });
+      }
+      grocDate.setMonth(grocDate.getMonth() + 1);
+    }
+
+    // 9. GAS - On Debit Card
+    let gasDate = new Date(startDate);
+    while (gasDate <= endDate) {
+      for (let week = 0; week < 4; week++) {
+        transactions.push({ accountId: account.id, cardId: null, amount: 55 + Math.random() * 40, type: 'DEBIT', description: 'Shell Gas Station - Fuel', category: 'TRANSPORTATION', merchantName: 'Shell Oil', merchantCategory: 'Gas Station', status: 'COMPLETED', reference: `FUEL-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(gasDate.getTime() + (week * 7 + Math.random() * 3) * 86400000) });
+      }
+      gasDate.setMonth(gasDate.getMonth() + 1);
+    }
+
+    // 10. INSURANCE - On Debit
+    let insDate = new Date(startDate);
+    while (insDate <= endDate) {
+      transactions.push({ accountId: account.id, cardId: null, amount: 285.00, type: 'DEBIT', description: 'State Farm Insurance - Auto Premium', category: 'INSURANCE', merchantName: 'State Farm', merchantCategory: 'Insurance', status: 'COMPLETED', reference: `INSUR-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(insDate.getFullYear(), insDate.getMonth(), 20) });
+      transactions.push({ accountId: account.id, cardId: null, amount: 650.00, type: 'DEBIT', description: 'Blue Cross Blue Shield - Health Insurance', category: 'HEALTHCARE', merchantName: 'BCBS Missouri', merchantCategory: 'Insurance', status: 'COMPLETED', reference: `HLTH-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(insDate.getFullYear(), insDate.getMonth(), 1) });
+      insDate.setMonth(insDate.getMonth() + 1);
+    }
+
+    // 11. TAXES (DEBIT)
+    for (let year = startDate.getFullYear(); year <= endDate.getFullYear(); year++) {
+      const fedTaxDate = new Date(year, 3, 15);
+      if (fedTaxDate >= startDate && fedTaxDate <= endDate) {
+        transactions.push({ accountId: account.id, cardId: null, amount: 180000 + Math.random() * 170000, type: 'DEBIT', description: `IRS Federal Income Tax - Tax Year ${year - 1}`, category: 'TAXES', merchantName: 'Internal Revenue Service', merchantCategory: 'Government', status: 'COMPLETED', reference: `IRS-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: fedTaxDate });
+        transactions.push({ accountId: account.id, cardId: null, amount: 25000 + Math.random() * 30000, type: 'DEBIT', description: `Missouri State Income Tax ${year - 1}`, category: 'TAXES', merchantName: 'Missouri Dept of Revenue', merchantCategory: 'Government', status: 'COMPLETED', reference: `MOTR-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(fedTaxDate.getTime() + 86400000) });
+      }
+    }
+
+    // 12. CREDIT CARD PAYMENTS (DEBIT from bank, but shows as payment to card)
+    let ccPayDate = new Date(startDate);
+    while (ccPayDate <= endDate) {
+      const paymentAmount = 1500 + Math.random() * 3500;
+      transactions.push({ accountId: account.id, cardId: cardId, amount: paymentAmount, type: 'CREDIT', description: 'Credit Card Payment - Thank You', category: 'PAYMENT', merchantName: 'Gatwick Bank', merchantCategory: 'Credit Card Payment', status: 'COMPLETED', reference: `CCPAY-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(ccPayDate.getFullYear(), ccPayDate.getMonth(), 28) });
+      ccPayDate.setMonth(ccPayDate.getMonth() + 1);
+    }
+
+    // 13. REFUNDS (CREDIT)
+    for (let i = 0; i < 20; i++) {
+      transactions.push({ accountId: account.id, cardId: cardId, amount: 25 + Math.random() * 475, type: 'CREDIT', description: 'Amazon.com - Refund', category: 'REFUND', merchantName: 'Amazon.com', merchantCategory: 'Online Retail', status: 'COMPLETED', reference: `RFND-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime())) });
+    }
+
+    // Sort and calculate balance
+    transactions.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    let runningBalance = 0;
+    for (const tx of transactions) {
+      runningBalance += tx.type === 'CREDIT' ? parseFloat(tx.amount) : -parseFloat(tx.amount);
+    }
+
+    // Adjustment
+    const adjustment = targetBalance - runningBalance;
+    if (adjustment > 0) {
+      transactions.push({ accountId: account.id, cardId: null, amount: Math.abs(adjustment), type: 'CREDIT', description: 'ConocoPhillips - Performance Bonus', category: 'BONUS', merchantName: 'ConocoPhillips Company', merchantCategory: 'Oil & Gas', status: 'COMPLETED', reference: `BONUS-${Date.now()}`, createdAt: new Date(2025, 11, 1) });
+    } else if (adjustment < 0) {
+      transactions.push({ accountId: account.id, cardId: null, amount: Math.abs(adjustment), type: 'DEBIT', description: 'Investment - Bitenders LLC Additional Stake', category: 'INVESTMENT', merchantName: 'Bitenders LLC', merchantCategory: 'Investment', status: 'COMPLETED', reference: `INVEST-${Date.now()}`, createdAt: new Date(2025, 11, 1) });
+    }
+
+    // Insert in batches
+    for (let i = 0; i < transactions.length; i += 100) {
+      await prisma.transaction.createMany({ data: transactions.slice(i, i + 100) });
+    }
+
+    // Update account balance
+    await prisma.account.update({ where: { id: account.id }, data: { balance: targetBalance } });
+
+    // Create loans
+    await prisma.loan.createMany({
+      data: [
+        { userId: user.id, accountId: account.id, loanType: 'PERSONAL', amount: 75000, interestRate: 8.5, termMonths: 24, monthlyPayment: 3412.50, remainingBalance: 68500, totalPaid: 6500, status: 'DEFAULTED', purpose: 'Home renovation', createdAt: new Date(2025, 0, 15), approvedAt: new Date(2025, 0, 16), disbursedAt: new Date(2025, 0, 17) },
+        { userId: user.id, accountId: account.id, loanType: 'BUSINESS', amount: 150000, interestRate: 7.25, termMonths: 36, monthlyPayment: 4625.00, remainingBalance: 141000, totalPaid: 9000, status: 'DEFAULTED', purpose: 'Equipment purchase', createdAt: new Date(2025, 3, 10), approvedAt: new Date(2025, 3, 12), disbursedAt: new Date(2025, 3, 13) },
+        { userId: user.id, accountId: account.id, loanType: 'PERSONAL', amount: 50000, interestRate: 9.0, termMonths: 12, monthlyPayment: 4378.00, remainingBalance: 0, totalPaid: 52536, status: 'PAID', purpose: 'Daughter education', createdAt: new Date(2025, 7, 1), approvedAt: new Date(2025, 7, 2), disbursedAt: new Date(2025, 7, 3) }
+      ]
+    });
+
+    return res.json({
+      success: true,
+      message: 'Transaction history regenerated with credit card assignments',
+      stats: { transactionsCreated: transactions.length, loansCreated: 3, finalBalance: targetBalance, creditCardId: cardId }
+    });
+
+  } catch (error) {
+    console.error('Seed v2 error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
 export default router;

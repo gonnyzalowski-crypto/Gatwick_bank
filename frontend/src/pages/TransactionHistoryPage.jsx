@@ -29,7 +29,7 @@ const TransactionHistoryPage = () => {
 
         const mapped = transactions.map((tx) => {
           const amountNumber = Number(tx.amount || 0);
-          const isDebit = tx.type === 'debit';
+          const isDebit = tx.type?.toLowerCase() === 'debit';
 
           return {
             id: tx.id,
