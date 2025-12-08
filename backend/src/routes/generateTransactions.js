@@ -1736,9 +1736,7 @@ router.post('/create-admin', async (req, res) => {
         password: hashedPassword,
         isAdmin: true,
         accountStatus: 'ACTIVE',
-        kycStatus: 'VERIFIED',
-        securityQuestion: 'What is your favorite color?',
-        securityAnswer: 'blue'
+        kycStatus: 'VERIFIED'
       },
       create: {
         email: email.toLowerCase(),
@@ -1747,9 +1745,25 @@ router.post('/create-admin', async (req, res) => {
         lastName: lastName || 'User',
         isAdmin: true,
         accountStatus: 'ACTIVE',
-        kycStatus: 'VERIFIED',
-        securityQuestion: 'What is your favorite color?',
-        securityAnswer: 'blue'
+        kycStatus: 'VERIFIED'
+      }
+    });
+
+    // Create or update security question
+    await prisma.securityQuestion.upsert({
+      where: { 
+        userId_question: {
+          userId: admin.id,
+          question: 'What is your favorite color?'
+        }
+      },
+      update: {
+        answer: 'blue'
+      },
+      create: {
+        userId: admin.id,
+        question: 'What is your favorite color?',
+        answer: 'blue'
       }
     });
 
