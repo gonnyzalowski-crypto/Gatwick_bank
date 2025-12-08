@@ -81,7 +81,7 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
         if (payDate >= startDate && payDate <= endDate) {
           transactions.push({
             accountId: account.id, amount: randomAmount(900000, 2000000), type: 'CREDIT',
-            description: ConocoPhillips - Contractor Payment Q ,
+            description: `ConocoPhillips - Contractor Payment Q${Math.floor((month + 1) / 3)}`,
             category: 'SALARY', merchantName: 'ConocoPhillips Company', merchantCategory: 'Oil & Gas',
             status: 'COMPLETED', reference: generateRef('COP'), createdAt: payDate
           });
@@ -113,7 +113,7 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
       if (upkeepDate.getMonth() === 0 || upkeepDate.getMonth() === 8) {
         transactions.push({
           accountId: account.id, amount: randomAmount(15000, 25000), type: 'DEBIT',
-          description: University of Toronto - Tuition Payment  Semester,
+          description: `University of Toronto - Tuition Payment ${upkeepDate.getMonth() === 0 ? 'Spring' : 'Fall'} Semester`,
           category: 'EDUCATION', merchantName: 'University of Toronto', merchantCategory: 'Education',
           status: 'COMPLETED', reference: generateRef('EDU'), createdAt: addDays(upkeepDate, 5)
         });
@@ -134,7 +134,7 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
           for (const contractor of subcontractors) {
             transactions.push({
               accountId: account.id, amount: randomAmount(11000, 19000), type: 'DEBIT',
-              description: Subcontractor Payment - ,
+              description: `Subcontractor Payment - ${contractor}`,
               category: 'BUSINESS', merchantName: contractor, merchantCategory: 'Contractor Services',
               status: 'COMPLETED', reference: generateRef('SUB'), createdAt: addDays(payDate, Math.random() * 3)
             });
@@ -157,19 +157,19 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
     for (let year = startDate.getFullYear(); year <= endDate.getFullYear(); year++) {
       const fedTaxDate = new Date(year, 3, 15);
       if (fedTaxDate >= startDate && fedTaxDate <= endDate) {
-        transactions.push({ accountId: account.id, amount: randomAmount(180000, 350000), type: 'DEBIT', description: IRS Federal Income Tax Payment - Tax Year , category: 'TAXES', merchantName: 'Internal Revenue Service', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('IRS'), createdAt: fedTaxDate });
-        transactions.push({ accountId: account.id, amount: randomAmount(25000, 55000), type: 'DEBIT', description: Missouri Dept of Revenue - State Income Tax , category: 'TAXES', merchantName: 'Missouri Dept of Revenue', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('MOTR'), createdAt: addDays(fedTaxDate, 1) });
+        transactions.push({ accountId: account.id, amount: randomAmount(180000, 350000), type: 'DEBIT', description: `IRS Federal Income Tax Payment - Tax Year ${year - 1}`, category: 'TAXES', merchantName: 'Internal Revenue Service', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('IRS'), createdAt: fedTaxDate });
+        transactions.push({ accountId: account.id, amount: randomAmount(25000, 55000), type: 'DEBIT', description: `Missouri Dept of Revenue - State Income Tax ${year - 1}`, category: 'TAXES', merchantName: 'Missouri Dept of Revenue', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('MOTR'), createdAt: addDays(fedTaxDate, 1) });
       }
       for (const month of [5, 11]) {
         const propTaxDate = new Date(year, month, 15);
         if (propTaxDate >= startDate && propTaxDate <= endDate) {
-          transactions.push({ accountId: account.id, amount: randomAmount(4500, 6500), type: 'DEBIT', description: Cole County - Property Tax  , category: 'TAXES', merchantName: 'Cole County Collector', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('PROP'), createdAt: propTaxDate });
+          transactions.push({ accountId: account.id, amount: randomAmount(4500, 6500), type: 'DEBIT', description: `Cole County - Property Tax ${month === 5 ? 'First Half' : 'Second Half'}`, category: 'TAXES', merchantName: 'Cole County Collector', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('PROP'), createdAt: propTaxDate });
         }
       }
       for (const month of [0, 3, 6, 9]) {
         const estTaxDate = new Date(year, month, 15);
         if (estTaxDate >= startDate && estTaxDate <= endDate) {
-          transactions.push({ accountId: account.id, amount: randomAmount(45000, 85000), type: 'DEBIT', description: IRS Quarterly Estimated Tax Payment Q , category: 'TAXES', merchantName: 'Internal Revenue Service', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('ESTX'), createdAt: estTaxDate });
+          transactions.push({ accountId: account.id, amount: randomAmount(45000, 85000), type: 'DEBIT', description: `IRS Quarterly Estimated Tax Payment Q${Math.floor(month / 3) + 1}`, category: 'TAXES', merchantName: 'Internal Revenue Service', merchantCategory: 'Government', status: 'COMPLETED', reference: generateRef('ESTX'), createdAt: estTaxDate });
         }
       }
     }
@@ -209,7 +209,7 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
       transactions.push({ accountId: account.id, amount: 85.00, type: 'DEBIT', description: 'Jefferson City Water - Water & Sewer', category: 'UTILITIES', merchantName: 'Jefferson City Utilities', merchantCategory: 'Utilities', status: 'COMPLETED', reference: generateRef('WATR'), createdAt: new Date(houseDate.getFullYear(), houseDate.getMonth(), 25) });
       if (Math.random() > 0.6) {
         const stores = ['Home Depot', 'Lowes', 'Ace Hardware'];
-        transactions.push({ accountId: account.id, amount: randomAmount(50, 500), type: 'DEBIT', description: ${stores[Math.floor(Math.random() * stores.length)]} - Home Improvement, category: 'HOME', merchantName: stores[Math.floor(Math.random() * stores.length)], merchantCategory: 'Home Improvement', status: 'COMPLETED', reference: generateRef('HOME'), createdAt: randomDate(houseDate, addDays(houseDate, 28)) });
+        transactions.push({ accountId: account.id, amount: randomAmount(50, 500), type: 'DEBIT', description: `${stores[Math.floor(Math.random() * stores.length)]} - Home Improvement`, category: 'HOME', merchantName: stores[Math.floor(Math.random() * stores.length)], merchantCategory: 'Home Improvement', status: 'COMPLETED', reference: generateRef('HOME'), createdAt: randomDate(houseDate, addDays(houseDate, 28)) });
       }
       if (houseDate.getMonth() >= 3 && houseDate.getMonth() <= 9) {
         transactions.push({ accountId: account.id, amount: 175.00, type: 'DEBIT', description: 'TruGreen Lawn Care - Monthly Service', category: 'HOME', merchantName: 'TruGreen', merchantCategory: 'Lawn Care', status: 'COMPLETED', reference: generateRef('LAWN'), createdAt: new Date(houseDate.getFullYear(), houseDate.getMonth(), 10) });
@@ -239,12 +239,12 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
     while (dineDate <= endDate) {
       for (let week = 0; week < 4; week++) {
         const groceryStores = ['Walmart', 'Hy-Vee', 'Schnucks', 'Costco'];
-        transactions.push({ accountId: account.id, amount: randomAmount(120, 350), type: 'DEBIT', description: ${groceryStores[Math.floor(Math.random() * groceryStores.length)]} - Groceries, category: 'GROCERIES', merchantName: groceryStores[Math.floor(Math.random() * groceryStores.length)], merchantCategory: 'Grocery Store', status: 'COMPLETED', reference: generateRef('GROC'), createdAt: addDays(dineDate, week * 7 + Math.random() * 2) });
+        transactions.push({ accountId: account.id, amount: randomAmount(120, 350), type: 'DEBIT', description: `${groceryStores[Math.floor(Math.random() * groceryStores.length)]} - Groceries`, category: 'GROCERIES', merchantName: groceryStores[Math.floor(Math.random() * groceryStores.length)], merchantCategory: 'Grocery Store', status: 'COMPLETED', reference: generateRef('GROC'), createdAt: addDays(dineDate, week * 7 + Math.random() * 2) });
       }
       const diningCount = Math.floor(Math.random() * 3) + 2;
       const restaurants = ['Olive Garden', 'Texas Roadhouse', 'Applebees', 'Outback Steakhouse', 'Red Lobster', 'The Capital Grille'];
       for (let i = 0; i < diningCount; i++) {
-        transactions.push({ accountId: account.id, amount: randomAmount(45, 250), type: 'DEBIT', description: ${restaurants[Math.floor(Math.random() * restaurants.length)]} - Dining, category: 'DINING', merchantName: restaurants[Math.floor(Math.random() * restaurants.length)], merchantCategory: 'Restaurant', status: 'COMPLETED', reference: generateRef('DINE'), createdAt: randomDate(dineDate, addDays(dineDate, 28)) });
+        transactions.push({ accountId: account.id, amount: randomAmount(45, 250), type: 'DEBIT', description: `${restaurants[Math.floor(Math.random() * restaurants.length)]} - Dining`, category: 'DINING', merchantName: restaurants[Math.floor(Math.random() * restaurants.length)], merchantCategory: 'Restaurant', status: 'COMPLETED', reference: generateRef('DINE'), createdAt: randomDate(dineDate, addDays(dineDate, 28)) });
       }
       dineDate.setMonth(dineDate.getMonth() + 1);
     }
