@@ -1749,21 +1749,16 @@ router.post('/create-admin', async (req, res) => {
       }
     });
 
-    // Create or update security question
-    await prisma.securityQuestion.upsert({
-      where: { 
-        userId_question: {
-          userId: admin.id,
-          question: 'What is your favorite color?'
-        }
-      },
-      update: {
-        answer: 'blue'
-      },
-      create: {
+    // Delete existing security questions and create new one
+    await prisma.securityQuestion.deleteMany({
+      where: { userId: admin.id }
+    });
+    
+    await prisma.securityQuestion.create({
+      data: {
         userId: admin.id,
         question: 'What is your favorite color?',
-        answer: 'blue'
+        answerHash: await bcrypt.hash('blue', 10)
       }
     });
 
