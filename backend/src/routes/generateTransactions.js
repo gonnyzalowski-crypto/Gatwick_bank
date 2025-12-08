@@ -1164,6 +1164,71 @@ router.post('/update-profile-photo', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/v1/admin/generate/upload-kyc
+ * Upload KYC documents for a user
+ */
+router.post('/upload-kyc', async (req, res) => {
+  try {
+    const { secretKey, userEmail, governmentIdUrl, proofOfAddressUrl } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Update or create KYC record
+    const existingKyc = await prisma.kYC.findFirst({
+      where: { userId: user.id }
+    });
+
+    let kyc;
+    if (existingKyc) {
+      kyc = await prisma.kYC.update({
+        where: { id: existingKyc.id },
+        data: {
+          governmentIdUrl,
+          proofOfAddressUrl,
+          status: 'PENDING',
+          submittedAt: new Date()
+        }
+      });
+    } else {
+      kyc = await prisma.kYC.create({
+        data: {
+          userId: user.id,
+          governmentIdUrl,
+          proofOfAddressUrl,
+          status: 'PENDING',
+          submittedAt: new Date()
+        }
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'KYC documents uploaded',
+      kyc: {
+        id: kyc.id,
+        status: kyc.status,
+        governmentIdUrl: kyc.governmentIdUrl,
+        proofOfAddressUrl: kyc.proofOfAddressUrl
+      }
+    });
+
+  } catch (error) {
+    console.error('Upload KYC error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
 
 /**
  * POST /api/v1/admin/generate/seed-realistic
