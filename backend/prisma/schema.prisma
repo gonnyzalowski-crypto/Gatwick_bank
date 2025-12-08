@@ -147,8 +147,6 @@ model Transaction {
   category      String?
   merchantName  String?
   merchantCategory String?
-  merchantLogo  String?   // URL to merchant logo image
-  balanceAfter  Decimal?  @db.Decimal(15, 2) // Balance after transaction
   status        String    @default("PENDING") // 'PENDING', 'COMPLETED', 'FAILED'
   requiresAuth  Boolean   @default(false) // Requires security question/code
   verifiedAt    DateTime?
