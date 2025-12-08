@@ -176,8 +176,8 @@ export const TransactionManagement = () => {
         description: formData.description,
         category: formData.category,
         status: formData.status,
-        createdAt: formData.createdAt,
-        merchantLogo: formData.merchantLogo
+        createdAt: formData.createdAt ? new Date(formData.createdAt).toISOString() : undefined
+        // merchantLogo temporarily disabled until schema migration
       });
       setShowEditModal(false);
       setEditingTx(null);
