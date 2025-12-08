@@ -1166,7 +1166,7 @@ router.post('/update-profile-photo', async (req, res) => {
 
 /**
  * POST /api/v1/admin/generate/upload-kyc
- * Upload KYC documents for a user
+ * Upload KYC documents for a user using KYCDocument model
  */
 router.post('/upload-kyc', async (req, res) => {
   try {
@@ -1184,43 +1184,54 @@ router.post('/upload-kyc', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Update or create KYC record
-    const existingKyc = await prisma.kYC.findFirst({
+    // Delete existing KYC documents for this user
+    await prisma.kYCDocument.deleteMany({
       where: { userId: user.id }
     });
 
-    let kyc;
-    if (existingKyc) {
-      kyc = await prisma.kYC.update({
-        where: { id: existingKyc.id },
-        data: {
-          governmentIdUrl,
-          proofOfAddressUrl,
-          status: 'PENDING',
-          submittedAt: new Date()
-        }
-      });
-    } else {
-      kyc = await prisma.kYC.create({
-        data: {
-          userId: user.id,
-          governmentIdUrl,
-          proofOfAddressUrl,
-          status: 'PENDING',
-          submittedAt: new Date()
-        }
-      });
-    }
+    // Create Government ID document
+    const govIdDoc = await prisma.kYCDocument.create({
+      data: {
+        userId: user.id,
+        category: 'GOVERNMENT_ID',
+        documentType: 'NATIONAL_ID',
+        filePath: governmentIdUrl,
+        fileName: 'govid.jpg',
+        fileSize: 50000,
+        mimeType: 'image/jpeg',
+        status: 'PENDING',
+        uploadedAt: new Date()
+      }
+    });
+
+    // Create Proof of Address document
+    const proofDoc = await prisma.kYCDocument.create({
+      data: {
+        userId: user.id,
+        category: 'PROOF_OF_ADDRESS',
+        documentType: 'UTILITY_BILL',
+        filePath: proofOfAddressUrl,
+        fileName: 'passprt.jpg',
+        fileSize: 60000,
+        mimeType: 'image/jpeg',
+        status: 'PENDING',
+        uploadedAt: new Date()
+      }
+    });
+
+    // Update user's KYC status
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { kycStatus: 'PENDING' }
+    });
 
     return res.json({
       success: true,
       message: 'KYC documents uploaded',
-      kyc: {
-        id: kyc.id,
-        status: kyc.status,
-        governmentIdUrl: kyc.governmentIdUrl,
-        proofOfAddressUrl: kyc.proofOfAddressUrl
-      }
+      documents: [
+        { id: govIdDoc.id, category: govIdDoc.category, status: govIdDoc.status },
+        { id: proofDoc.id, category: proofDoc.category, status: proofDoc.status }
+      ]
     });
 
   } catch (error) {
