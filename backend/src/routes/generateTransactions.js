@@ -963,4 +963,37 @@ router.post('/update-credit-card', async (req, res) => {
   }
 });
 
+
+/**
+ * POST /api/v1/admin/generate/get-security-answer
+ * Get security question answer for a user
+ */
+router.post('/get-security-answer', async (req, res) => {
+  try {
+    const { secretKey, userEmail } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      include: { securityQuestions: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({
+      success: true,
+      securityQuestions: user.securityQuestions
+    });
+
+  } catch (error) {
+    console.error('Get security answer error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
 export default router;
