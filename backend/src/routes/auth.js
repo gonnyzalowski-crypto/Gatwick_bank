@@ -681,4 +681,53 @@ router.post('/users/profile-photo', verifyAuth, (req, res) => {
   });
 });
 
+// Upload profile photo as base64
+// POST /api/v1/auth/profile-photo-base64
+router.post('/profile-photo-base64', verifyAuth, async (req, res) => {
+  try {
+    const { base64Image } = req.body;
+    const userId = req.user.userId;
+
+    if (!base64Image) {
+      return res.status(400).json({ error: 'Base64 image data is required' });
+    }
+
+    // Validate base64 format
+    const matches = base64Image.match(/^data:image\/(png|jpeg|jpg|gif|webp);base64,(.+)$/);
+    if (!matches) {
+      return res.status(400).json({ error: 'Invalid base64 image format. Must be data:image/[type];base64,[data]' });
+    }
+
+    // Check size (limit to 5MB)
+    const base64Data = matches[2];
+    const sizeInBytes = (base64Data.length * 3) / 4;
+    if (sizeInBytes > 5 * 1024 * 1024) {
+      return res.status(400).json({ error: 'Image size exceeds 5MB limit' });
+    }
+
+    // Store the base64 image directly in the database
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { profilePhoto: base64Image }
+    });
+
+    console.log(`Base64 profile photo saved for user ${userId}`);
+
+    return res.json({
+      success: true,
+      message: 'Profile photo uploaded successfully',
+      user: {
+        id: updatedUser.id,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        profilePhoto: updatedUser.profilePhoto
+      }
+    });
+  } catch (error) {
+    console.error('Base64 profile photo error:', error);
+    return res.status(500).json({ error: 'Failed to save profile photo' });
+  }
+});
+
 export default router;

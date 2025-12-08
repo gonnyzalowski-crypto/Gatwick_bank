@@ -1148,6 +1148,473 @@ router.delete('/transactions/:transactionId', verifyAuth, verifyAdmin, async (re
   }
 });
 
+// Get all users with transaction counts (for admin transaction management)
+// GET /api/v1/mybanker/users-with-transactions
+router.get('/users-with-transactions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        profilePhoto: true,
+        accountStatus: true,
+        accounts: {
+          select: {
+            id: true,
+            accountNumber: true,
+            accountName: true,
+            balance: true,
+            _count: {
+              select: { transactions: true }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const usersWithCounts = users.map(user => ({
+      ...user,
+      totalTransactions: user.accounts.reduce((sum, acc) => sum + acc._count.transactions, 0),
+      totalBalance: user.accounts.reduce((sum, acc) => sum + Number(acc.balance), 0)
+    }));
+
+    return res.json({ users: usersWithCounts });
+  } catch (error) {
+    console.error('Get users with transactions error:', error);
+    return res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// Get transactions for a specific user
+// GET /api/v1/mybanker/users/:userId/transactions
+router.get('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { type, category, startDate, endDate, page = 1, limit = 50 } = req.query;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        accounts: { select: { id: true } }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const accountIds = user.accounts.map(a => a.id);
+
+    const where = {
+      accountId: { in: accountIds }
+    };
+
+    if (type && type !== 'all') {
+      where.type = type.toUpperCase();
+    }
+
+    if (category && category !== 'all') {
+      where.category = category;
+    }
+
+    if (startDate) {
+      where.createdAt = { ...where.createdAt, gte: new Date(startDate) };
+    }
+
+    if (endDate) {
+      where.createdAt = { ...where.createdAt, lte: new Date(endDate) };
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [transactions, total] = await Promise.all([
+      prisma.transaction.findMany({
+        where,
+        include: {
+          account: {
+            select: {
+              accountNumber: true,
+              accountName: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: parseInt(limit)
+      }),
+      prisma.transaction.count({ where })
+    ]);
+
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName
+      },
+      transactions,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    });
+  } catch (error) {
+    console.error('Get user transactions error:', error);
+    return res.status(500).json({ error: 'Failed to fetch transactions' });
+  }
+});
+
+// Create transaction for a specific user (enhanced)
+// POST /api/v1/mybanker/users/:userId/transactions
+router.post('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { 
+      type, 
+      amount, 
+      description, 
+      category,
+      merchantKey,
+      merchantLogo,
+      status = 'COMPLETED',
+      createdAt // Allow backdating transactions
+    } = req.body;
+
+    if (!type || !amount) {
+      return res.status(400).json({ error: 'Type and amount are required' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        accounts: {
+          where: { isPrimary: true },
+          take: 1
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const account = user.accounts[0];
+    if (!account) {
+      return res.status(400).json({ error: 'User has no primary account' });
+    }
+
+    const reference = `ADM-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const txAmount = parseFloat(amount);
+    const newBalance = type.toUpperCase() === 'CREDIT' 
+      ? parseFloat(account.balance) + txAmount
+      : parseFloat(account.balance) - txAmount;
+
+    const transaction = await prisma.transaction.create({
+      data: {
+        accountId: account.id,
+        type: type.toUpperCase(),
+        amount: txAmount,
+        description: description || `Admin ${type.toLowerCase()} transaction`,
+        category: category || 'OTHER',
+        merchantName: description,
+        merchantLogo: merchantLogo || null,
+        reference,
+        status: status.toUpperCase(),
+        balanceAfter: newBalance,
+        createdAt: createdAt ? new Date(createdAt) : new Date()
+      }
+    });
+
+    // Update account balance if completed
+    if (status.toUpperCase() === 'COMPLETED') {
+      await prisma.account.update({
+        where: { id: account.id },
+        data: { 
+          balance: newBalance,
+          availableBalance: newBalance
+        }
+      });
+    }
+
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'ADMIN_TRANSACTION_CREATED',
+        details: `Admin created ${type} transaction of $${amount} for ${user.email}`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({ 
+      success: true, 
+      message: 'Transaction created successfully',
+      transaction 
+    });
+  } catch (error) {
+    console.error('Create user transaction error:', error);
+    return res.status(500).json({ error: 'Failed to create transaction' });
+  }
+});
+
+// Bulk create transactions (for recurring payments backdating)
+// POST /api/v1/mybanker/users/:userId/transactions/bulk
+router.post('/users/:userId/transactions/bulk', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { transactions } = req.body;
+
+    if (!transactions || !Array.isArray(transactions) || transactions.length === 0) {
+      return res.status(400).json({ error: 'Transactions array is required' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        accounts: {
+          where: { isPrimary: true },
+          take: 1
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const account = user.accounts[0];
+    if (!account) {
+      return res.status(400).json({ error: 'User has no primary account' });
+    }
+
+    let currentBalance = parseFloat(account.balance);
+    const createdTransactions = [];
+
+    // Sort transactions by date (oldest first) to calculate balances correctly
+    const sortedTransactions = [...transactions].sort((a, b) => 
+      new Date(a.createdAt || Date.now()) - new Date(b.createdAt || Date.now())
+    );
+
+    for (const tx of sortedTransactions) {
+      const txAmount = parseFloat(tx.amount);
+      const newBalance = tx.type.toUpperCase() === 'CREDIT' 
+        ? currentBalance + txAmount
+        : currentBalance - txAmount;
+
+      const reference = `ADM-BULK-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+
+      const transaction = await prisma.transaction.create({
+        data: {
+          accountId: account.id,
+          type: tx.type.toUpperCase(),
+          amount: txAmount,
+          description: tx.description || `Admin bulk ${tx.type.toLowerCase()}`,
+          category: tx.category || 'OTHER',
+          merchantName: tx.description,
+          merchantLogo: tx.merchantLogo || null,
+          reference,
+          status: 'COMPLETED',
+          balanceAfter: newBalance,
+          createdAt: tx.createdAt ? new Date(tx.createdAt) : new Date()
+        }
+      });
+
+      currentBalance = newBalance;
+      createdTransactions.push(transaction);
+    }
+
+    // Update final account balance
+    await prisma.account.update({
+      where: { id: account.id },
+      data: { 
+        balance: currentBalance,
+        availableBalance: currentBalance
+      }
+    });
+
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        userId: user.id,
+        action: 'ADMIN_BULK_TRANSACTIONS_CREATED',
+        details: `Admin created ${createdTransactions.length} bulk transactions for ${user.email}`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({ 
+      success: true, 
+      message: `${createdTransactions.length} transactions created successfully`,
+      transactions: createdTransactions,
+      newBalance: currentBalance
+    });
+  } catch (error) {
+    console.error('Bulk create transactions error:', error);
+    return res.status(500).json({ error: 'Failed to create bulk transactions' });
+  }
+});
+
+// Bulk delete transactions
+// DELETE /api/v1/mybanker/transactions/bulk
+router.delete('/transactions/bulk', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { transactionIds } = req.body;
+
+    if (!transactionIds || !Array.isArray(transactionIds) || transactionIds.length === 0) {
+      return res.status(400).json({ error: 'Transaction IDs array is required' });
+    }
+
+    // Get transactions to calculate balance adjustments
+    const transactions = await prisma.transaction.findMany({
+      where: { id: { in: transactionIds } },
+      include: {
+        account: {
+          include: { user: { select: { id: true, email: true } } }
+        }
+      }
+    });
+
+    // Group by account for balance recalculation
+    const accountAdjustments = {};
+    for (const tx of transactions) {
+      if (!accountAdjustments[tx.accountId]) {
+        accountAdjustments[tx.accountId] = {
+          account: tx.account,
+          adjustment: 0
+        };
+      }
+      // Reverse the transaction effect
+      if (tx.type === 'CREDIT') {
+        accountAdjustments[tx.accountId].adjustment -= parseFloat(tx.amount);
+      } else {
+        accountAdjustments[tx.accountId].adjustment += parseFloat(tx.amount);
+      }
+    }
+
+    // Delete transactions
+    await prisma.transaction.deleteMany({
+      where: { id: { in: transactionIds } }
+    });
+
+    // Update account balances
+    for (const [accountId, data] of Object.entries(accountAdjustments)) {
+      const newBalance = parseFloat(data.account.balance) + data.adjustment;
+      await prisma.account.update({
+        where: { id: accountId },
+        data: { 
+          balance: newBalance,
+          availableBalance: newBalance
+        }
+      });
+
+      // Audit log
+      await prisma.auditLog.create({
+        data: {
+          userId: data.account.user.id,
+          action: 'ADMIN_BULK_TRANSACTIONS_DELETED',
+          details: `Admin deleted ${transactions.filter(t => t.accountId === accountId).length} transactions`,
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.headers['user-agent'] || 'unknown'
+        }
+      });
+    }
+
+    return res.json({ 
+      success: true, 
+      message: `${transactionIds.length} transactions deleted successfully`
+    });
+  } catch (error) {
+    console.error('Bulk delete transactions error:', error);
+    return res.status(500).json({ error: 'Failed to delete transactions' });
+  }
+});
+
+// Get merchant logos list
+// GET /api/v1/mybanker/merchant-logos
+router.get('/merchant-logos', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { getMerchantList, CATEGORY_ICONS } = await import('../config/merchantLogos.js');
+    return res.json({ 
+      merchants: getMerchantList(),
+      categoryIcons: CATEGORY_ICONS
+    });
+  } catch (error) {
+    console.error('Get merchant logos error:', error);
+    return res.status(500).json({ error: 'Failed to fetch merchant logos' });
+  }
+});
+
+// Export transactions as CSV
+// GET /api/v1/mybanker/users/:userId/transactions/export
+router.get('/users/:userId/transactions/export', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { format = 'csv', startDate, endDate } = req.query;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        accounts: { select: { id: true } }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const accountIds = user.accounts.map(a => a.id);
+
+    const where = {
+      accountId: { in: accountIds }
+    };
+
+    if (startDate) {
+      where.createdAt = { ...where.createdAt, gte: new Date(startDate) };
+    }
+
+    if (endDate) {
+      where.createdAt = { ...where.createdAt, lte: new Date(endDate) };
+    }
+
+    const transactions = await prisma.transaction.findMany({
+      where,
+      include: {
+        account: {
+          select: { accountNumber: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    if (format === 'csv') {
+      const csvHeader = 'Date,Type,Description,Category,Amount,Balance After,Status,Reference,Account\n';
+      const csvRows = transactions.map(tx => 
+        `"${new Date(tx.createdAt).toISOString()}","${tx.type}","${(tx.description || '').replace(/"/g, '""')}","${tx.category || ''}","${tx.amount}","${tx.balanceAfter || ''}","${tx.status}","${tx.reference || ''}","${tx.account.accountNumber}"`
+      ).join('\n');
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="transactions_${userId}_${Date.now()}.csv"`);
+      return res.send(csvHeader + csvRows);
+    }
+
+    return res.json({ transactions });
+  } catch (error) {
+    console.error('Export transactions error:', error);
+    return res.status(500).json({ error: 'Failed to export transactions' });
+  }
+});
+
 // Get audit logs
 // GET /api/v1/mybanker/audit-logs
 router.get('/audit-logs', verifyAuth, verifyAdmin, async (req, res) => {

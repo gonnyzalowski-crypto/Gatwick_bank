@@ -305,58 +305,73 @@ export const DashboardPage = () => {
             <p className="text-sm text-neutral-500 mt-0.5">Where your money goes this month</p>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Pie Chart Placeholder */}
-              <div className="flex items-center justify-center">
-                <div className="relative w-48 h-48">
-                  <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-                    {/* Housing - 35% */}
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#8B5CF6" strokeWidth="20" 
-                      strokeDasharray="87.96 251.2" strokeDashoffset="0"/>
-                    {/* Food - 25% */}
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#3B82F6" strokeWidth="20" 
-                      strokeDasharray="62.83 251.2" strokeDashoffset="-87.96"/>
-                    {/* Transport - 20% */}
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#10B981" strokeWidth="20" 
-                      strokeDasharray="50.27 251.2" strokeDashoffset="-150.79"/>
-                    {/* Entertainment - 12% */}
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#F59E0B" strokeWidth="20" 
-                      strokeDasharray="30.16 251.2" strokeDashoffset="-201.06"/>
-                    {/* Other - 8% */}
-                    <circle cx="50" cy="50" r="40" fill="none" stroke="#6B7280" strokeWidth="20" 
-                      strokeDasharray="20.11 251.2" strokeDashoffset="-231.22"/>
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <p className="text-2xl font-bold text-neutral-900">{formatCurrency(4250)}</p>
-                    <p className="text-xs text-neutral-500">Total</p>
+            {summary.expensesBreakdown && summary.expensesBreakdown.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Dynamic Pie Chart */}
+                <div className="flex items-center justify-center">
+                  <div className="relative w-48 h-48">
+                    <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                      {(() => {
+                        const colors = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#6B7280', '#EC4899', '#14B8A6'];
+                        const circumference = 2 * Math.PI * 40;
+                        let offset = 0;
+                        return summary.expensesBreakdown.map((item, i) => {
+                          const dashArray = (item.percent / 100) * circumference;
+                          const circle = (
+                            <circle 
+                              key={i}
+                              cx="50" 
+                              cy="50" 
+                              r="40" 
+                              fill="none" 
+                              stroke={colors[i % colors.length]} 
+                              strokeWidth="20" 
+                              strokeDasharray={`${dashArray} ${circumference}`}
+                              strokeDashoffset={-offset}
+                            />
+                          );
+                          offset += dashArray;
+                          return circle;
+                        });
+                      })()}
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <p className="text-2xl font-bold text-neutral-900">{formatCurrency(summary.monthlyExpenses || 0)}</p>
+                      <p className="text-xs text-neutral-500">Total</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-              {/* Legend */}
-              <div className="space-y-3">
-                {[
-                  { label: 'Housing & Utilities', amount: 1487.50, percent: 35, color: 'bg-purple-500' },
-                  { label: 'Food & Dining', amount: 1062.50, percent: 25, color: 'bg-blue-500' },
-                  { label: 'Transportation', amount: 850.00, percent: 20, color: 'bg-emerald-500' },
-                  { label: 'Entertainment', amount: 510.00, percent: 12, color: 'bg-amber-500' },
-                  { label: 'Other', amount: 340.00, percent: 8, color: 'bg-neutral-500' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${item.color}`}/>
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-neutral-700">{item.label}</span>
-                        <span className="text-sm font-medium text-neutral-900">{formatCurrency(item.amount)}</span>
+                {/* Dynamic Legend */}
+                <div className="space-y-3">
+                  {(() => {
+                    const colorClasses = ['bg-purple-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-neutral-500', 'bg-pink-500', 'bg-teal-500'];
+                    return summary.expensesBreakdown.map((item, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${colorClasses[i % colorClasses.length]}`}/>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-neutral-700">{item.label}</span>
+                            <span className="text-sm font-medium text-neutral-900">{formatCurrency(item.amount)}</span>
+                          </div>
+                          <div className="mt-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
+                            <div className={`h-full ${colorClasses[i % colorClasses.length]} rounded-full`} style={{ width: `${item.percent}%` }}/>
+                          </div>
+                        </div>
+                        <span className="text-xs text-neutral-500 w-10 text-right">{item.percent}%</span>
                       </div>
-                      <div className="mt-1 h-1.5 bg-neutral-100 rounded-full overflow-hidden">
-                        <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.percent}%` }}/>
-                      </div>
-                    </div>
-                    <span className="text-xs text-neutral-500 w-10 text-right">{item.percent}%</span>
-                  </div>
-                ))}
+                    ));
+                  })()}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+                  <DollarSign className="w-8 h-8 text-neutral-400" />
+                </div>
+                <h3 className="text-sm font-semibold text-neutral-900 mb-1">No expenses this month</h3>
+                <p className="text-sm text-neutral-500">Your expense breakdown will appear here once you have transactions</p>
+              </div>
+            )}
           </div>
         </div>
 

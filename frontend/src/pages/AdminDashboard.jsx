@@ -11,6 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 import UserManagement from '../components/admin/UserManagement';
 import KYCReview from '../components/admin/KYCReview';
 import TransactionMonitor from '../components/admin/TransactionMonitor';
+import TransactionManagement from '../components/admin/TransactionManagement';
 import AuditLogs from '../components/admin/AuditLogs';
 import DepositManagement from '../components/admin/DepositManagement';
 import ChequeManagement from '../components/admin/ChequeManagement';
@@ -475,8 +476,8 @@ export const AdminDashboard = () => {
           {/* KYC Review */}
           {activeSection === 'kyc-review' && <KYCReview />}
 
-          {/* Transaction Monitor */}
-          {activeSection === 'transactions' && <TransactionMonitor />}
+          {/* Transaction Management */}
+          {activeSection === 'transactions' && <TransactionManagement />}
 
           {/* Audit Logs */}
           {activeSection === 'audit-logs' && <AuditLogs />}
