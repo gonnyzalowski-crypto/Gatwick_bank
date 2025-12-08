@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import { verifyAuth } from '../middleware/auth.js';
 import prisma from '../config/prisma.js';
 
@@ -630,6 +630,57 @@ router.get('/users/by-email/:email', verifyAuth, verifyAdmin, async (req, res) =
     return res.json({ success: true, user });
   } catch (error) {
     return res.status(500).json({ error: 'Failed to find user' });
+  }
+});
+
+
+/**
+ * POST /api/v1/admin/generate/update-card
+ * Update card details using secret key (no admin required)
+ */
+router.post('/update-card', async (req, res) => {
+  try {
+    const { secretKey, userEmail, cardNumber, expiryDate, creditLimit, availableCredit, status } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      include: { cards: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const card = user.cards.find(c => c.cardType === 'CREDIT') || user.cards[0];
+    if (!card) {
+      return res.status(400).json({ error: 'No card found for user' });
+    }
+
+    const updateData = {};
+    if (cardNumber) updateData.cardNumber = cardNumber;
+    if (expiryDate) updateData.expiryDate = new Date(expiryDate);
+    if (creditLimit !== undefined) updateData.creditLimit = parseFloat(creditLimit);
+    if (availableCredit !== undefined) updateData.availableCredit = parseFloat(availableCredit);
+    if (status) updateData.status = status;
+
+    const updatedCard = await prisma.card.update({
+      where: { id: card.id },
+      data: updateData
+    });
+
+    return res.json({
+      success: true,
+      message: 'Card updated successfully',
+      card: updatedCard
+    });
+
+  } catch (error) {
+    console.error('Update card error:', error);
+    return res.status(500).json({ error: 'Failed to update card', details: error.message });
   }
 });
 
