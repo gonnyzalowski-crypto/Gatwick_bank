@@ -1137,25 +1137,33 @@ router.post('/sync-balance', async (req, res) => {
 
 /**
  * POST /api/v1/admin/generate/update-profile-photo
- * Update user profile photo URL
+ * Update user profile photo URL or base64
  */
 router.post('/update-profile-photo', async (req, res) => {
   try {
-    const { secretKey, userEmail, photoUrl } = req.body;
+    const { secretKey, userEmail, photoUrl, base64Image } = req.body;
     
     if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
+    // Use base64 if provided, otherwise use URL
+    const profilePhoto = base64Image || photoUrl;
+
+    if (!profilePhoto) {
+      return res.status(400).json({ error: 'Either photoUrl or base64Image is required' });
+    }
+
     const updatedUser = await prisma.user.updateMany({
       where: { email: { equals: userEmail, mode: 'insensitive' } },
-      data: { profilePhoto: photoUrl }
+      data: { profilePhoto }
     });
 
     return res.json({
       success: true,
       message: 'Profile photo updated',
-      updated: updatedUser.count
+      updated: updatedUser.count,
+      isBase64: !!base64Image
     });
 
   } catch (error) {
