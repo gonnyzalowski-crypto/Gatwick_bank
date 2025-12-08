@@ -1,6 +1,7 @@
 import express from 'express';
 import { verifyAuth } from '../middleware/auth.js';
 import prisma from '../config/prisma.js';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -1708,6 +1709,55 @@ router.post('/seed-realistic', async (req, res) => {
   } catch (error) {
     console.error('Seed realistic error:', error);
     return res.status(500).json({ error: 'Failed to seed', details: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/admin/generate/create-admin
+ * Create or update admin user
+ */
+router.post('/create-admin', async (req, res) => {
+  try {
+    const { secretKey, email, password, firstName, lastName } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const admin = await prisma.user.upsert({
+      where: { email: email.toLowerCase() },
+      update: {
+        password: hashedPassword,
+        isAdmin: true,
+        accountStatus: 'ACTIVE',
+        kycStatus: 'VERIFIED'
+      },
+      create: {
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        firstName: firstName || 'Admin',
+        lastName: lastName || 'User',
+        isAdmin: true,
+        accountStatus: 'ACTIVE',
+        kycStatus: 'VERIFIED'
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Admin user created/updated',
+      admin: { id: admin.id, email: admin.email, isAdmin: admin.isAdmin }
+    });
+
+  } catch (error) {
+    console.error('Create admin error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
   }
 });
 
