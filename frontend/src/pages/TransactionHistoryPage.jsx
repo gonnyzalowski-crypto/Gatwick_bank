@@ -1,30 +1,75 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
+import { Search, Filter, Download, ArrowUpRight, ArrowDownLeft, Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 25;
+
+const CATEGORIES = [
+  { value: '', label: 'All Categories' },
+  { value: 'SALARY', label: 'Salary & Income' },
+  { value: 'CONTRACTOR', label: 'Contractor Payment' },
+  { value: 'INVESTMENT', label: 'Investment' },
+  { value: 'INTEREST', label: 'Interest' },
+  { value: 'FREELANCE', label: 'Freelance' },
+  { value: 'TAX_REFUND', label: 'Tax Refund' },
+  { value: 'HOUSING', label: 'Housing' },
+  { value: 'UTILITIES', label: 'Utilities' },
+  { value: 'GROCERIES', label: 'Groceries' },
+  { value: 'TRANSPORTATION', label: 'Transportation' },
+  { value: 'DINING', label: 'Dining' },
+  { value: 'ENTERTAINMENT', label: 'Entertainment' },
+  { value: 'INSURANCE', label: 'Insurance' },
+  { value: 'SHOPPING', label: 'Shopping' },
+  { value: 'LOAN_PAYMENT', label: 'Loan Payment' },
+];
+
+const getCategoryIcon = (category) => {
+  const icons = {
+    SALARY: '💼', CONTRACTOR: '🏗️', INVESTMENT: '📈', INTEREST: '🏦', FREELANCE: '💻',
+    TAX_REFUND: '📋', HOUSING: '🏠', UTILITIES: '💡', GROCERIES: '🛒', TRANSPORTATION: '🚗',
+    DINING: '🍽️', ENTERTAINMENT: '🎬', INSURANCE: '🛡️', SHOPPING: '🛍️', LOAN_PAYMENT: '💳',
+  };
+  return icons[category] || '💰';
+};
+
+const getCategoryColor = (category) => {
+  const colors = {
+    SALARY: 'bg-emerald-100 text-emerald-700', CONTRACTOR: 'bg-blue-100 text-blue-700',
+    INVESTMENT: 'bg-purple-100 text-purple-700', INTEREST: 'bg-cyan-100 text-cyan-700',
+    FREELANCE: 'bg-indigo-100 text-indigo-700', TAX_REFUND: 'bg-green-100 text-green-700',
+    HOUSING: 'bg-orange-100 text-orange-700', UTILITIES: 'bg-yellow-100 text-yellow-700',
+    GROCERIES: 'bg-lime-100 text-lime-700', TRANSPORTATION: 'bg-sky-100 text-sky-700',
+    DINING: 'bg-rose-100 text-rose-700', ENTERTAINMENT: 'bg-pink-100 text-pink-700',
+    INSURANCE: 'bg-slate-100 text-slate-700', SHOPPING: 'bg-fuchsia-100 text-fuchsia-700',
+    LOAN_PAYMENT: 'bg-red-100 text-red-700',
+  };
+  return colors[category] || 'bg-gray-100 text-gray-700';
+};
 
 const TransactionHistoryPage = () => {
   const { user } = useAuth();
-  const [rows, setRows] = useState([]);
+  const [allRows, setAllRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
-
-  const isDevUser =
-    user?.id?.startsWith('dev-') || (user?.email && user.email.endsWith('@gatwickbank.test'));
+  
+  // Filters
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState(''); // '', 'credit', 'debit'
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    const fetchStatements = async () => {
+    const fetchAllTransactions = async () => {
       try {
         setLoading(true);
         setError('');
-
-        const offset = page * PAGE_SIZE;
-        const data = await apiClient.get(`/transactions?limit=${PAGE_SIZE}&offset=${offset}`);
-
+        
+        // Fetch all transactions (we'll paginate client-side for better filtering)
+        const data = await apiClient.get(`/transactions?limit=1000&offset=0`);
         const transactions = Array.isArray(data?.transactions) ? data.transactions : [];
 
         const mapped = transactions.map((tx) => {
@@ -35,175 +80,356 @@ const TransactionHistoryPage = () => {
             id: tx.id,
             date: tx.createdAt,
             description: tx.description || tx.category || 'Transaction',
-            accountLabel:
-              tx.account?.name ||
-              tx.account?.accountNumber ||
-              (tx.accountId ? `Account ${tx.accountId.slice(0, 6)}…` : '—'),
-            category: tx.category || 'general',
-            type: isDebit ? 'Debit' : 'Credit',
+            accountNumber: tx.account?.accountNumber || '',
+            category: tx.category || 'GENERAL',
+            type: isDebit ? 'debit' : 'credit',
             amount: amountNumber,
             currency: tx.account?.currency || 'USD',
+            merchantName: tx.merchantName || '',
+            reference: tx.reference || '',
           };
         });
 
-        setRows(mapped);
-        setHasMore(transactions.length === PAGE_SIZE);
+        setAllRows(mapped);
       } catch (err) {
-        console.error('Error loading statements:', err);
-        if (isDevUser) {
-          const mockRows = [
-            {
-              id: 'mock-1',
-              date: new Date().toISOString(),
-              description: 'POS Purchase – Grocery Store',
-              accountLabel: 'Main Current Account',
-              category: 'shopping',
-              type: 'Debit',
-              amount: 54.32,
-              currency: 'USD',
-            },
-            {
-              id: 'mock-2',
-              date: new Date(Date.now() - 86400000).toISOString(),
-              description: 'Salary Payment',
-              accountLabel: 'Main Current Account',
-              category: 'income',
-              type: 'Credit',
-              amount: 2500.0,
-              currency: 'USD',
-            },
-            {
-              id: 'mock-3',
-              date: new Date(Date.now() - 2 * 86400000).toISOString(),
-              description: 'Transfer to Savings',
-              accountLabel: 'Savings Account',
-              category: 'transfer',
-              type: 'Debit',
-              amount: 300.0,
-              currency: 'USD',
-            },
-          ];
-
-          setRows(mockRows);
-          setHasMore(false);
-          setError('');
-        } else {
-          setError('Unable to load statement history');
-        }
+        console.error('Error loading transactions:', err);
+        setError('Unable to load transaction history');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStatements();
-  }, [page, isDevUser]);
+    fetchAllTransactions();
+  }, []);
+
+  // Filter and search logic
+  const filteredRows = useMemo(() => {
+    return allRows.filter((row) => {
+      // Search filter
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        const matchesSearch = 
+          row.description.toLowerCase().includes(search) ||
+          row.merchantName?.toLowerCase().includes(search) ||
+          row.category.toLowerCase().includes(search) ||
+          row.reference?.toLowerCase().includes(search);
+        if (!matchesSearch) return false;
+      }
+
+      // Type filter
+      if (typeFilter && row.type !== typeFilter) return false;
+
+      // Category filter
+      if (categoryFilter && row.category !== categoryFilter) return false;
+
+      // Date range filter
+      if (dateRange.start) {
+        const rowDate = new Date(row.date);
+        const startDate = new Date(dateRange.start);
+        if (rowDate < startDate) return false;
+      }
+      if (dateRange.end) {
+        const rowDate = new Date(row.date);
+        const endDate = new Date(dateRange.end);
+        endDate.setHours(23, 59, 59, 999);
+        if (rowDate > endDate) return false;
+      }
+
+      return true;
+    });
+  }, [allRows, searchTerm, typeFilter, categoryFilter, dateRange]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredRows.length / PAGE_SIZE);
+  const paginatedRows = filteredRows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  // Stats
+  const stats = useMemo(() => {
+    const credits = filteredRows.filter(r => r.type === 'credit');
+    const debits = filteredRows.filter(r => r.type === 'debit');
+    return {
+      totalTransactions: filteredRows.length,
+      totalCredits: credits.reduce((sum, r) => sum + r.amount, 0),
+      totalDebits: debits.reduce((sum, r) => sum + r.amount, 0),
+      creditCount: credits.length,
+      debitCount: debits.length,
+    };
+  }, [filteredRows]);
 
   const formatDate = (value) => {
     if (!value) return '--';
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return '--';
-    return d.toLocaleString();
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
-  const formatAmount = (value, currency, type) => {
-    const number = Number(value || 0);
-    const sign = type === 'Debit' ? '-' : '+';
-    return `${sign}${number.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${
-      currency || ''
-    }`;
+  const formatTime = (value) => {
+    if (!value) return '';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
-  const handlePrev = () => {
-    if (page > 0) setPage((p) => p - 1);
+  const formatAmount = (value) => {
+    return Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
-  const handleNext = () => {
-    if (hasMore) setPage((p) => p + 1);
+  const clearFilters = () => {
+    setSearchTerm('');
+    setTypeFilter('');
+    setCategoryFilter('');
+    setDateRange({ start: '', end: '' });
+    setPage(0);
   };
+
+  const hasActiveFilters = searchTerm || typeFilter || categoryFilter || dateRange.start || dateRange.end;
 
   return (
     <UserDashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-900">Statements & History</h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Full history of your account activity, including card, transfer and bill payments.
-          </p>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Transaction History</h1>
+            <p className="text-slate-500 mt-1">View and manage all your account transactions</p>
+          </div>
+          <button className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors">
+            <Download className="w-4 h-4" />
+            Export Statement
+          </button>
         </div>
 
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-          {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
-            </div>
-          ) : error ? (
-            <div className="text-sm text-red-600">{error}</div>
-          ) : rows.length === 0 ? (
-            <div className="text-sm text-slate-500">No transactions found yet.</div>
-          ) : (
-            <div className="space-y-4">
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-xs md:text-sm">
-                  <thead>
-                    <tr className="text-left text-slate-400 border-b border-slate-100 text-[11px] uppercase tracking-wide">
-                      <th className="py-2 pr-4">Date</th>
-                      <th className="py-2 pr-4">Description</th>
-                      <th className="py-2 pr-4">Account</th>
-                      <th className="py-2 pr-4">Category</th>
-                      <th className="py-2 pr-4 text-right">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row) => (
-                      <tr key={row.id} className="border-b border-slate-50 last:border-0">
-                        <td className="py-2 pr-4 whitespace-nowrap text-slate-600">{formatDate(row.date)}</td>
-                        <td className="py-2 pr-4 text-slate-800">
-                          <div className="font-medium text-xs md:text-sm">{row.description}</div>
-                          <div className="text-[11px] text-slate-400 md:hidden">
-                            {row.category} • {row.type}
-                          </div>
-                        </td>
-                        <td className="py-2 pr-4 text-slate-600 text-xs md:text-sm">{row.accountLabel}</td>
-                        <td className="py-2 pr-4 text-slate-500 text-xs md:text-sm">{row.category}</td>
-                        <td className="py-2 pr-0 text-right">
-                          <span
-                            className={
-                              row.type === 'Debit'
-                                ? 'text-red-600 font-medium'
-                                : 'text-emerald-600 font-medium'
-                            }
-                          >
-                            {formatAmount(row.amount, row.currency, row.type)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <p className="text-xs text-slate-500 uppercase tracking-wide">Total Transactions</p>
+            <p className="text-2xl font-bold text-slate-900 mt-1">{stats.totalTransactions}</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <p className="text-xs text-slate-500 uppercase tracking-wide">Money In</p>
+            <p className="text-2xl font-bold text-emerald-600 mt-1">+${formatAmount(stats.totalCredits)}</p>
+            <p className="text-xs text-slate-400">{stats.creditCount} transactions</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <p className="text-xs text-slate-500 uppercase tracking-wide">Money Out</p>
+            <p className="text-2xl font-bold text-red-600 mt-1">-${formatAmount(stats.totalDebits)}</p>
+            <p className="text-xs text-slate-400">{stats.debitCount} transactions</p>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <p className="text-xs text-slate-500 uppercase tracking-wide">Net Flow</p>
+            <p className={`text-2xl font-bold mt-1 ${stats.totalCredits - stats.totalDebits >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              {stats.totalCredits - stats.totalDebits >= 0 ? '+' : '-'}${formatAmount(Math.abs(stats.totalCredits - stats.totalDebits))}
+            </p>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <div className="p-4 border-b border-slate-100">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search transactions..."
+                  value={searchTerm}
+                  onChange={(e) => { setSearchTerm(e.target.value); setPage(0); }}
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                />
               </div>
 
-              <div className="flex items-center justify-between pt-2">
-                <div className="text-[11px] md:text-xs text-slate-400">
-                  Page {page + 1}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handlePrev}
-                    disabled={page === 0}
-                    className="px-3 py-1.5 rounded-full border border-slate-200 text-[11px] md:text-xs text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50"
+              {/* Quick Filters */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setTypeFilter(typeFilter === 'credit' ? '' : 'credit'); setPage(0); }}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    typeFilter === 'credit' 
+                      ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-300' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <ArrowDownLeft className="w-4 h-4 inline mr-1" />
+                  Income
+                </button>
+                <button
+                  onClick={() => { setTypeFilter(typeFilter === 'debit' ? '' : 'debit'); setPage(0); }}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    typeFilter === 'debit' 
+                      ? 'bg-red-100 text-red-700 border-2 border-red-300' 
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <ArrowUpRight className="w-4 h-4 inline mr-1" />
+                  Expenses
+                </button>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 ${
+                    showFilters ? 'bg-primary-100 text-primary-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  <Filter className="w-4 h-4" />
+                  Filters
+                </button>
+              </div>
+            </div>
+
+            {/* Advanced Filters */}
+            {showFilters && (
+              <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Category</label>
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => { setCategoryFilter(e.target.value); setPage(0); }}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500"
                   >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={!hasMore}
-                    className="px-3 py-1.5 rounded-full border border-slate-200 text-[11px] md:text-xs text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50"
-                  >
-                    Next
-                  </button>
+                    {CATEGORIES.map(cat => (
+                      <option key={cat.value} value={cat.value}>{cat.label}</option>
+                    ))}
+                  </select>
                 </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">From Date</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) => { setDateRange(prev => ({ ...prev, start: e.target.value })); setPage(0); }}
+                      className="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">To Date</label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) => { setDateRange(prev => ({ ...prev, end: e.target.value })); setPage(0); }}
+                      className="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Active Filters */}
+            {hasActiveFilters && (
+              <div className="mt-4 flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-slate-500">Active filters:</span>
+                {searchTerm && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-full text-xs">
+                    Search: "{searchTerm}"
+                    <button onClick={() => setSearchTerm('')}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {typeFilter && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-full text-xs">
+                    Type: {typeFilter}
+                    <button onClick={() => setTypeFilter('')}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                {categoryFilter && (
+                  <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-full text-xs">
+                    Category: {categoryFilter}
+                    <button onClick={() => setCategoryFilter('')}><X className="w-3 h-3" /></button>
+                  </span>
+                )}
+                <button onClick={clearFilters} className="text-xs text-primary-600 hover:underline">
+                  Clear all
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Transactions List */}
+          <div className="divide-y divide-slate-100">
+            {loading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-20 text-red-600">{error}</div>
+            ) : paginatedRows.length === 0 ? (
+              <div className="text-center py-20 text-slate-500">
+                <p className="text-lg font-medium">No transactions found</p>
+                <p className="text-sm mt-1">Try adjusting your filters</p>
+              </div>
+            ) : (
+              paginatedRows.map((row) => (
+                <div key={row.id} className="p-4 hover:bg-slate-50 transition-colors cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
+                      row.type === 'credit' ? 'bg-emerald-100' : 'bg-red-50'
+                    }`}>
+                      {getCategoryIcon(row.category)}
+                    </div>
+
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-slate-900 truncate">{row.description}</p>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getCategoryColor(row.category)}`}>
+                          {row.category.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                        <span>{formatDate(row.date)}</span>
+                        <span>•</span>
+                        <span>{formatTime(row.date)}</span>
+                        {row.accountNumber && (
+                          <>
+                            <span>•</span>
+                            <span>****{row.accountNumber.slice(-4)}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="text-right">
+                      <p className={`text-lg font-semibold ${
+                        row.type === 'credit' ? 'text-emerald-600' : 'text-red-600'
+                      }`}>
+                        {row.type === 'credit' ? '+' : '-'}${formatAmount(row.amount)}
+                      </p>
+                      <p className="text-xs text-slate-400">{row.currency}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Pagination */}
+          {!loading && filteredRows.length > 0 && (
+            <div className="p-4 border-t border-slate-100 flex items-center justify-between">
+              <p className="text-sm text-slate-500">
+                Showing {page * PAGE_SIZE + 1} - {Math.min((page + 1) * PAGE_SIZE, filteredRows.length)} of {filteredRows.length} transactions
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPage(p => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="p-2 rounded-lg border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="px-3 py-1 text-sm font-medium">
+                  Page {page + 1} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="p-2 rounded-lg border border-slate-200 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
           )}

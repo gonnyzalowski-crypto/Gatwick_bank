@@ -1203,25 +1203,36 @@ router.post('/seed-realistic', async (req, res) => {
 
     // ========== CREDIT TRANSACTIONS (Income) ==========
     
-    // 1. ConocoPhillips - Monthly Salary ($18,500/month)
-    let salaryDate = new Date(startDate);
-    while (salaryDate <= nov7) {
-      const payDay = new Date(salaryDate.getFullYear(), salaryDate.getMonth(), 15);
-      if (payDay <= nov7) {
+    // 1. ConocoPhillips - Contractor Payments ($800K - $2M per job, every 3-6 months)
+    // User is a contractor who pays his workers from these payments
+    const contractorPayments = [
+      { date: new Date(2021, 2, 15), amount: 925000, desc: 'ConocoPhillips - Contractor Payment - Pipeline Maintenance Q1' },
+      { date: new Date(2021, 7, 22), amount: 1150000, desc: 'ConocoPhillips - Contractor Payment - Refinery Services Q2-Q3' },
+      { date: new Date(2022, 0, 10), amount: 875000, desc: 'ConocoPhillips - Contractor Payment - Equipment Installation' },
+      { date: new Date(2022, 5, 18), amount: 1320000, desc: 'ConocoPhillips - Contractor Payment - Offshore Platform Work' },
+      { date: new Date(2022, 11, 5), amount: 980000, desc: 'ConocoPhillips - Contractor Payment - Annual Maintenance Contract' },
+      { date: new Date(2023, 3, 20), amount: 1450000, desc: 'ConocoPhillips - Contractor Payment - Pipeline Extension Project' },
+      { date: new Date(2023, 8, 12), amount: 1125000, desc: 'ConocoPhillips - Contractor Payment - Safety Upgrade Project' },
+      { date: new Date(2024, 1, 28), amount: 1680000, desc: 'ConocoPhillips - Contractor Payment - Facility Expansion' },
+      { date: new Date(2024, 6, 15), amount: 1275000, desc: 'ConocoPhillips - Contractor Payment - Quarterly Service Contract' },
+      { date: new Date(2024, 10, 6), amount: 1025365, desc: 'ConocoPhillips - Contractor Payment - Current Project Completion' }, // Nov 6, 2024 - $1,025,365
+    ];
+    
+    for (const payment of contractorPayments) {
+      if (payment.date <= nov7) {
         transactions.push({
           accountId: account.id,
-          amount: 18500 + Math.random() * 500,
+          amount: payment.amount,
           type: 'CREDIT',
-          description: 'ConocoPhillips - Direct Deposit Payroll',
-          category: 'SALARY',
+          description: payment.desc,
+          category: 'CONTRACTOR',
           merchantName: 'ConocoPhillips Company',
           merchantCategory: 'Oil & Gas',
           status: 'COMPLETED',
-          reference: `COP-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
-          createdAt: payDay
+          reference: `COP-${payment.date.getFullYear()}${payment.date.getMonth()}-${Math.random().toString(36).substr(2, 6)}`,
+          createdAt: payment.date
         });
       }
-      salaryDate.setMonth(salaryDate.getMonth() + 1);
     }
 
     // 2. Tax Refunds (Annual in April)

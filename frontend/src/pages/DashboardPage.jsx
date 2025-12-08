@@ -214,10 +214,14 @@ export const DashboardPage = () => {
               <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
                 <DollarSign className="w-5 h-5 text-emerald-600" />
               </div>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+8%</span>
+              {summary.monthlyIncome > 0 && (
+                <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                  +{Math.round((summary.monthlyIncome / (summary.totalBalance || 1)) * 100)}%
+                </span>
+              )}
             </div>
             <h3 className="text-sm font-medium text-neutral-600 mb-1">Monthly Income</h3>
-            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.monthlyIncome || 12500)}</p>
+            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.monthlyIncome || 0)}</p>
             {/* Mini Line Chart */}
             <div className="h-12 relative">
               <svg width="100%" height="100%" viewBox="0 0 100 48" preserveAspectRatio="none">
@@ -231,34 +235,30 @@ export const DashboardPage = () => {
                 <polyline points="0,40 15,35 30,28 45,32 60,20 75,15 90,18 100,10" fill="none" stroke="#10B981" strokeWidth="2"/>
               </svg>
             </div>
-            <p className="text-xs text-neutral-500 mt-2">Trend this month</p>
+            <p className="text-xs text-neutral-500 mt-2">This month's credits</p>
           </div>
 
-          {/* Savings Growth */}
+          {/* Monthly Expenses */}
           <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                <PiggyBank className="w-5 h-5 text-purple-600" />
+              <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                <ArrowUpRight className="w-5 h-5 text-red-600" />
               </div>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">+15%</span>
+              {summary.monthlyExpenses > 0 && (
+                <span className="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full">
+                  -{Math.round((summary.monthlyExpenses / (summary.totalBalance || 1)) * 100)}%
+                </span>
+              )}
             </div>
-            <h3 className="text-sm font-medium text-neutral-600 mb-1">Savings Growth</h3>
-            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.savingsBalance || 28750)}</p>
-            {/* Progress Ring */}
+            <h3 className="text-sm font-medium text-neutral-600 mb-1">Monthly Expenses</h3>
+            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.monthlyExpenses || 0)}</p>
+            {/* Net Flow */}
             <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12">
-                <svg className="w-12 h-12 transform -rotate-90">
-                  <circle cx="24" cy="24" r="20" stroke="#E5E7EB" strokeWidth="4" fill="none"/>
-                  <circle cx="24" cy="24" r="20" stroke="#9333EA" strokeWidth="4" fill="none" 
-                    strokeDasharray="125.6" strokeDashoffset="31.4" strokeLinecap="round"/>
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-purple-600">75%</span>
-              </div>
-              <div>
-                <p className="text-xs text-neutral-500">Goal Progress</p>
-                <p className="text-sm font-medium text-neutral-900">$38,333 target</p>
+              <div className={`text-sm font-semibold ${(summary.monthlyIncome - summary.monthlyExpenses) >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                Net: {formatCurrency((summary.monthlyIncome || 0) - (summary.monthlyExpenses || 0))}
               </div>
             </div>
+            <p className="text-xs text-neutral-500 mt-2">This month's debits</p>
           </div>
 
           {/* Loan Status */}
@@ -267,21 +267,34 @@ export const DashboardPage = () => {
               <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
                 <Landmark className="w-5 h-5 text-amber-600" />
               </div>
-              <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2 py-1 rounded-full">Active</span>
+              <span className="text-xs font-medium text-neutral-600 bg-neutral-100 px-2 py-1 rounded-full">
+                {summary.loanBalance > 0 ? 'Active' : 'No Loans'}
+              </span>
             </div>
             <h3 className="text-sm font-medium text-neutral-600 mb-1">Loan Balance</h3>
-            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.loanBalance || 15000)}</p>
+            <p className="text-2xl font-bold text-neutral-900 mb-3">{formatCurrency(summary.loanBalance || 0)}</p>
             {/* Payment Progress */}
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className="text-neutral-500">Paid</span>
-                <span className="font-medium text-neutral-900">$10,000 / $25,000</span>
+            {summary.loanOriginalAmount > 0 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-neutral-500">Paid</span>
+                  <span className="font-medium text-neutral-900">
+                    {formatCurrency(summary.loanTotalPaid || 0)} / {formatCurrency(summary.loanOriginalAmount || 0)}
+                  </span>
+                </div>
+                <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-amber-500 rounded-full" 
+                    style={{ width: `${Math.round((summary.loanTotalPaid / summary.loanOriginalAmount) * 100)}%` }}
+                  />
+                </div>
+                {summary.nextLoanPayment && (
+                  <p className="text-xs text-neutral-500">
+                    Next payment: {new Date(summary.nextLoanPayment).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </p>
+                )}
               </div>
-              <div className="h-2 bg-neutral-200 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-full" style={{ width: '40%' }}/>
-              </div>
-              <p className="text-xs text-neutral-500">Next payment: Dec 15</p>
-            </div>
+            )}
           </div>
         </div>
 

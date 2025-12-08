@@ -217,7 +217,12 @@ export const getAccountById = async (accountId, userId) => {
 
 // Get account summary (used by /api/v1/accounts/summary and /api/v1/dashboard)
 export const getAccountSummary = async (userId) => {
-  const [accounts, cards, recentTransactions] = await Promise.all([
+  // Get current month date range
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  const [accounts, cards, recentTransactions, monthlyTransactions, loans] = await Promise.all([
     prisma.account.findMany({
       where: { userId },
       select: {
@@ -225,6 +230,7 @@ export const getAccountSummary = async (userId) => {
         accountType: true,
         balance: true,
         availableBalance: true,
+        pendingBalance: true,
       },
     }),
     prisma.card.findMany({
@@ -252,6 +258,35 @@ export const getAccountSummary = async (userId) => {
       orderBy: { createdAt: 'desc' },
       take: 5,
     }),
+    // Get all transactions for the current month for metrics
+    prisma.transaction.findMany({
+      where: {
+        account: { userId },
+        createdAt: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+      select: {
+        amount: true,
+        type: true,
+        category: true,
+      },
+    }),
+    // Get active loans
+    prisma.loan.findMany({
+      where: {
+        userId,
+        status: 'ACTIVE',
+      },
+      select: {
+        amount: true,
+        remainingBalance: true,
+        totalPaid: true,
+        monthlyPayment: true,
+        nextPaymentDate: true,
+      },
+    }),
   ]);
 
   const totalBalance = accounts.reduce(
@@ -264,13 +299,73 @@ export const getAccountSummary = async (userId) => {
     0,
   );
 
-  // Calculate pending balance from actual pendingBalance field, not derived
   const pendingBalance = accounts.reduce(
     (sum, acc) => sum + Number(acc.pendingBalance || 0),
     0,
   );
 
   const activeCards = cards.filter((c) => c.isActive && !c.isFrozen).length;
+
+  // Calculate monthly income (credits this month)
+  const monthlyIncome = monthlyTransactions
+    .filter(tx => tx.type === 'CREDIT')
+    .reduce((sum, tx) => sum + Number(tx.amount), 0);
+
+  // Calculate monthly expenses (debits this month)
+  const monthlyExpenses = monthlyTransactions
+    .filter(tx => tx.type === 'DEBIT')
+    .reduce((sum, tx) => sum + Number(tx.amount), 0);
+
+  // Calculate expenses by category
+  const expensesByCategory = {};
+  monthlyTransactions
+    .filter(tx => tx.type === 'DEBIT')
+    .forEach(tx => {
+      const category = tx.category || 'OTHER';
+      expensesByCategory[category] = (expensesByCategory[category] || 0) + Number(tx.amount);
+    });
+
+  // Map categories to display names
+  const categoryMapping = {
+    HOUSING: 'Housing & Utilities',
+    UTILITIES: 'Housing & Utilities',
+    GROCERIES: 'Food & Dining',
+    DINING: 'Food & Dining',
+    TRANSPORTATION: 'Transportation',
+    ENTERTAINMENT: 'Entertainment',
+    INSURANCE: 'Other',
+    SHOPPING: 'Other',
+    LOAN_PAYMENT: 'Other',
+  };
+
+  // Aggregate expenses by display category
+  const aggregatedExpenses = {};
+  Object.entries(expensesByCategory).forEach(([cat, amount]) => {
+    const displayCat = categoryMapping[cat] || 'Other';
+    aggregatedExpenses[displayCat] = (aggregatedExpenses[displayCat] || 0) + amount;
+  });
+
+  // Convert to array with percentages
+  const totalExpenses = Object.values(aggregatedExpenses).reduce((a, b) => a + b, 0) || 1;
+  const expensesBreakdown = Object.entries(aggregatedExpenses)
+    .map(([label, amount]) => ({
+      label,
+      amount: Number(amount.toFixed(2)),
+      percent: Math.round((amount / totalExpenses) * 100),
+    }))
+    .sort((a, b) => b.amount - a.amount);
+
+  // Loan summary
+  const loanBalance = loans.reduce((sum, loan) => sum + Number(loan.remainingBalance), 0);
+  const loanTotalPaid = loans.reduce((sum, loan) => sum + Number(loan.totalPaid), 0);
+  const loanOriginalAmount = loans.reduce((sum, loan) => sum + Number(loan.amount), 0);
+  const nextLoanPayment = loans.length > 0 ? loans[0].nextPaymentDate : null;
+
+  // Savings (assume savings accounts or a percentage of balance)
+  const savingsAccounts = accounts.filter(acc => acc.accountType === 'SAVINGS');
+  const savingsBalance = savingsAccounts.length > 0 
+    ? savingsAccounts.reduce((sum, acc) => sum + Number(acc.balance), 0)
+    : totalBalance * 0.15; // Estimate 15% as savings if no savings account
 
   const summary = {
     totalBalance: Number(totalBalance.toFixed(2)),
@@ -280,6 +375,15 @@ export const getAccountSummary = async (userId) => {
     totalCards: cards.length,
     activeCards,
     recentTransactionCount: recentTransactions.length,
+    // New metrics
+    monthlyIncome: Number(monthlyIncome.toFixed(2)),
+    monthlyExpenses: Number(monthlyExpenses.toFixed(2)),
+    savingsBalance: Number(savingsBalance.toFixed(2)),
+    loanBalance: Number(loanBalance.toFixed(2)),
+    loanTotalPaid: Number(loanTotalPaid.toFixed(2)),
+    loanOriginalAmount: Number(loanOriginalAmount.toFixed(2)),
+    nextLoanPayment,
+    expensesBreakdown,
   };
 
   return {
