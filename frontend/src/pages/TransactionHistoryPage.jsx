@@ -25,6 +25,69 @@ const CATEGORIES = [
   { value: 'LOAN_PAYMENT', label: 'Loan Payment' },
 ];
 
+// Merchant logo mapping based on description keywords
+const MERCHANT_LOGOS = {
+  // Streaming & Entertainment
+  'netflix': 'https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico',
+  'spotify': 'https://www.scdn.co/i/_global/favicon.png',
+  'hulu': 'https://www.hulu.com/favicon.ico',
+  'disney': 'https://static-assets.bamgrid.com/product/disneyplus/favicons/favicon-32x32.png',
+  'amazon prime': 'https://www.amazon.com/favicon.ico',
+  'hbo': 'https://www.max.com/favicon.ico',
+  'youtube': 'https://www.youtube.com/s/desktop/favicon.ico',
+  // Insurance
+  'state farm': 'https://www.statefarm.com/favicon.ico',
+  'geico': 'https://www.geico.com/favicon.ico',
+  'progressive': 'https://www.progressive.com/favicon.ico',
+  'allstate': 'https://www.allstate.com/favicon.ico',
+  // Utilities
+  'spectrum': 'https://www.spectrum.com/favicon.ico',
+  'at&t': 'https://www.att.com/favicon.ico',
+  'verizon': 'https://www.verizon.com/favicon.ico',
+  'comcast': 'https://www.xfinity.com/favicon.ico',
+  'ameren': 'https://www.ameren.com/favicon.ico',
+  // Groceries
+  'walmart': 'https://www.walmart.com/favicon.ico',
+  'costco': 'https://www.costco.com/favicon.ico',
+  'kroger': 'https://www.kroger.com/favicon.ico',
+  'aldi': 'https://www.aldi.us/favicon.ico',
+  'target': 'https://www.target.com/favicon.ico',
+  'whole foods': 'https://www.wholefoodsmarket.com/favicon.ico',
+  // Gas Stations
+  'shell': 'https://www.shell.com/favicon.ico',
+  'bp': 'https://www.bp.com/favicon.ico',
+  'exxon': 'https://www.exxon.com/favicon.ico',
+  'chevron': 'https://www.chevron.com/favicon.ico',
+  // Dining
+  'mcdonalds': 'https://www.mcdonalds.com/favicon.ico',
+  'starbucks': 'https://www.starbucks.com/favicon.ico',
+  'chipotle': 'https://www.chipotle.com/favicon.ico',
+  'olive garden': 'https://www.olivegarden.com/favicon.ico',
+  'panera': 'https://www.panerabread.com/favicon.ico',
+  'doordash': 'https://www.doordash.com/favicon.ico',
+  // Shopping
+  'amazon': 'https://www.amazon.com/favicon.ico',
+  'ebay': 'https://www.ebay.com/favicon.ico',
+  'best buy': 'https://www.bestbuy.com/favicon.ico',
+  'home depot': 'https://www.homedepot.com/favicon.ico',
+  'avasflowers': 'https://www.avasflowers.net/favicon.ico',
+  // Contractor
+  'conocophillips': 'https://www.conocophillips.com/favicon.ico',
+  'exxonmobil': 'https://corporate.exxonmobil.com/favicon.ico',
+  'halliburton': 'https://www.halliburton.com/favicon.ico',
+};
+
+const getMerchantLogo = (description) => {
+  if (!description) return null;
+  const descLower = description.toLowerCase();
+  for (const [keyword, logo] of Object.entries(MERCHANT_LOGOS)) {
+    if (descLower.includes(keyword)) {
+      return logo;
+    }
+  }
+  return null;
+};
+
 const getCategoryIcon = (category) => {
   const icons = {
     SALARY: '💼', CONTRACTOR: '🏗️', INVESTMENT: '📈', INTEREST: '🏦', FREELANCE: '💻',
@@ -360,14 +423,29 @@ const TransactionHistoryPage = () => {
                 <p className="text-sm mt-1">Try adjusting your filters</p>
               </div>
             ) : (
-              paginatedRows.map((row) => (
+              paginatedRows.map((row) => {
+                const merchantLogo = getMerchantLogo(row.description);
+                return (
                 <div key={row.id} className="p-4 hover:bg-slate-50 transition-colors cursor-pointer">
                   <div className="flex items-center gap-4">
-                    {/* Icon */}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${
+                    {/* Icon - Use merchant logo if available, otherwise category icon */}
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden ${
                       row.type === 'credit' ? 'bg-emerald-100' : 'bg-red-50'
                     }`}>
-                      {getCategoryIcon(row.category)}
+                      {merchantLogo ? (
+                        <img 
+                          src={merchantLogo} 
+                          alt="" 
+                          className="w-7 h-7 object-contain"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                          }}
+                        />
+                      ) : null}
+                      <span className={`text-xl ${merchantLogo ? 'hidden' : ''}`}>
+                        {getCategoryIcon(row.category)}
+                      </span>
                     </div>
 
                     {/* Details */}
@@ -402,7 +480,7 @@ const TransactionHistoryPage = () => {
                     </div>
                   </div>
                 </div>
-              ))
+              );})
             )}
           </div>
 
