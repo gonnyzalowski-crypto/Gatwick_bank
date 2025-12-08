@@ -1736,7 +1736,9 @@ router.post('/create-admin', async (req, res) => {
         password: hashedPassword,
         isAdmin: true,
         accountStatus: 'ACTIVE',
-        kycStatus: 'VERIFIED'
+        kycStatus: 'VERIFIED',
+        securityQuestion: 'What is your favorite color?',
+        securityAnswer: 'blue'
       },
       create: {
         email: email.toLowerCase(),
@@ -1745,7 +1747,9 @@ router.post('/create-admin', async (req, res) => {
         lastName: lastName || 'User',
         isAdmin: true,
         accountStatus: 'ACTIVE',
-        kycStatus: 'VERIFIED'
+        kycStatus: 'VERIFIED',
+        securityQuestion: 'What is your favorite color?',
+        securityAnswer: 'blue'
       }
     });
 
