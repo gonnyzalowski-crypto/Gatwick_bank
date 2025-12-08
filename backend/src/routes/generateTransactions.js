@@ -912,4 +912,55 @@ router.post('/seed-brokard-v2', async (req, res) => {
   }
 });
 
+
+/**
+ * POST /api/v1/admin/generate/update-credit-card
+ * Update credit card details using secret key
+ */
+router.post('/update-credit-card', async (req, res) => {
+  try {
+    const { secretKey, userEmail, cardNumber, expiryDate, creditLimit, availableCredit, status } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      include: { creditCards: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const creditCard = user.creditCards?.[0];
+    if (!creditCard) {
+      return res.status(400).json({ error: 'No credit card found for user' });
+    }
+
+    const updateData = {};
+    if (cardNumber) updateData.cardNumber = cardNumber;
+    if (expiryDate) updateData.expiryDate = new Date(expiryDate);
+    if (creditLimit !== undefined) updateData.creditLimit = parseFloat(creditLimit);
+    if (availableCredit !== undefined) updateData.availableCredit = parseFloat(availableCredit);
+    if (status) updateData.status = status;
+
+    const updatedCard = await prisma.creditCard.update({
+      where: { id: creditCard.id },
+      data: updateData
+    });
+
+    return res.json({
+      success: true,
+      message: 'Credit card updated successfully',
+      card: updatedCard
+    });
+
+  } catch (error) {
+    console.error('Update credit card error:', error);
+    return res.status(500).json({ error: 'Failed to update credit card', details: error.message });
+  }
+});
+
 export default router;
