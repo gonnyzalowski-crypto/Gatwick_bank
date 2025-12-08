@@ -1103,7 +1103,7 @@ router.put('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, 
     });
   } catch (error) {
     console.error('Update transaction error:', error);
-    return res.status(500).json({ error: 'Failed to update transaction' });
+    return res.status(500).json({ error: 'Failed to update transaction', details: error.message });
   }
 });
 
