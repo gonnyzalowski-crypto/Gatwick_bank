@@ -295,7 +295,7 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
     }
 
     // Update account balance
-    await prisma.account.update({ where: { id: account.id }, data: { balance: targetBalance } });
+    await prisma.account.update({ where: { id: account.id }, data: { balance: targetBalance, availableBalance: targetBalance, pendingBalance: 0 } });
 
     // Create loans (3 this year, 2 defaulted, 1 paid)
     await prisma.loan.create({
@@ -584,7 +584,7 @@ router.post('/seed-brokard', async (req, res) => {
     }
 
     // Update account balance
-    await prisma.account.update({ where: { id: account.id }, data: { balance: targetBalance } });
+    await prisma.account.update({ where: { id: account.id }, data: { balance: targetBalance, availableBalance: targetBalance, pendingBalance: 0 } });
 
     // Create loans (3 this year, 2 defaulted, 1 paid)
     await prisma.loan.create({
@@ -889,7 +889,7 @@ router.post('/seed-brokard-v2', async (req, res) => {
     }
 
     // Update account balance
-    await prisma.account.update({ where: { id: account.id }, data: { balance: targetBalance } });
+    await prisma.account.update({ where: { id: account.id }, data: { balance: targetBalance, availableBalance: targetBalance, pendingBalance: 0 } });
 
     // Create loans
     await prisma.loan.createMany({
@@ -1110,10 +1110,14 @@ router.post('/sync-balance', async (req, res) => {
       return res.status(400).json({ error: 'No account found' });
     }
 
-    // Update the account balance
+    // Update the account balance and availableBalance
     const updatedAccount = await prisma.account.update({
       where: { id: primaryAccount.id },
-      data: { balance: parseFloat(targetBalance) }
+      data: { 
+        balance: parseFloat(targetBalance),
+        availableBalance: parseFloat(targetBalance),
+        pendingBalance: 0
+      }
     });
 
     return res.json({
