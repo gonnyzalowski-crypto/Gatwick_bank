@@ -662,7 +662,7 @@ router.post('/update-card', async (req, res) => {
 
     const updateData = {};
     if (cardNumber) updateData.cardNumber = cardNumber;
-    if (expiryDate) updateData.expiryDate = new Date(expiryDate);
+    if (expiryDate) updateData.expiry = new Date(expiryDate);
     if (creditLimit !== undefined) updateData.creditLimit = parseFloat(creditLimit);
     if (availableCredit !== undefined) updateData.availableCredit = parseFloat(availableCredit);
     if (status) updateData.status = status;
