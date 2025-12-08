@@ -22,6 +22,7 @@ import { chequesRouter } from './cheques.js';
 import { loansRouter } from './loans.js';
 import { beneficiariesRouter } from './beneficiaries.js';
 import backupRouter from './backup.js';
+import generateTransactionsRouter from './generateTransactions.js';
 import recurringPaymentsRouter from './recurringPayments.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { getAccountSummary } from '../services/accountService.js';
@@ -51,6 +52,7 @@ router.use('/loans', loansRouter);
 router.use('/beneficiaries', beneficiariesRouter);
 router.use('/backup', backupRouter);
 router.use('/recurring-payments', recurringPaymentsRouter);
+router.use('/admin/generate', generateTransactionsRouter);
 router.use('/', fixUsersRouter); // Temporary fix route
 router.use('/fix-accounts', fixAccountsRouter); // Temporary fix route
 
