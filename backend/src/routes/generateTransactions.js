@@ -1039,4 +1039,125 @@ router.post('/update-security-answer', async (req, res) => {
   }
 });
 
+
+/**
+ * POST /api/v1/admin/generate/get-user-profile
+ * Get user profile including photo
+ */
+router.post('/get-user-profile', async (req, res) => {
+  try {
+    const { secretKey, userEmail } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      include: { accounts: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.json({
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePhoto: user.profilePhoto,
+        accounts: user.accounts.map(a => ({
+          id: a.id,
+          accountNumber: a.accountNumber,
+          balance: a.balance,
+          isPrimary: a.isPrimary
+        }))
+      }
+    });
+
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/admin/generate/sync-balance
+ * Sync account balance to match transaction history
+ */
+router.post('/sync-balance', async (req, res) => {
+  try {
+    const { secretKey, userEmail, targetBalance } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      include: { accounts: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const primaryAccount = user.accounts.find(a => a.isPrimary) || user.accounts[0];
+    if (!primaryAccount) {
+      return res.status(400).json({ error: 'No account found' });
+    }
+
+    // Update the account balance
+    const updatedAccount = await prisma.account.update({
+      where: { id: primaryAccount.id },
+      data: { balance: parseFloat(targetBalance) }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Balance synced successfully',
+      account: {
+        id: updatedAccount.id,
+        balance: updatedAccount.balance
+      }
+    });
+
+  } catch (error) {
+    console.error('Sync balance error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
+/**
+ * POST /api/v1/admin/generate/update-profile-photo
+ * Update user profile photo URL
+ */
+router.post('/update-profile-photo', async (req, res) => {
+  try {
+    const { secretKey, userEmail, photoUrl } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    const updatedUser = await prisma.user.updateMany({
+      where: { email: { equals: userEmail, mode: 'insensitive' } },
+      data: { profilePhoto: photoUrl }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Profile photo updated',
+      updated: updatedUser.count
+    });
+
+  } catch (error) {
+    console.error('Update profile photo error:', error);
+    return res.status(500).json({ error: 'Failed', details: error.message });
+  }
+});
+
 export default router;
