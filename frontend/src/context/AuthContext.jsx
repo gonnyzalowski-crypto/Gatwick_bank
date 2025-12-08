@@ -14,21 +14,39 @@ export const AuthProvider = ({ children }) => {
   const inactivityTimerRef = useRef(null);
   const warningTimerRef = useRef(null);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage and fetch fresh user data
   useEffect(() => {
-    const storedToken = localStorage.getItem('accessToken');
-    const storedUser = localStorage.getItem('user');
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem('accessToken');
+      const storedUser = localStorage.getItem('user');
 
-    if (storedToken && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (err) {
-        console.error('Failed to parse stored user:', err);
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
+      if (storedToken && storedUser) {
+        try {
+          // Set initial user from localStorage
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          
+          // Fetch fresh user data from server to get latest profilePhoto etc.
+          try {
+            const response = await apiClient.get('/auth/me');
+            if (response?.user) {
+              const freshUser = { ...parsedUser, ...response.user };
+              setUser(freshUser);
+              localStorage.setItem('user', JSON.stringify(freshUser));
+            }
+          } catch (fetchErr) {
+            console.error('Failed to refresh user data:', fetchErr);
+          }
+        } catch (err) {
+          console.error('Failed to parse stored user:', err);
+          localStorage.removeItem('user');
+          localStorage.removeItem('accessToken');
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+    
+    initAuth();
   }, []);
 
   // Auto-logout after inactivity (for non-admin users only)
