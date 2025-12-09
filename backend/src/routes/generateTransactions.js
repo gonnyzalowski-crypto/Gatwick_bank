@@ -1841,4 +1841,183 @@ router.post('/fix-transaction-dates', async (req, res) => {
 });
 
 
+/**
+ * POST /api/v1/admin/generate/copy-user-data
+ * Copy all data from one user to another (transactions, accounts, loans, etc.)
+ */
+router.post('/copy-user-data', async (req, res) => {
+  try {
+    const { secretKey, sourceEmail, targetEmail } = req.body;
+    
+    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+      return res.status(403).json({ error: 'Invalid secret key' });
+    }
+
+    if (!sourceEmail || !targetEmail) {
+      return res.status(400).json({ error: 'sourceEmail and targetEmail are required' });
+    }
+
+    // Find source user with all related data
+    const sourceUser = await prisma.user.findFirst({
+      where: { email: { equals: sourceEmail, mode: 'insensitive' } },
+      include: {
+        accounts: {
+          include: {
+            transactions: true,
+            cards: true
+          }
+        },
+        loans: true
+      }
+    });
+
+    if (!sourceUser) {
+      return res.status(404).json({ error: 'Source user not found' });
+    }
+
+    // Find target user
+    const targetUser = await prisma.user.findFirst({
+      where: { email: { equals: targetEmail, mode: 'insensitive' } },
+      include: {
+        accounts: true,
+        loans: true
+      }
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'Target user not found' });
+    }
+
+    console.log(`Copying data from ${sourceEmail} to ${targetEmail}`);
+    
+    const results = {
+      accountsUpdated: 0,
+      transactionsCopied: 0,
+      cardsCopied: 0,
+      loansCopied: 0
+    };
+
+    // Delete existing transactions and cards for target user
+    for (const account of targetUser.accounts) {
+      await prisma.transaction.deleteMany({
+        where: { accountId: account.id }
+      });
+      await prisma.card.deleteMany({
+        where: { accountId: account.id }
+      });
+    }
+
+    // Delete existing loans for target user
+    await prisma.loan.deleteMany({
+      where: { userId: targetUser.id }
+    });
+
+    // Copy account balances and data
+    for (let i = 0; i < sourceUser.accounts.length; i++) {
+      const sourceAccount = sourceUser.accounts[i];
+      let targetAccount = targetUser.accounts[i];
+
+      // If target doesn't have enough accounts, create one
+      if (!targetAccount) {
+        targetAccount = await prisma.account.create({
+          data: {
+            userId: targetUser.id,
+            accountNumber: `ACC${Date.now()}${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+            accountType: sourceAccount.accountType,
+            currency: sourceAccount.currency,
+            balance: sourceAccount.balance,
+            availableBalance: sourceAccount.availableBalance,
+            status: sourceAccount.status
+          }
+        });
+        targetUser.accounts.push(targetAccount);
+      } else {
+        // Update existing account
+        await prisma.account.update({
+          where: { id: targetAccount.id },
+          data: {
+            balance: sourceAccount.balance,
+            availableBalance: sourceAccount.availableBalance,
+            accountType: sourceAccount.accountType,
+            status: sourceAccount.status
+          }
+        });
+      }
+      results.accountsUpdated++;
+
+      // Copy transactions
+      for (const tx of sourceAccount.transactions) {
+        await prisma.transaction.create({
+          data: {
+            accountId: targetAccount.id,
+            userId: targetUser.id,
+            reference: generateRef('TXN'),
+            amount: tx.amount,
+            type: tx.type,
+            description: tx.description,
+            category: tx.category,
+            merchantName: tx.merchantName,
+            merchantCategory: tx.merchantCategory,
+            status: tx.status,
+            requiresAuth: tx.requiresAuth,
+            verifiedAt: tx.verifiedAt,
+            createdAt: tx.createdAt
+          }
+        });
+        results.transactionsCopied++;
+      }
+
+      // Copy cards
+      for (const card of sourceAccount.cards) {
+        await prisma.card.create({
+          data: {
+            accountId: targetAccount.id,
+            cardNumber: `****${Math.random().toString().substr(2, 4)}`,
+            cardType: card.cardType,
+            cardNetwork: card.cardNetwork,
+            expiryDate: card.expiryDate,
+            cvv: card.cvv,
+            status: card.status,
+            dailyLimit: card.dailyLimit,
+            monthlyLimit: card.monthlyLimit,
+            isVirtual: card.isVirtual
+          }
+        });
+        results.cardsCopied++;
+      }
+    }
+
+    // Copy loans
+    for (const loan of sourceUser.loans) {
+      await prisma.loan.create({
+        data: {
+          userId: targetUser.id,
+          loanType: loan.loanType,
+          principalAmount: loan.principalAmount,
+          interestRate: loan.interestRate,
+          termMonths: loan.termMonths,
+          monthlyPayment: loan.monthlyPayment,
+          remainingBalance: loan.remainingBalance,
+          status: loan.status,
+          approvedAt: loan.approvedAt,
+          nextPaymentDate: loan.nextPaymentDate
+        }
+      });
+      results.loansCopied++;
+    }
+
+    console.log('Copy results:', results);
+
+    return res.json({
+      success: true,
+      message: `Successfully copied data from ${sourceEmail} to ${targetEmail}`,
+      results
+    });
+
+  } catch (error) {
+    console.error('Copy user data error:', error);
+    return res.status(500).json({ error: 'Failed to copy user data', details: error.message });
+  }
+});
+
 export default router;
