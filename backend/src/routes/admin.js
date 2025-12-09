@@ -448,15 +448,19 @@ router.get('/users/:userId/backup-codes', verifyAuth, verifyAdmin, async (req, r
 router.post('/users/:userId/regenerate-backup-codes', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
+    const { count = 50 } = req.body; // Default to 50 codes, admin can specify custom amount
+
+    // Validate count (must be between 1 and 100)
+    const codeCount = Math.min(Math.max(parseInt(count) || 50, 1), 100);
 
     // Delete existing backup codes
     await prisma.backupCode.deleteMany({
       where: { userId }
     });
 
-    // Generate new backup codes (50 codes)
+    // Generate new backup codes
     const newCodes = [];
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < codeCount; i++) {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const codeHash = await bcrypt.hash(code, 10);
       await prisma.backupCode.create({
@@ -473,7 +477,7 @@ router.post('/users/:userId/regenerate-backup-codes', verifyAuth, verifyAdmin, a
       data: {
         userId: req.user.userId,
         action: 'REGENERATE_BACKUP_CODES',
-        description: `Admin regenerated backup codes for user ${userId}`,
+        description: `Admin regenerated ${codeCount} backup codes for user ${userId}`,
         severity: 'HIGH',
         ipAddress: req.ip
       }
@@ -481,8 +485,9 @@ router.post('/users/:userId/regenerate-backup-codes', verifyAuth, verifyAdmin, a
 
     return res.json({ 
       success: true, 
-      message: 'Backup codes regenerated successfully',
-      codes: newCodes 
+      message: `${codeCount} backup codes regenerated successfully`,
+      codes: newCodes,
+      count: codeCount
     });
   } catch (error) {
     console.error('Regenerate backup codes error:', error);

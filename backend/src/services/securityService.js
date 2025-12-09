@@ -121,26 +121,26 @@ const generateBackupCodesPDF = (codes, user) => {
 /**
  * Verify a backup code for a user
  * Marks the code as used if valid
+ * Returns object with { valid, error, alreadyUsed }
  */
 export const verifyBackupCode = async (userId, code) => {
   if (!code || code.length !== 6) {
-    return false;
+    return { valid: false, error: 'Invalid code format' };
   }
   
-  // Get all unused codes for this user
-  const backupCodes = await prisma.backupCode.findMany({
-    where: {
-      userId,
-      used: false
-    }
+  // First check if this code was already used
+  const allCodes = await prisma.backupCode.findMany({
+    where: { userId }
   });
   
-  // Check each code hash
-  for (const dbCode of backupCodes) {
-    const isValid = await bcrypt.compare(code, dbCode.codeHash);
-    
-    if (isValid) {
-      // Mark as used
+  // Check if code matches any used code
+  for (const dbCode of allCodes) {
+    const isMatch = await bcrypt.compare(code, dbCode.codeHash);
+    if (isMatch) {
+      if (dbCode.used) {
+        return { valid: false, error: 'Code already used', alreadyUsed: true };
+      }
+      // Code is valid and not used - mark as used
       await prisma.backupCode.update({
         where: { id: dbCode.id },
         data: {
@@ -148,12 +148,11 @@ export const verifyBackupCode = async (userId, code) => {
           usedAt: new Date()
         }
       });
-      
-      return true;
+      return { valid: true };
     }
   }
   
-  return false;
+  return { valid: false, error: 'Invalid backup code' };
 };
 
 /**

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Eye, Download, RefreshCw, Search, User, Calendar, CheckCircle, XCircle } from 'lucide-react';
+import { Shield, Eye, Download, RefreshCw, Search, User, Calendar, CheckCircle, XCircle, FileText } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
+import jsPDF from 'jspdf';
 
 export const BackupCodesManagement = () => {
   const [users, setUsers] = useState([]);
@@ -11,6 +12,8 @@ export const BackupCodesManagement = () => {
   const [backupCodes, setBackupCodes] = useState([]);
   const [loadingCodes, setLoadingCodes] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [showRegenerateModal, setShowRegenerateModal] = useState(false);
+  const [codeCount, setCodeCount] = useState(50);
 
   useEffect(() => {
     fetchUsers();
@@ -47,26 +50,150 @@ export const BackupCodesManagement = () => {
     await fetchBackupCodes(user.id);
   };
 
+  const handleOpenRegenerateModal = () => {
+    setCodeCount(50);
+    setShowRegenerateModal(true);
+  };
+
   const handleRegenerateCodes = async () => {
     if (!selectedUser) return;
-    
-    const confirmed = window.confirm(
-      `Are you sure you want to regenerate backup codes for ${selectedUser.firstName} ${selectedUser.lastName}? This will invalidate all existing codes.`
-    );
-    
-    if (!confirmed) return;
 
     try {
       setRegenerating(true);
-      const response = await apiClient.post(`/mybanker/users/${selectedUser.id}/regenerate-backup-codes`);
+      setShowRegenerateModal(false);
+      const response = await apiClient.post(`/mybanker/users/${selectedUser.id}/regenerate-backup-codes`, {
+        count: codeCount
+      });
       setBackupCodes(response.codes || []);
-      alert('Backup codes regenerated successfully!');
+      // Auto-download PDF after regeneration
+      handleDownloadPDF(response.codes || []);
     } catch (error) {
       console.error('Failed to regenerate codes:', error);
       alert('Failed to regenerate backup codes');
     } finally {
       setRegenerating(false);
     }
+  };
+
+  const handleDownloadPDF = (codes = backupCodes) => {
+    if (!selectedUser || !codes.length) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    // Header
+    doc.setFillColor(79, 70, 229); // Indigo
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('GATWICK BANK', pageWidth / 2, 18, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Backup Authentication Codes', pageWidth / 2, 30, { align: 'center' });
+    
+    // User Info Box
+    doc.setTextColor(0, 0, 0);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(15, 50, pageWidth - 30, 30, 3, 3, 'F');
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Account Holder:', 20, 60);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${selectedUser.firstName} ${selectedUser.lastName}`, 55, 60);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Email:', 20, 70);
+    doc.setFont('helvetica', 'normal');
+    doc.text(selectedUser.email, 35, 70);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Generated:', 120, 60);
+    doc.setFont('helvetica', 'normal');
+    doc.text(new Date().toLocaleDateString(), 145, 60);
+    
+    doc.setFont('helvetica', 'bold');
+    doc.text('Total Codes:', 120, 70);
+    doc.setFont('helvetica', 'normal');
+    doc.text(codes.length.toString(), 150, 70);
+    
+    // Security Notice
+    doc.setFillColor(254, 243, 199); // Amber
+    doc.roundedRect(15, 90, pageWidth - 30, 20, 3, 3, 'F');
+    doc.setFontSize(9);
+    doc.setTextColor(146, 64, 14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('⚠ IMPORTANT:', 20, 100);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Keep these codes secure. Each code can only be used ONCE. Store in a safe place.', 50, 100);
+    doc.text('Contact admin to request new codes when exhausted.', 20, 107);
+    
+    // Codes Grid
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Your Backup Codes', 15, 125);
+    
+    const activeCodes = codes.filter(c => !c.used);
+    const codesPerRow = 4;
+    const codeWidth = (pageWidth - 40) / codesPerRow;
+    const codeHeight = 12;
+    let startY = 135;
+    let currentPage = 1;
+    
+    activeCodes.forEach((codeObj, index) => {
+      const row = Math.floor(index / codesPerRow);
+      const col = index % codesPerRow;
+      const x = 20 + (col * codeWidth);
+      const y = startY + (row * codeHeight);
+      
+      // Check if we need a new page
+      if (y > 270) {
+        doc.addPage();
+        currentPage++;
+        startY = 20 - (row * codeHeight);
+      }
+      
+      const actualY = startY + (row * codeHeight);
+      
+      // Code box
+      doc.setFillColor(240, 253, 244); // Green tint
+      doc.roundedRect(x, actualY - 8, codeWidth - 5, 10, 2, 2, 'F');
+      doc.setDrawColor(34, 197, 94);
+      doc.roundedRect(x, actualY - 8, codeWidth - 5, 10, 2, 2, 'S');
+      
+      // Code number
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`${index + 1}.`, x + 2, actualY - 1);
+      
+      // Code value
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('courier', 'bold');
+      doc.text(codeObj.code, x + 10, actualY - 1);
+      doc.setFont('helvetica', 'normal');
+    });
+    
+    // Footer
+    const lastPage = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= lastPage; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Page ${i} of ${lastPage} | Generated: ${new Date().toLocaleString()} | Gatwick Bank - Secure Banking`,
+        pageWidth / 2,
+        doc.internal.pageSize.getHeight() - 10,
+        { align: 'center' }
+      );
+    }
+    
+    // Save PDF
+    doc.save(`backup-codes-${selectedUser.email}-${Date.now()}.pdf`);
   };
 
   const handleDownloadCodes = () => {
@@ -273,25 +400,27 @@ IMPORTANT: Keep these codes secure. Each code can only be used once.`;
                   <div className="grid grid-cols-2 gap-3">
                     {backupCodes.map((code, index) => (
                       <div
-                        key={code.id}
+                        key={code.id || index}
                         className={`p-3 rounded-lg border ${
                           code.used
-                            ? 'bg-slate-50 border-slate-200'
+                            ? 'bg-red-50 border-red-200'
                             : 'bg-green-50 border-green-200'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-mono text-sm font-medium">
+                          <span className={`font-mono text-sm font-medium ${
+                            code.used ? 'text-red-400 line-through' : 'text-slate-900'
+                          }`}>
                             {code.code === '******' ? '••••••' : code.code}
                           </span>
                           {code.used ? (
-                            <span className="text-xs text-slate-500">Used</span>
+                            <span className="text-xs text-red-500 font-medium">Used</span>
                           ) : (
                             <span className="text-xs text-green-600 font-medium">Active</span>
                           )}
                         </div>
                         {code.usedAt && (
-                          <div className="text-xs text-slate-500 mt-1">
+                          <div className="text-xs text-red-400 mt-1">
                             Used: {new Date(code.usedAt).toLocaleString()}
                           </div>
                         )}
@@ -321,7 +450,7 @@ IMPORTANT: Keep these codes secure. Each code can only be used once.`;
                       <div className="text-xs text-slate-600">Active</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold text-slate-400">
+                      <div className="text-2xl font-bold text-red-500">
                         {backupCodes.filter(c => c.used).length}
                       </div>
                       <div className="text-xs text-slate-600">Used</div>
@@ -334,15 +463,15 @@ IMPORTANT: Keep these codes secure. Each code can only be used once.`;
             {/* Modal Footer */}
             <div className="px-6 py-4 border-t border-slate-200 flex gap-3">
               <button
-                onClick={handleDownloadCodes}
-                disabled={backupCodes.length === 0}
+                onClick={() => handleDownloadPDF()}
+                disabled={backupCodes.length === 0 || backupCodes.filter(c => !c.used).length === 0}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
-                <Download className="w-4 h-4" />
-                Download
+                <FileText className="w-4 h-4" />
+                Download PDF
               </button>
               <button
-                onClick={handleRegenerateCodes}
+                onClick={handleOpenRegenerateModal}
                 disabled={regenerating}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
               >
@@ -354,9 +483,65 @@ IMPORTANT: Keep these codes secure. Each code can only be used once.`;
                 ) : (
                   <>
                     <RefreshCw className="w-4 h-4" />
-                    Regenerate All
+                    Regenerate Codes
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Regenerate Codes Modal */}
+      {showRegenerateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white rounded-xl max-w-md w-full overflow-hidden shadow-xl">
+            <div className="px-6 py-4 border-b border-slate-200">
+              <h3 className="text-lg font-bold text-slate-900">Generate Backup Codes</h3>
+              <p className="text-sm text-slate-600 mt-1">
+                Enter the number of codes to generate for {selectedUser?.firstName} {selectedUser?.lastName}
+              </p>
+            </div>
+            
+            <div className="px-6 py-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Number of Codes
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={codeCount}
+                  onChange={(e) => setCodeCount(Math.min(100, Math.max(1, parseInt(e.target.value) || 1)))}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-lg font-mono text-center"
+                  placeholder="Enter number (1-100)"
+                />
+                <p className="text-xs text-slate-500 mt-2">
+                  Enter a number between 1 and 100. This will replace all existing codes.
+                </p>
+              </div>
+              
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  <strong>Warning:</strong> This will invalidate all existing backup codes for this user.
+                </p>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-slate-200 flex gap-3">
+              <button
+                onClick={() => setShowRegenerateModal(false)}
+                className="flex-1 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRegenerateCodes}
+                disabled={!codeCount || codeCount < 1}
+                className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                Generate {codeCount} Codes
               </button>
             </div>
           </div>

@@ -291,7 +291,14 @@ router.post('/login/verify', async (req, res) => {
       if (!backupCode) {
         return res.status(400).json({ error: 'Backup code is required' });
       }
-      verified = await verifyBackupCode(userId, backupCode);
+      const backupResult = await verifyBackupCode(userId, backupCode);
+      if (!backupResult.valid) {
+        return res.status(401).json({ 
+          error: backupResult.error || 'Verification failed',
+          alreadyUsed: backupResult.alreadyUsed || false
+        });
+      }
+      verified = true;
     } else {
       return res.status(400).json({ error: 'Invalid verification method' });
     }
