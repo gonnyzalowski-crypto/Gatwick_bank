@@ -1458,10 +1458,8 @@ router.post('/users/:userId/transactions/bulk', verifyAuth, verifyAdmin, async (
           description: tx.description || `Admin bulk ${tx.type.toLowerCase()}`,
           category: tx.category || 'OTHER',
           merchantName: tx.description,
-          merchantLogo: tx.merchantLogo || null,
           reference,
           status: 'COMPLETED',
-          balanceAfter: newBalance,
           createdAt: tx.createdAt ? new Date(tx.createdAt) : new Date()
         }
       });
