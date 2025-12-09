@@ -352,7 +352,6 @@ router.get('/users/:userId', verifyAuth, verifyAdmin, async (req, res) => {
         },
         _count: {
           select: {
-            transactions: true,
             backupCodes: true
           }
         }
