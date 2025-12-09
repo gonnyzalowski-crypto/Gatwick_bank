@@ -1972,15 +1972,13 @@ router.post('/copy-user-data', async (req, res) => {
         await prisma.card.create({
           data: {
             accountId: targetAccount.id,
-            cardNumber: `****${Math.random().toString().substr(2, 4)}`,
+            cardNumber: `${Date.now()}${Math.random().toString().substr(2, 6)}`,
             cardType: card.cardType,
-            cardNetwork: card.cardNetwork,
-            expiryDate: card.expiryDate,
-            cvv: card.cvv,
-            status: card.status,
-            dailyLimit: card.dailyLimit,
-            monthlyLimit: card.monthlyLimit,
-            isVirtual: card.isVirtual
+            expiry: card.expiry,
+            cvv: card.cvv || '000',
+            isActive: card.isActive,
+            isFrozen: card.isFrozen,
+            dailyLimit: card.dailyLimit
           }
         });
         results.cardsCopied++;
@@ -1993,14 +1991,16 @@ router.post('/copy-user-data', async (req, res) => {
         data: {
           userId: targetUser.id,
           loanType: loan.loanType,
-          principalAmount: loan.principalAmount,
+          amount: loan.amount,
           interestRate: loan.interestRate,
           termMonths: loan.termMonths,
           monthlyPayment: loan.monthlyPayment,
           remainingBalance: loan.remainingBalance,
+          totalPaid: loan.totalPaid || 0,
           status: loan.status,
           approvedAt: loan.approvedAt,
-          nextPaymentDate: loan.nextPaymentDate
+          nextPaymentDate: loan.nextPaymentDate,
+          purpose: loan.purpose
         }
       });
       results.loansCopied++;
