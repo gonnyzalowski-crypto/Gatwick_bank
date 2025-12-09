@@ -454,9 +454,9 @@ router.post('/users/:userId/regenerate-backup-codes', verifyAuth, verifyAdmin, a
       where: { userId }
     });
 
-    // Generate new backup codes
+    // Generate new backup codes (50 codes)
     const newCodes = [];
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 50; i++) {
       const code = Math.floor(100000 + Math.random() * 900000).toString();
       const codeHash = await bcrypt.hash(code, 10);
       await prisma.backupCode.create({
