@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowUpRight, ArrowDownLeft, Search, Filter, Download, Eye, Edit, Trash2, 
   Plus, X, Save, Users, ChevronLeft, ChevronRight, Calendar, FileText,
-  CheckCircle, AlertCircle, Clock
+  CheckCircle, AlertCircle, Clock, Copy
 } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 
@@ -304,6 +304,11 @@ export const TransactionManagement = () => {
 
   const removeBulkRow = (index) => {
     setBulkTransactions(bulkTransactions.filter((_, i) => i !== index));
+  };
+
+  const cloneBulkRow = (index) => {
+    const rowToClone = bulkTransactions[index];
+    setBulkTransactions([...bulkTransactions, { ...rowToClone }]);
   };
 
   const updateBulkRow = (index, field, value) => {
@@ -1017,7 +1022,14 @@ export const TransactionManagement = () => {
                       className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded text-white text-sm"
                     />
                   </div>
-                  <div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => cloneBulkRow(index)}
+                      title="Clone this row"
+                      className="p-1.5 hover:bg-indigo-600/20 rounded transition"
+                    >
+                      <Copy className="w-4 h-4 text-indigo-400" />
+                    </button>
                     <button
                       onClick={() => removeBulkRow(index)}
                       disabled={bulkTransactions.length === 1}

@@ -1482,8 +1482,8 @@ router.post('/users/:userId/transactions/bulk', verifyAuth, verifyAdmin, async (
     // Audit log
     await prisma.auditLog.create({
       data: {
-        userId: user.id,
-        action: 'ADMIN_BULK_TRANSACTIONS_CREATED',
+        user: { connect: { id: user.id } },
+          action: 'ADMIN_BULK_TRANSACTIONS_CREATED',
         details: `Admin created ${createdTransactions.length} bulk transactions for ${user.email}`,
         ipAddress: req.ip || 'unknown',
         userAgent: req.headers['user-agent'] || 'unknown'
