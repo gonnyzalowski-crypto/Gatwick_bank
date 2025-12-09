@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../lib/apiClient';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import { MetricCard } from '../components/ui/MetricCard';
@@ -34,6 +34,33 @@ export const DashboardPage = () => {
   const [kyc, setKyc] = useState(null);
   const [showTransactionHistory, setShowTransactionHistory] = useState(false);
   const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
+  const [searchParams] = useSearchParams();
+  const impersonateToken = searchParams.get('impersonate');
+  
+  // If impersonation token is provided, set it in localStorage temporarily
+  useEffect(() => {
+    if (impersonateToken) {
+      // Store original token
+      const originalToken = localStorage.getItem('accessToken');
+      if (originalToken) {
+        sessionStorage.setItem('originalToken', originalToken);
+      }
+      // Set impersonation token
+      localStorage.setItem('accessToken', impersonateToken);
+      // Remove the query param from URL without reload
+      window.history.replaceState({}, '', '/dashboard');
+    }
+    
+    // Cleanup on unmount - restore original token if this was impersonation
+    return () => {
+      const originalToken = sessionStorage.getItem('originalToken');
+      if (originalToken) {
+        localStorage.setItem('accessToken', originalToken);
+        sessionStorage.removeItem('originalToken');
+      }
+    };
+  }, [impersonateToken]);
+
 
   useEffect(() => {
     const fetchDashboardAndKyc = async () => {

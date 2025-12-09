@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, UserPlus, Edit, Trash2, Eye, MoreVertical, DollarSign, CreditCard, Wallet, ChevronDown, Shield } from 'lucide-react';
+import { Search, Filter, UserPlus, Edit, Trash2, Eye, MoreVertical, DollarSign, CreditCard, Wallet, ChevronDown, Shield, ExternalLink } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 import AddUserModal from './AddUserModal';
 import GodModeUserModal from './GodModeUserModal';
@@ -36,6 +36,22 @@ export const UserManagement = () => {
       console.error('Failed to fetch users:', error);
     }
     setIsLoading(false);
+  };
+
+  const handleViewAsUser = async (userId) => {
+    try {
+      const response = await apiClient.post(`/mybanker/users/${userId}/impersonate`);
+      if (response.success && response.token) {
+        // Open dashboard in new tab with the impersonation token
+        const dashboardUrl = `${window.location.origin}/dashboard?impersonate=${response.token}`;
+        window.open(dashboardUrl, '_blank');
+      } else {
+        alert('Failed to generate impersonation token');
+      }
+    } catch (error) {
+      console.error('Failed to impersonate user:', error);
+      alert('Failed to view as user: ' + (error.response?.data?.error || error.message));
+    }
   };
 
   const handleStatusChange = async (userId, newStatus) => {
@@ -299,14 +315,11 @@ export const UserManagement = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
                         <button 
-                          onClick={() => {
-                            setSelectedUser(user.id);
-                            setShowViewModal(true);
-                          }}
-                          className="p-2 hover:bg-purple-600/30 bg-purple-500/10 rounded-lg transition-colors border border-purple-500/30"
-                          title="God Mode - Full Control"
+                          onClick={() => handleViewAsUser(user.id)}
+                          className="p-2 hover:bg-cyan-600/30 bg-cyan-500/10 rounded-lg transition-colors border border-cyan-500/30"
+                          title="View as User (opens in new tab)"
                         >
-                          <Shield className="w-4 h-4 text-purple-400" />
+                          <ExternalLink className="w-4 h-4 text-cyan-400" />
                         </button>
                         <button 
                           onClick={() => {

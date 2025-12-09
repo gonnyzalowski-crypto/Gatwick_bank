@@ -1,4 +1,5 @@
 import express from 'express';
+import { generateToken } from '../utils/jwt.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { getAuditLogs, getAuditStats } from '../services/auditService.js';
 import prisma from '../config/prisma.js';
@@ -3532,6 +3533,53 @@ router.post('/loans', verifyAuth, verifyAdmin, async (req, res) => {
   } catch (error) {
     console.error('Create loan error:', error);
     return res.status(500).json({ error: 'Failed to create loan' });
+  }
+});
+
+
+// Admin impersonate user - generate token to view user's dashboard
+// POST /api/v1/mybanker/users/:userId/impersonate
+router.post('/users/:userId/impersonate', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Verify the target user exists
+    const targetUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, firstName: true, lastName: true, isAdmin: true }
+    });
+
+    if (!targetUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Generate a token for the target user
+    const impersonationToken = generateToken(targetUser.id);
+
+    // Log the impersonation action
+    await prisma.auditLog.create({
+      data: {
+        user: { connect: { id: req.user.userId } },
+        action: 'ADMIN_IMPERSONATE_USER',
+        details: `Admin impersonated user ${targetUser.email} (${targetUser.firstName} ${targetUser.lastName})`,
+        ipAddress: req.ip || 'unknown',
+        userAgent: req.headers['user-agent'] || 'unknown'
+      }
+    });
+
+    return res.json({
+      success: true,
+      token: impersonationToken,
+      user: {
+        id: targetUser.id,
+        email: targetUser.email,
+        firstName: targetUser.firstName,
+        lastName: targetUser.lastName
+      }
+    });
+  } catch (error) {
+    console.error('Impersonate user error:', error);
+    return res.status(500).json({ error: 'Failed to impersonate user' });
   }
 });
 
