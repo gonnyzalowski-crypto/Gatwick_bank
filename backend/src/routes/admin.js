@@ -274,7 +274,7 @@ router.get('/users', verifyAuth, verifyAdmin, async (req, res) => {
           _count: {
             select: {
               accounts: true,
-              backupCodes: { where: { used: false } }
+              backupCodes: true
             }
           }
         },
