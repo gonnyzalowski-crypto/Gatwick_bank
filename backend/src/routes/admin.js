@@ -1086,18 +1086,23 @@ router.put('/transactions/:transactionId', verifyAuth, verifyAdmin, async (req, 
       data: updateData
     });
 
-    // Create audit log - use userId from transaction directly if available, otherwise from account.user
-    const auditUserId = transaction.userId || transaction.account?.user?.id;
+    // Create audit log - use userId from transaction directly if available, otherwise from account
+    const auditUserId = transaction.userId || transaction.account?.user?.id || transaction.account?.userId;
     if (auditUserId) {
-      await prisma.auditLog.create({
-        data: {
-          user: { connect: { id: auditUserId } },
-          action: 'ADMIN_TRANSACTION_UPDATED',
-          details: `Admin updated transaction ${transactionId}`,
-          ipAddress: req.ip || 'unknown',
-          userAgent: req.headers['user-agent'] || 'unknown'
-        }
-      });
+      try {
+        await prisma.auditLog.create({
+          data: {
+            user: { connect: { id: auditUserId } },
+            action: 'ADMIN_TRANSACTION_UPDATED',
+            details: `Admin updated transaction ${transactionId}`,
+            ipAddress: req.ip || 'unknown',
+            userAgent: req.headers['user-agent'] || 'unknown'
+          }
+        });
+      } catch (auditError) {
+        console.error('Audit log creation failed (non-critical):', auditError.message);
+        // Don't fail the transaction update if audit log fails
+      }
     }
 
     return res.json({ 
@@ -1134,18 +1139,23 @@ router.delete('/transactions/:transactionId', verifyAuth, verifyAdmin, async (re
       where: { id: transactionId }
     });
 
-    // Create audit log - use userId from transaction directly if available, otherwise from account.user
-    const auditUserId = transaction.userId || transaction.account?.user?.id;
+    // Create audit log - use userId from transaction directly if available, otherwise from account
+    const auditUserId = transaction.userId || transaction.account?.user?.id || transaction.account?.userId;
     if (auditUserId) {
-      await prisma.auditLog.create({
-        data: {
-          user: { connect: { id: auditUserId } },
-          action: 'ADMIN_TRANSACTION_DELETED',
-          details: `Admin deleted transaction ${transactionId} (${transaction.type} $${transaction.amount})`,
-          ipAddress: req.ip || 'unknown',
-          userAgent: req.headers['user-agent'] || 'unknown'
-        }
-      });
+      try {
+        await prisma.auditLog.create({
+          data: {
+            user: { connect: { id: auditUserId } },
+            action: 'ADMIN_TRANSACTION_DELETED',
+            details: `Admin deleted transaction ${transactionId} (${transaction.type} $${transaction.amount})`,
+            ipAddress: req.ip || 'unknown',
+            userAgent: req.headers['user-agent'] || 'unknown'
+          }
+        });
+      } catch (auditError) {
+        console.error('Audit log creation failed (non-critical):', auditError.message);
+        // Don't fail the transaction delete if audit log fails
+      }
     }
 
     return res.json({ 
