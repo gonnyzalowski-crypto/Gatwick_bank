@@ -3556,16 +3556,20 @@ router.post('/users/:userId/impersonate', verifyAuth, verifyAdmin, async (req, r
     // Generate a token for the target user
     const impersonationToken = generateToken(targetUser.id);
 
-    // Log the impersonation action
-    await prisma.auditLog.create({
-      data: {
-        user: { connect: { id: req.user.userId } },
-        action: 'ADMIN_IMPERSONATE_USER',
-        details: `Admin impersonated user ${targetUser.email} (${targetUser.firstName} ${targetUser.lastName})`,
-        ipAddress: req.ip || 'unknown',
-        userAgent: req.headers['user-agent'] || 'unknown'
-      }
-    });
+    // Log the impersonation action (non-critical)
+    try {
+      await prisma.auditLog.create({
+        data: {
+          user: { connect: { id: req.user.userId } },
+          action: 'ADMIN_IMPERSONATE_USER',
+          details: `Admin impersonated user ${targetUser.email} (${targetUser.firstName} ${targetUser.lastName})`,
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.headers['user-agent'] || 'unknown'
+        }
+      });
+    } catch (auditError) {
+      console.error('Audit log creation failed (non-critical):', auditError.message);
+    }
 
     return res.json({
       success: true,
