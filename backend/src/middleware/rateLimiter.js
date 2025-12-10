@@ -1,4 +1,9 @@
-import { rateLimit } from 'express-rate-limit';
+import * as rateLimitModule from 'express-rate-limit';
+
+const rateLimit =
+  rateLimitModule.default ||
+  rateLimitModule.rateLimit ||
+  rateLimitModule;
 
 /**
  * General API rate limiter
