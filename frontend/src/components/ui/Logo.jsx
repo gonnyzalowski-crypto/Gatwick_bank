@@ -2,7 +2,7 @@ import React from 'react';
 import { Building2 } from 'lucide-react';
 
 /**
- * Gatwick Bank Professional Logo
+ * Rosch Capital Bank Professional Logo
  * Unified design for both Landing Page and Dashboard
  */
 export const Logo = ({ size = 'md', variant = 'full', className = '' }) => {
