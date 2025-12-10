@@ -1,5 +1,5 @@
 /**
- * Gatwick Bank - Comprehensive Database Seed Script
+ * Rosch Capital Bank - Comprehensive Database Seed Script
  * Generates 3 years of realistic banking data (Nov 19, 2022 - Nov 19, 2025)
  * 
  * Target Final Balances:
@@ -143,7 +143,7 @@ function generateCardHash(last4: string): string {
 
 // ============= MAIN SEED FUNCTION =============
 async function main() {
-  console.log('🌱 Starting Gatwick Bank Seed Script...');
+  console.log('🌱 Starting Rosch Capital Bank Seed Script...');
   console.log(`📅 Date Range: ${START_DATE.toISOString()} to ${END_DATE.toISOString()}`);
   console.log(`🆔 Seed Run ID: ${SEED_RUN_ID}`);
 
@@ -559,13 +559,13 @@ async function main() {
   // Add opening balance transactions
   transactions.unshift(
     createTx(brokardChecking.id, brokardOpening, 'CREDIT', 'OTHER',
-      { name: 'Gatwick Bank', city: 'Springfield', state: 'MO' },
+      { name: 'Rosch Capital Bank', city: 'Springfield', state: 'MO' },
       START_DATE, 'Account Opening Balance')
   );
   
   transactions.unshift(
     createTx(jonodChecking.id, jonodOpening, 'CREDIT', 'OTHER',
-      { name: 'Gatwick Bank', city: 'Springfield', state: 'MO' },
+      { name: 'Rosch Capital Bank', city: 'Springfield', state: 'MO' },
       START_DATE, 'Account Opening Balance')
   );
 

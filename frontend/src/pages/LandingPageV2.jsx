@@ -17,11 +17,11 @@ const FAQSection = () => {
 
   const faqs = [
     {
-      question: 'How do I open a Gatwick Bank account?',
+      question: 'How do I open a Rosch Capital Bank account?',
       answer: 'Opening an account takes just 5 minutes. Simply download our app or sign up online, verify your identity with a valid ID, and you\'re ready to start banking globally.'
     },
     {
-      question: 'What currencies does Gatwick Bank support?',
+      question: 'What currencies does Rosch Capital Bank support?',
       answer: 'We support over 50 currencies including USD, EUR, GBP, CAD, AUD, and many more. You can hold, send, and receive money in multiple currencies from a single account.'
     },
     {
@@ -29,11 +29,11 @@ const FAQSection = () => {
       answer: 'Most international transfers arrive within minutes. For some currencies and destinations, transfers may take up to 1-2 business days depending on local banking systems.'
     },
     {
-      question: 'Is my money safe with Gatwick Bank?',
+      question: 'Is my money safe with Rosch Capital Bank?',
       answer: 'Yes. We use bank-grade security including 256-bit encryption, two-factor authentication, and 24/7 fraud monitoring. Customer funds are held with licensed partner banks.'
     },
     {
-      question: 'What are the fees for using Gatwick Bank?',
+      question: 'What are the fees for using Rosch Capital Bank?',
       answer: 'We believe in transparent pricing. Account opening is free, and we charge minimal fees for currency exchange at competitive mid-market rates. No hidden fees, ever.'
     }
   ];
@@ -46,7 +46,7 @@ const FAQSection = () => {
             Frequently Asked <span className="text-purple-700">Questions</span>
           </h2>
           <p className="text-lg text-gray-600">
-            Everything you need to know about Gatwick Bank
+            Everything you need to know about Rosch Capital Bank
           </p>
         </div>
 

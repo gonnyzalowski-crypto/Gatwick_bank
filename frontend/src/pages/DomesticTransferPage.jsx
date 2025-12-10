@@ -135,7 +135,7 @@ export const DomesticTransferPage = () => {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-semibold text-neutral-900 mb-1">Internal Transfer</h1>
-          <p className="text-sm text-neutral-600">Transfer money to other Gatwick Bank users instantly</p>
+          <p className="text-sm text-neutral-600">Transfer money to other Rosch Capital Bank users instantly</p>
         </div>
 
         {/* Success Message */}
@@ -251,7 +251,7 @@ export const DomesticTransferPage = () => {
                 type="text"
                 value={recipientAccountNumber}
                 onChange={(e) => setRecipientAccountNumber(e.target.value)}
-                placeholder="10-digit Gatwick Bank account number"
+                placeholder="10-digit Rosch Capital Bank account number"
                 className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
                 required
               />
@@ -339,7 +339,7 @@ export const DomesticTransferPage = () => {
             <div>
               <h3 className="text-sm font-semibold text-emerald-900 mb-1">Internal Transfers</h3>
               <p className="text-sm text-emerald-700">
-                Transfers between Gatwick Bank accounts are instant and free. Backup code verification is required for security.
+                Transfers between Rosch Capital Bank accounts are instant and free. Backup code verification is required for security.
               </p>
             </div>
           </div>

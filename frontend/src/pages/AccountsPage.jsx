@@ -111,7 +111,7 @@ export const AccountsPage = () => {
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Accounts</h2>
           <p className="text-sm text-slate-500 mt-1">
-            Manage all your Gatwick Bank accounts in one place.
+            Manage all your Rosch Capital Bank accounts in one place.
           </p>
         </div>
 

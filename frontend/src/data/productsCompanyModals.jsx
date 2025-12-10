@@ -11,7 +11,7 @@ export const productsCompanyModals = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">Your Everyday Banking Solution</h3>
-          <p>Gatwick Bank's Personal Banking offers everything you need to manage your money with confidence. From checking and savings accounts to mobile banking and bill pay, we provide modern banking tools designed for your lifestyle.</p>
+          <p>Rosch Capital Bank's Personal Banking offers everything you need to manage your money with confidence. From checking and savings accounts to mobile banking and bill pay, we provide modern banking tools designed for your lifestyle.</p>
         </section>
 
         <section>
@@ -45,7 +45,7 @@ export const productsCompanyModals = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">Grow Your Business with Confidence</h3>
-          <p>Gatwick Bank's Business Banking provides comprehensive financial solutions tailored to businesses of all sizes. From startups to established enterprises, we offer the tools and support you need to succeed.</p>
+          <p>Rosch Capital Bank's Business Banking provides comprehensive financial solutions tailored to businesses of all sizes. From startups to established enterprises, we offer the tools and support you need to succeed.</p>
         </section>
 
         <section>
@@ -78,7 +78,7 @@ export const productsCompanyModals = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">Your Gateway to Digital Assets</h3>
-          <p>Gatwick Bank's Crypto Wallets seamlessly integrate traditional banking with cryptocurrency management. Buy, sell, store, and transfer Bitcoin, Ethereum, and USDT with bank-level security.</p>
+          <p>Rosch Capital Bank's Crypto Wallets seamlessly integrate traditional banking with cryptocurrency management. Buy, sell, store, and transfer Bitcoin, Ethereum, and USDT with bank-level security.</p>
         </section>
 
         <section>
@@ -109,7 +109,7 @@ export const productsCompanyModals = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">Credit Cards Designed for You</h3>
-          <p>Gatwick Bank offers premium credit cards with competitive rates, generous rewards, and powerful security features. Build credit or maximize rewards with the perfect card for your needs.</p>
+          <p>Rosch Capital Bank offers premium credit cards with competitive rates, generous rewards, and powerful security features. Build credit or maximize rewards with the perfect card for your needs.</p>
         </section>
 
         <section>
@@ -141,8 +141,8 @@ export const productsCompanyModals = {
         <p className="text-lg font-semibold">Flexible Financing Solutions</p>
         
         <section>
-          <h3 className="text-xl font-bold mb-3">Achieve Your Goals with Gatwick Loans</h3>
-          <p>Whether you're buying a home, starting a business, or consolidating debt, Gatwick Bank offers competitive loan products with transparent terms and personalized service.</p>
+          <h3 className="text-xl font-bold mb-3">Achieve Your Goals with Rosch Capital Loans</h3>
+          <p>Whether you're buying a home, starting a business, or consolidating debt, Rosch Capital Bank offers competitive loan products with transparent terms and personalized service.</p>
         </section>
 
         <section>
@@ -175,7 +175,7 @@ export const productsCompanyModals = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">Our Story</h3>
-          <p>Founded in 2020, Gatwick Bank was born from a simple idea: banking should be accessible, transparent, and designed for the modern world. We've grown to serve over 50,000 customers across 150+ countries.</p>
+          <p>Founded in 2020, Rosch Capital Bank was born from a simple idea: banking should be accessible, transparent, and designed for the modern world. We've grown to serve over 50,000 customers across 150+ countries.</p>
         </section>
 
         <section>
@@ -208,15 +208,15 @@ export const productsCompanyModals = {
     title: 'Careers',
     content: (
       <div className="space-y-6">
-        <p className="text-lg font-semibold">Join the Gatwick Team</p>
+        <p className="text-lg font-semibold">Join the Rosch Capital Bank Team</p>
         
         <section>
           <h3 className="text-xl font-bold mb-3">Build Your Career with Us</h3>
-          <p>At Gatwick Bank, we're always looking for talented, passionate individuals who want to shape the future of banking. Join a team that values innovation, collaboration, and making a real impact.</p>
+          <p>At Rosch Capital Bank, we're always looking for talented, passionate individuals who want to shape the future of banking. Join a team that values innovation, collaboration, and making a real impact.</p>
         </section>
 
         <section>
-          <h3 className="text-xl font-bold mb-3">Why Work at Gatwick?</h3>
+          <h3 className="text-xl font-bold mb-3">Why Work at Rosch Capital Bank?</h3>
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>Competitive Compensation:</strong> Salary, bonuses, and equity options</li>
             <li><strong>Health & Wellness:</strong> Comprehensive medical, dental, and vision coverage</li>
@@ -245,13 +245,13 @@ export const productsCompanyModals = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">Media Resources</h3>
-          <p>Welcome to Gatwick Bank's press center. Here you'll find the latest news, press releases, and media kits.</p>
+          <p>Welcome to Rosch Capital Bank's press center. Here you'll find the latest news, press releases, and media kits.</p>
         </section>
 
         <section>
           <h3 className="text-xl font-bold mb-3">Recent Press Releases</h3>
           <ul className="list-disc pl-6 space-y-2">
-            <li><strong>November 2025:</strong> Gatwick Bank Reaches 50,000 User Milestone</li>
+            <li><strong>November 2025:</strong> Rosch Capital Bank Reaches 50,000 User Milestone</li>
             <li><strong>October 2025:</strong> New Crypto Wallet Features Launched</li>
             <li><strong>September 2025:</strong> Expansion to 150+ Countries Completed</li>
           </ul>
@@ -259,13 +259,13 @@ export const productsCompanyModals = {
 
         <section>
           <h3 className="text-xl font-bold mb-3">Media Contact</h3>
-          <p><strong>Email:</strong> press@gatwickbank.com</p>
+          <p><strong>Email:</strong> press@roschcapital.com</p>
           <p><strong>Phone:</strong> +1 (234) 567-893</p>
         </section>
 
         <div className="mt-8 p-6 bg-purple-50 rounded-xl border-2 border-purple-200">
-          <h4 className="text-lg font-bold text-purple-950 mb-3">Experience Gatwick Bank</h4>
-          <p className="text-purple-900 mb-4">See what the press is talking about. Try Gatwick Bank today.</p>
+          <h4 className="text-lg font-bold text-purple-950 mb-3">Experience Rosch Capital Bank</h4>
+          <p className="text-purple-900 mb-4">See what the press is talking about. Try Rosch Capital Bank today.</p>
           <Link to="/register" className="inline-block px-6 py-3 bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-lg hover:from-purple-800 hover:to-purple-950 transition-all font-semibold">
             Open Account
           </Link>
@@ -303,7 +303,7 @@ export const productsCompanyModals = {
 
         <div className="mt-8 p-6 bg-purple-50 rounded-xl border-2 border-purple-200">
           <h4 className="text-lg font-bold text-purple-950 mb-3">Start Your Financial Journey</h4>
-          <p className="text-purple-900 mb-4">Put your knowledge into action with a Gatwick Bank account.</p>
+          <p className="text-purple-900 mb-4">Put your knowledge into action with a Rosch Capital Bank account.</p>
           <Link to="/register" className="inline-block px-6 py-3 bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-lg hover:from-purple-800 hover:to-purple-950 transition-all font-semibold">
             Open Account
           </Link>
@@ -316,11 +316,11 @@ export const productsCompanyModals = {
     title: 'Partner Program',
     content: (
       <div className="space-y-6">
-        <p className="text-lg font-semibold">Grow Together with Gatwick</p>
+        <p className="text-lg font-semibold">Grow Together with Rosch Capital Bank</p>
         
         <section>
           <h3 className="text-xl font-bold mb-3">Partnership Opportunities</h3>
-          <p>Gatwick Bank's Partner Program offers businesses and organizations the opportunity to integrate our banking services, earn revenue, and provide value to their customers.</p>
+          <p>Rosch Capital Bank's Partner Program offers businesses and organizations the opportunity to integrate our banking services, earn revenue, and provide value to their customers.</p>
         </section>
 
         <section>
@@ -347,7 +347,7 @@ export const productsCompanyModals = {
 
         <div className="mt-8 p-6 bg-purple-50 rounded-xl border-2 border-purple-200">
           <h4 className="text-lg font-bold text-purple-950 mb-3">Become a Partner</h4>
-          <p className="text-purple-900 mb-4">Join our partner network and grow your business with Gatwick Bank.</p>
+          <p className="text-purple-900 mb-4">Join our partner network and grow your business with Rosch Capital Bank.</p>
           <Link to="/register" className="inline-block px-6 py-3 bg-gradient-to-r from-purple-700 to-purple-900 text-white rounded-lg hover:from-purple-800 hover:to-purple-950 transition-all font-semibold">
             Apply Now
           </Link>

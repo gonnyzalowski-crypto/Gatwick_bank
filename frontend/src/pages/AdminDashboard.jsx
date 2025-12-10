@@ -151,7 +151,7 @@ export const AdminDashboard = () => {
           <div className="flex items-center gap-2">
             <Landmark className="w-8 h-8 text-indigo-400" />
             <div>
-              <h2 className="text-white font-bold text-lg">Gatwick Bank</h2>
+              <h2 className="text-white font-bold text-lg">Rosch Capital Bank</h2>
               <p className="text-slate-400 text-xs">Admin Panel</p>
             </div>
           </div>
@@ -345,7 +345,7 @@ export const AdminDashboard = () => {
                     activeSection.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
                   }
                 </h1>
-                <p className="text-sm text-slate-400">Gatwick Bank Administration</p>
+                <p className="text-sm text-slate-400">Rosch Capital Bank Administration</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

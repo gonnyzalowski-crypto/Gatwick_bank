@@ -10,7 +10,7 @@ export const LandingPage = () => {
   const news = [
     { id: 1, date: 'Nov 2025', title: 'New Security Features Released', snippet: 'Enhanced 2FA and biometric authentication now available for all users.' },
     { id: 2, date: 'Oct 2025', title: 'Mobile App Update', snippet: 'Redesigned interface with improved performance and new features.' },
-    { id: 3, date: 'Aug 2025', title: 'Q3 Earnings: 15% Growth', snippet: 'Gatwick Bank reports strong quarterly performance with 15% year-over-year growth.' },
+    { id: 3, date: 'Aug 2025', title: 'Q3 Earnings: 15% Growth', snippet: 'Rosch Capital Bank reports strong quarterly performance with 15% year-over-year growth.' },
     { id: 4, date: 'Jun 2025', title: 'Security Patch Released', snippet: 'Critical security updates deployed across all platforms.' }
   ];
 
@@ -21,7 +21,7 @@ export const LandingPage = () => {
     },
     {
       title: 'Terms of Service',
-      content: 'By using Gatwick Bank services, you agree to our terms. We provide secure banking services with industry-standard security measures and customer support.'
+      content: 'By using Rosch Capital Bank services, you agree to our terms. We provide secure banking services with industry-standard security measures and customer support.'
     },
     {
       title: 'Cookie Policy',
@@ -43,7 +43,7 @@ export const LandingPage = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
               <Building2 className="w-8 h-8 text-primary-600" />
-              <span className="text-xl font-bold text-neutral-900">Gatwick Bank</span>
+              <span className="text-xl font-bold text-neutral-900">Rosch Capital Bank</span>
             </div>
             
             <div className="hidden md:flex items-center gap-8">
@@ -106,7 +106,7 @@ export const LandingPage = () => {
             Secure, Modern Banking at Your Fingertips
           </h1>
           <p className="text-base md:text-lg lg:text-xl text-neutral-600 mb-8 max-w-2xl mx-auto">
-            Join thousands who trust Gatwick Bank with their finances. Instant transfers, 24/7 support, 256-bit encryption.
+            Join thousands who trust Rosch Capital Bank with their finances. Instant transfers, 24/7 support, 256-bit encryption.
           </p>
           <Link 
             to="/register"
@@ -139,7 +139,7 @@ export const LandingPage = () => {
       {/* About Section */}
       <section id="about" className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-neutral-900 mb-12">Why Choose Gatwick Bank?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-neutral-900 mb-12">Why Choose Rosch Capital Bank?</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mb-12">
             <div className="bg-white rounded-2xl p-6 border-2 border-primary-100 hover:border-primary-300 hover:shadow-lg transition-all">
@@ -305,8 +305,8 @@ export const LandingPage = () => {
                     <Mail className="w-5 h-5 text-primary-600 mt-1" />
                     <div>
                       <div className="font-semibold text-neutral-900">Email</div>
-                      <a href="mailto:support@gatwickbank.com" className="text-primary-600 hover:text-primary-700">
-                        support@gatwickbank.com
+                      <a href="mailto:support@roschcapital.com" className="text-primary-600 hover:text-primary-700">
+                        support@roschcapital.com
                       </a>
                     </div>
                   </div>
@@ -374,7 +374,7 @@ export const LandingPage = () => {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Building2 className="w-8 h-8 text-primary-600" />
-                <span className="text-xl font-bold text-neutral-900">Gatwick Bank</span>
+                <span className="text-xl font-bold text-neutral-900">Rosch Capital Bank</span>
               </div>
               <p className="text-neutral-600">Secure, modern banking at your fingertips.</p>
             </div>
@@ -403,7 +403,7 @@ export const LandingPage = () => {
           </div>
 
           <div className="border-t border-purple-200 pt-8 text-center">
-            <p className="text-neutral-600 text-sm">© 2025 Gatwick Bank. All rights reserved.</p>
+            <p className="text-neutral-600 text-sm">© 2025 Rosch Capital Bank. All rights reserved.</p>
           </div>
         </div>
       </footer>

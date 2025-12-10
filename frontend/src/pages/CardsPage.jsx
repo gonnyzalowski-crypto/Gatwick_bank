@@ -142,13 +142,13 @@ export const CardsPage = () => {
       if (cardType === 'DEBIT') {
         response = await apiClient.post('/cards/debit', {
           accountId: selectedAccount,
-          cardHolderName: 'GATWICK BANK'
+          cardHolderName: 'ROSCH CAPITAL BANK'
         });
       } else {
         // Credit card application
         response = await apiClient.post('/cards/credit/apply', {
           requestedLimit: 5000,
-          cardHolderName: 'GATWICK BANK'
+          cardHolderName: 'ROSCH CAPITAL BANK'
         });
       }
 
@@ -601,7 +601,7 @@ export const CardsPage = () => {
               </div>
               <h3 className="text-lg font-semibold text-neutral-900 mb-2">No cards yet</h3>
               <p className="text-neutral-500 mb-6 max-w-sm mx-auto">
-                Create your first card to start managing your finances with Gatwick Bank
+                Create your first card to start managing your finances with Rosch Capital Bank
               </p>
               <button
                 type="button"

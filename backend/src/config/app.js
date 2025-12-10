@@ -40,8 +40,8 @@ const config = {
   logLevel: process.env.LOG_LEVEL || 'info',
   // Email configuration
   sendgridApiKey: process.env.SENDGRID_API_KEY,
-  fromEmail: process.env.FROM_EMAIL || 'noreply@gatwickbank.com',
-  frontendUrl: process.env.FRONTEND_URL || 'https://gatwickbank.up.railway.app',
+  fromEmail: process.env.FROM_EMAIL || 'noreply@roschcapital.com',
+  frontendUrl: process.env.FRONTEND_URL || 'https://roschcapital.com',
 };
 
 export default config;

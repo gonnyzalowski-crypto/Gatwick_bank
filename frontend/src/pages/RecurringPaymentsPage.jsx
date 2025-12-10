@@ -537,7 +537,7 @@ const RecurringPaymentsPage = () => {
                     type="text"
                     value={form.toAccountNumber}
                     onChange={(e) => setForm({...form, toAccountNumber: e.target.value})}
-                    placeholder="Gatwick Bank account number"
+                    placeholder="Rosch Capital Bank account number"
                     className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     required
                   />

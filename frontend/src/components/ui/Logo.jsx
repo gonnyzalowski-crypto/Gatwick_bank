@@ -31,7 +31,7 @@ export const Logo = ({ size = 'md', variant = 'full', className = '' }) => {
       <Icon />
       <div className="flex flex-col justify-center">
         <span className={`${s.text} font-bold text-slate-900 leading-tight tracking-tight`}>
-          Gatwick Bank
+          Rosch Capital Bank
         </span>
       </div>
     </div>

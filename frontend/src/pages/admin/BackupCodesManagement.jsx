@@ -88,7 +88,7 @@ export const BackupCodesManagement = () => {
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('GATWICK BANK', pageWidth / 2, 18, { align: 'center' });
+    doc.text('ROSCH CAPITAL BANK', pageWidth / 2, 18, { align: 'center' });
     
     doc.setFontSize(12);
     doc.setFont('helvetica', 'normal');
@@ -185,7 +185,7 @@ export const BackupCodesManagement = () => {
       doc.setFontSize(8);
       doc.setTextColor(150, 150, 150);
       doc.text(
-        `Page ${i} of ${lastPage} | Generated: ${new Date().toLocaleString()} | Gatwick Bank - Secure Banking`,
+        `Page ${i} of ${lastPage} | Generated: ${new Date().toLocaleString()} | Rosch Capital Bank - Secure Banking`,
         pageWidth / 2,
         doc.internal.pageSize.getHeight() - 10,
         { align: 'center' }
@@ -203,7 +203,7 @@ export const BackupCodesManagement = () => {
       .map((code, index) => `${index + 1}. ${code.code || '[USED]'} ${code.used ? '(USED)' : ''}`)
       .join('\n');
 
-    const content = `Gatwick Bank - Backup Codes
+    const content = `Rosch Capital Bank - Backup Codes
 User: ${selectedUser.firstName} ${selectedUser.lastName}
 Email: ${selectedUser.email}
 Generated: ${new Date().toLocaleString()}

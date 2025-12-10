@@ -138,7 +138,7 @@ export const CardsPage = () => {
             </div>
             <h3 className="text-xl font-semibold text-slate-900 mb-2">No cards yet</h3>
             <p className="text-slate-500 mb-6">
-              Create your first card to start managing your finances with Gatwick Bank
+              Create your first card to start managing your finances with Rosch Capital Bank
             </p>
             <button
               onClick={() => setShowCreateModal(true)}

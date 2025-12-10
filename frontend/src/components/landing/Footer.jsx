@@ -47,7 +47,7 @@ export const Footer = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-800 rounded-xl flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">Gatwick Bank</span>
+              <span className="text-xl font-bold text-white">Rosch Capital Bank</span>
             </div>
             <p className="text-gray-400 text-sm mb-4 max-w-sm">
               Global banking made simple. Send, receive, and manage money across borders with enterprise-grade security.
@@ -92,11 +92,11 @@ export const Footer = () => {
         <div className="border-t border-gray-800 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-gray-500 text-sm">
-              2025 Gatwick Bank. All rights reserved.
+              2025 Rosch Capital Bank. All rights reserved.
             </p>
             <div className="flex items-center gap-4">
-              <a href="mailto:support@gatwickbank.com" className="text-sm text-gray-400 hover:text-purple-400 transition-colors">
-                support@gatwickbank.com
+              <a href="mailto:support@roschcapital.com" className="text-sm text-gray-400 hover:text-purple-400 transition-colors">
+                support@roschcapital.com
               </a>
             </div>
           </div>

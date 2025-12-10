@@ -299,18 +299,6 @@ export const generateInvoiceHTML = (invoice) => {
             border-radius: 0;
           }
         }
-      </style>
-    </head>
-    <body>
-      <div class="invoice-container">
-        <div class="invoice-header">
-          <div class="bank-name">🏦 GATWICK BANK</div>
-          <div class="bank-tagline">Your Trusted Financial Partner</div>
-        </div>
-        
-        <div class="invoice-body">
-          <div class="invoice-meta">
-            <div class="invoice-info">
               <h2>INVOICE</h2>
               <div class="invoice-number">Invoice #: ${id}</div>
               <div class="invoice-date">Date: ${invoiceDate}</div>
@@ -355,9 +343,9 @@ export const generateInvoiceHTML = (invoice) => {
           </div>
           
           <div class="invoice-footer">
-            <div class="footer-note">Thank you for banking with Gatwick Bank</div>
+            <div class="footer-note">Thank you for banking with Rosch Capital Bank</div>
             <div>123 Financial District, New York, NY 10004 | Tel: (555) 123-4567</div>
-            <div>support@gatwickbank.com | www.gatwickbank.com</div>
+            <div>support@roschcapital.com | www.roschcapital.com</div>
           </div>
         </div>
       </div>

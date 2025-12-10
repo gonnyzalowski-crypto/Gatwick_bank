@@ -31,7 +31,7 @@ export const sendEmailVerificationCode = async (user) => {
   });
 
   // Send email
-  const subject = 'Your Gatwick Bank Login Code';
+  const subject = 'Your Rosch Capital Bank Login Code';
   const html = `
     <!DOCTYPE html>
     <html>
@@ -53,17 +53,17 @@ export const sendEmailVerificationCode = async (user) => {
         </div>
         <div class="content">
           <p>Dear ${user.firstName},</p>
-          <p>You requested to log in to your Gatwick Bank account. Use the verification code below to complete your login:</p>
+          <p>You requested to log in to your Rosch Capital Bank account. Use the verification code below to complete your login:</p>
           <div class="code">${code}</div>
           <p><strong>This code will expire in 10 minutes.</strong></p>
           <div class="warning">
             <strong>⚠️ Security Notice</strong><br>
             If you did not request this code, please ignore this email and ensure your account is secure.
           </div>
-          <p>For your security, never share this code with anyone, including Gatwick Bank staff.</p>
+          <p>For your security, never share this code with anyone, including Rosch Capital Bank staff.</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>&#xa9; ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
           <p>This code is valid for 10 minutes only.</p>
         </div>
       </div>

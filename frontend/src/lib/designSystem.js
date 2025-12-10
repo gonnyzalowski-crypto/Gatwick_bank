@@ -1,5 +1,5 @@
 /**
- * Gatwick Bank Design System
+ * Rosch Capital Bank Design System
  * Enterprise-grade design tokens for consistent UI/UX
  */
 

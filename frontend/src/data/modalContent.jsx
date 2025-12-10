@@ -9,7 +9,7 @@ export const modalContent = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">1. Information We Collect</h3>
-          <p className="mb-2">At Gatwick Bank, we collect information to provide you with secure and efficient banking services:</p>
+          <p className="mb-2">At Rosch Capital Bank, we collect information to provide you with secure and efficient banking services:</p>
           <ul className="list-disc pl-6 space-y-2">
             <li><strong>Personal Information:</strong> Name, email address, phone number, date of birth, and government-issued ID</li>
             <li><strong>Financial Information:</strong> Account numbers, transaction history, and payment information</li>
@@ -60,7 +60,7 @@ export const modalContent = {
         <section>
           <h3 className="text-xl font-bold mb-3">6. Contact Us</h3>
           <p>For privacy-related questions or concerns, contact us at:</p>
-          <p className="mt-2"><strong>Email:</strong> privacy@gatwickbank.com</p>
+          <p className="mt-2"><strong>Email:</strong> privacy@roschcapital.com</p>
           <p><strong>Phone:</strong> +1 (234) 567-890</p>
         </section>
       </div>
@@ -75,7 +75,7 @@ export const modalContent = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">1. Acceptance of Terms</h3>
-          <p>By accessing or using Gatwick Bank services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
+          <p>By accessing or using Rosch Capital Bank services, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.</p>
         </section>
 
         <section>
@@ -103,7 +103,7 @@ export const modalContent = {
 
         <section>
           <h3 className="text-xl font-bold mb-3">4. Fees and Charges</h3>
-          <p>Gatwick Bank offers fee-free personal banking. However, certain services may incur charges:</p>
+          <p>Rosch Capital Bank offers fee-free personal banking. However, certain services may incur charges:</p>
           <ul className="list-disc pl-6 space-y-2">
             <li>International wire transfers: Variable fees based on destination</li>
             <li>Expedited card delivery: $25</li>
@@ -124,7 +124,7 @@ export const modalContent = {
 
         <section>
           <h3 className="text-xl font-bold mb-3">7. Limitation of Liability</h3>
-          <p>Gatwick Bank is not liable for indirect, incidental, or consequential damages arising from your use of our services, except as required by law.</p>
+          <p>Rosch Capital Bank is not liable for indirect, incidental, or consequential damages arising from your use of our services, except as required by law.</p>
         </section>
 
         <section>
@@ -259,7 +259,7 @@ export const modalContent = {
             <li>Use a strong, unique password (minimum 12 characters)</li>
             <li>Enable two-factor authentication</li>
             <li>Never share your password or security codes</li>
-            <li>Verify emails claiming to be from Gatwick Bank</li>
+            <li>Verify emails claiming to be from Rosch Capital Bank</li>
             <li>Use secure networks (avoid public Wi-Fi for banking)</li>
             <li>Keep your contact information up to date</li>
             <li>Review your account activity regularly</li>
@@ -270,7 +270,7 @@ export const modalContent = {
           <h3 className="text-xl font-bold mb-3">6. Report Security Concerns</h3>
           <p>If you suspect unauthorized access or fraudulent activity:</p>
           <p className="mt-2"><strong>24/7 Security Hotline:</strong> +1 (234) 567-891</p>
-          <p><strong>Email:</strong> security@gatwickbank.com</p>
+          <p><strong>Email:</strong> security@roschcapital.com</p>
           <p className="mt-3 text-sm italic">We respond to security incidents within 1 hour.</p>
         </section>
       </div>
@@ -285,7 +285,7 @@ export const modalContent = {
         
         <section>
           <h3 className="text-xl font-bold mb-3">1. Our Commitment</h3>
-          <p>Gatwick Bank is committed to ensuring digital accessibility for people with disabilities. We continuously improve the user experience for everyone and apply relevant accessibility standards.</p>
+          <p>Rosch Capital Bank is committed to ensuring digital accessibility for people with disabilities. We continuously improve the user experience for everyone and apply relevant accessibility standards.</p>
         </section>
 
         <section>
@@ -362,7 +362,7 @@ export const modalContent = {
             <li><strong>TTY/TDD:</strong> +1 (234) 567-892 (for hearing impaired)</li>
             <li><strong>Video Relay Service:</strong> Available 24/7</li>
             <li><strong>Live Chat:</strong> Screen reader compatible</li>
-            <li><strong>Email:</strong> accessibility@gatwickbank.com</li>
+            <li><strong>Email:</strong> accessibility@roschcapital.com</li>
             <li><strong>Phone:</strong> +1 (234) 567-890</li>
           </ul>
         </section>
@@ -374,8 +374,8 @@ export const modalContent = {
 
         <section>
           <h3 className="text-xl font-bold mb-3">7. Feedback</h3>
-          <p>We welcome feedback on the accessibility of Gatwick Bank. If you encounter any barriers, please contact us:</p>
-          <p className="mt-2"><strong>Email:</strong> accessibility@gatwickbank.com</p>
+          <p>We welcome feedback on the accessibility of Rosch Capital Bank. If you encounter any barriers, please contact us:</p>
+          <p className="mt-2"><strong>Email:</strong> accessibility@roschcapital.com</p>
           <p><strong>Phone:</strong> +1 (234) 567-890</p>
           <p className="mt-3">We aim to respond within 2 business days.</p>
         </section>

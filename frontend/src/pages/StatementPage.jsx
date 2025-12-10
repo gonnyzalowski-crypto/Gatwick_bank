@@ -114,7 +114,7 @@ const StatementPage = () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Account Statement - Gatwick Bank</title>
+        <title>Account Statement - Rosch Capital Bank</title>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           body { 
@@ -236,9 +236,9 @@ const StatementPage = () => {
       <body>
         <div class="header">
           <div class="logo-section">
-            <div class="logo">GB</div>
+            <div class="logo">RC</div>
             <div>
-              <div class="bank-name">Gatwick Bank</div>
+              <div class="bank-name">Rosch Capital Bank</div>
               <div class="bank-tagline">Banking Reimagined for the Digital Age</div>
             </div>
           </div>
@@ -339,11 +339,11 @@ const StatementPage = () => {
         </table>
         
         <div class="footer">
-          <p><strong>Gatwick Bank</strong> - Your Trusted Financial Partner</p>
+          <p><strong>Rosch Capital Bank</strong> - Your Trusted Financial Partner</p>
           <p>This is a computer-generated statement and does not require a signature.</p>
-          <p>For any queries, please contact support@gatwickbank.com or call +1 (800) 555-0123</p>
+          <p>For any queries, please contact support@roschcapital.com or call +1 (800) 555-0123</p>
           <p style="margin-top: 10px; font-size: 10px;">
-            © ${new Date().getFullYear()} Gatwick Bank. All rights reserved. Member FDIC.
+            &copy; ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved. Member FDIC.
           </p>
         </div>
         

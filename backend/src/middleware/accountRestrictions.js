@@ -38,7 +38,7 @@ export const checkPNDStatus = async (req, res, next) => {
         restrictedActions: ['DEBIT', 'TRANSFER', 'WITHDRAWAL', 'PAYMENT'],
         contactInfo: {
           phone: '+1 (800) 555-BANK',
-          email: 'accountmanager@gatwickbank.com',
+          email: 'accountmanager@roschcapital.com',
           supportTicket: 'Create a support ticket for faster resolution'
         }
       });
@@ -79,12 +79,12 @@ export const checkSuspendedStatus = async (req, res, next) => {
       return res.status(403).json({
         error: 'Account Suspended',
         code: 'ACCOUNT_SUSPENDED',
-        message: 'Your account has been suspended and requires physical verification with the bank. Please visit your nearest Gatwick Bank branch with valid identification.',
+        message: 'Your account has been suspended and requires physical verification with the bank. Please visit your nearest Rosch Capital Bank branch with valid identification.',
         suspensionReason: user.suspensionReason || 'Account suspended pending verification',
         accountStatus: 'SUSPENDED',
         contactInfo: {
           phone: '+1 (800) 555-BANK',
-          email: 'support@gatwickbank.com',
+          email: 'support@roschcapital.com',
           hours: 'Mon-Fri 9AM-5PM EST'
         }
       });
@@ -128,7 +128,7 @@ export const checkDebitEligibility = async (req, res, next) => {
       return res.status(403).json({
         error: 'Account Suspended',
         code: 'ACCOUNT_SUSPENDED',
-        message: 'Your account has been suspended. Please visit your nearest Gatwick Bank branch for verification.',
+        message: 'Your account has been suspended. Please visit your nearest Rosch Capital Bank branch for verification.',
         accountStatus: 'SUSPENDED'
       });
     }
@@ -143,7 +143,7 @@ export const checkDebitEligibility = async (req, res, next) => {
         accountStatus: 'PND',
         contactInfo: {
           phone: '+1 (800) 555-BANK',
-          email: 'accountmanager@gatwickbank.com'
+          email: 'accountmanager@roschcapital.com'
         }
       });
     }

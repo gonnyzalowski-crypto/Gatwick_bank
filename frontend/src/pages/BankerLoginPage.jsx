@@ -197,7 +197,7 @@ export const BankerLoginPage = () => {
                           boxShadow: emailFocused ? '0 0 0 4px rgba(139, 92, 246, 0.15)' : 'none'
                         }}
                         className="w-full h-14 pl-12 pr-4 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all focus:outline-none"
-                        placeholder="banker@gatwickbank.com"
+                        placeholder="banker@roschcapital.com"
                       />
                     </div>
                   </div>

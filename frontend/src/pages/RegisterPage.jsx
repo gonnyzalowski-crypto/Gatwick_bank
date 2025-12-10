@@ -198,7 +198,7 @@ export const RegisterPage = () => {
           <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mb-6 border border-white/20">
             <Building2 className="w-12 h-12 text-white" strokeWidth={2} />
           </div>
-          <h1 className="text-5xl font-bold mb-4">Gatwick Bank</h1>
+          <h1 className="text-5xl font-bold mb-4">Rosch Capital Bank</h1>
           <p className="text-xl text-white/90 text-center max-w-md mb-12">
             Join thousands of users who trust us with their finances
           </p>
@@ -281,13 +281,13 @@ export const RegisterPage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                 <Building2 className="w-10 h-10 text-white" strokeWidth={2} />
               </div>
-              <h1 className="text-2xl font-bold text-neutral-900">Gatwick Bank</h1>
+              <h1 className="text-2xl font-bold text-neutral-900">Rosch Capital Bank</h1>
               <p className="text-sm text-neutral-600 mt-1">Secure, modern banking</p>
             </div>
 
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-neutral-900 mb-2">Create Account</h2>
-              <p className="text-neutral-600">Join Gatwick Bank today</p>
+              <p className="text-neutral-600">Join Rosch Capital Bank today</p>
             </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -352,7 +352,7 @@ export const RegisterPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  placeholder="you@example.com"
+                  placeholder="you@roschcapital.com"
                   className={`w-full h-14 pl-12 pr-4 bg-neutral-50/80 backdrop-blur-sm border-2 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all ${
                     fieldErrors.email ? 'border-red-500 ring-4 ring-red-100' : 'border-neutral-200 hover:border-neutral-300 focus:border-purple-700 focus:ring-4 focus:ring-purple-100'
                   }`}

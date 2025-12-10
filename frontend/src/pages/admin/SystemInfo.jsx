@@ -19,7 +19,7 @@ const SystemInfo = () => {
       // Mock data for development
       setSystemStats({
         platform: {
-          name: 'Gatwick Bank',
+          name: 'Rosch Capital Bank',
           version: '1.0.0',
           environment: 'Production',
           uptime: '15 days, 7 hours',

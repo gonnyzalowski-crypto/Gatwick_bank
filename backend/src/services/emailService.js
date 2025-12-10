@@ -7,8 +7,8 @@ if (config.sendgridApiKey) {
   sgMail.setApiKey(config.sendgridApiKey);
 }
 
-const FROM_EMAIL = config.fromEmail || 'noreply@gatwickbank.com';
-const FROM_NAME = 'Gatwick Bank';
+const FROM_EMAIL = config.fromEmail || 'noreply@roschcapital.com';
+const FROM_NAME = 'Rosch Capital Bank';
 
 /**
  * Send email using SendGrid
@@ -49,7 +49,7 @@ export const sendEmail = async (to, subject, html, text = null) => {
  * Send welcome email to new user
  */
 export const sendWelcomeEmail = async (user) => {
-  const subject = 'Welcome to Gatwick Bank!';
+  const subject = 'Welcome to Rosch Capital Bank!';
   const html = `
     <!DOCTYPE html>
     <html>
@@ -66,11 +66,11 @@ export const sendWelcomeEmail = async (user) => {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to Gatwick Bank!</h1>
+          <h1>Welcome to Rosch Capital Bank!</h1>
         </div>
         <div class="content">
           <p>Dear ${user.firstName} ${user.lastName},</p>
-          <p>Thank you for choosing Gatwick Bank. Your account has been successfully created!</p>
+          <p>Thank you for choosing Rosch Capital Bank. Your account has been successfully created!</p>
           <p><strong>Account Details:</strong></p>
           <ul>
             <li>Email: ${user.email}</li>
@@ -82,7 +82,7 @@ export const sendWelcomeEmail = async (user) => {
           <p>If you have any questions, our support team is here to help 24/7.</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>&#169; ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
           <p>This is an automated message, please do not reply to this email.</p>
         </div>
       </div>
@@ -130,7 +130,7 @@ export const sendDepositApprovedEmail = async (user, deposit) => {
           <p>Your new balance is now available for use.</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
         </div>
       </div>
     </body>

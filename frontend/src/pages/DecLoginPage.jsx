@@ -9,7 +9,7 @@ const DecLoginPage = () => {
   const handleUserLogin = () => {
     const result = devLogin({
       id: 'dev-user',
-      email: 'customer@gatwickbank.test',
+      email: 'customer@roschcapital.test',
       firstName: 'Demo',
       lastName: 'Customer',
       isAdmin: false,
@@ -23,7 +23,7 @@ const DecLoginPage = () => {
   const handleAdminLogin = () => {
     const result = devLogin({
       id: 'dev-admin',
-      email: 'admin@gatwickbank.test',
+      email: 'admin@roschcapital.test',
       firstName: 'Demo',
       lastName: 'Admin',
       isAdmin: true,
@@ -41,7 +41,7 @@ const DecLoginPage = () => {
           <h1 className="text-lg font-semibold text-slate-900">Dev Login</h1>
           <p className="text-xs text-slate-500">
             This page is for local development only. It skips real authentication so you can preview
-            the Gatwick Bank dashboards without a running backend.
+            the Rosch Capital Bank dashboards without a running backend.
           </p>
         </div>
 

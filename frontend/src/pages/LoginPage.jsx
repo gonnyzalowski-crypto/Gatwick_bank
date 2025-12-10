@@ -79,7 +79,7 @@ export const LoginPage = () => {
     } catch (err) {
       // Check if account is suspended
       if (err.response?.status === 403 && err.response?.data?.accountStatus === 'SUSPENDED') {
-        setError(err.response.data.message || 'Your account has been suspended. Please visit your nearest Gatwick Bank branch for verification.');
+        setError(err.response.data.message || 'Your account has been suspended. Please visit your nearest Rosch Capital Bank branch for verification.');
       } else {
         setError(err.response?.data?.error || 'Login failed');
       }
@@ -145,7 +145,7 @@ export const LoginPage = () => {
           <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mb-6 border border-white/20">
             <Building2 className="w-12 h-12 text-white" strokeWidth={2} />
           </div>
-          <h1 className="text-5xl font-bold mb-4">Gatwick Bank</h1>
+          <h1 className="text-5xl font-bold mb-4">Rosch Capital Bank</h1>
           <p className="text-xl text-white/90 text-center max-w-md mb-12">
             Secure, Modern Banking at Your Fingertips
           </p>
@@ -221,7 +221,7 @@ export const LoginPage = () => {
               <div className="w-16 h-16 bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
                 <Building2 className="w-10 h-10 text-white" strokeWidth={2} />
               </div>
-              <h1 className="text-2xl font-bold text-neutral-900">Gatwick Bank</h1>
+              <h1 className="text-2xl font-bold text-neutral-900">Rosch Capital Bank</h1>
               <p className="text-sm text-neutral-600 mt-1">Secure, modern banking</p>
             </div>
 
@@ -266,7 +266,7 @@ export const LoginPage = () => {
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         onFocus={() => setEmailFocused(true)}
                         onBlur={() => setEmailFocused(false)}
-                        placeholder="you@example.com"
+                        placeholder="you@roschcapital.com"
                         style={{
                           background: 'rgba(255, 255, 255, 0.85)',
                           border: emailFocused ? '1.5px solid #7C3AED' : '1.5px solid rgba(124, 58, 237, 0.2)',

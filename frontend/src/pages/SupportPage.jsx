@@ -70,7 +70,7 @@ const SupportPage = () => {
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Support & Help</h2>
           <p className="text-sm text-slate-500 mt-1">
-            Get help with your Gatwick Bank account, cards, payments, and profile.
+            Get help with your Rosch Capital Bank account, cards, payments, and profile.
           </p>
         </div>
 
@@ -161,7 +161,7 @@ const SupportPage = () => {
 
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-3 text-sm text-slate-600">
           <h3 className="text-sm font-semibold text-slate-900">Other ways to reach us</h3>
-          <p>Email: <span className="font-mono">support@gatwickbank.com</span></p>
+          <p>Email: <span className="font-mono">support@roschcapital.com</span></p>
           <p>Phone: <span className="font-mono">+44 0000 000 000</span></p>
           <p>Support hours: Monday – Friday, 9:00 – 17:00 (GMT)</p>
         </div>

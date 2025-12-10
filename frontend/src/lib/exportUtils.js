@@ -284,7 +284,7 @@ export const generateReceiptHTML = (payment) => {
 
         <div class="footer">
           <p>This is an electronically generated receipt and is valid without a signature.</p>
-          <p>Thank you for banking with Gatwick Bank</p>
+          <p>Thank you for banking with Rosch Capital Bank</p>
         </div>
       </div>
     </body>

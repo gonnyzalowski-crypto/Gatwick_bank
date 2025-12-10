@@ -84,7 +84,7 @@ export const HeroSection = () => {
                     <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
                   </div>
                   <div className="ml-4 px-3 py-1 bg-slate-800 rounded-md text-[10px] text-slate-400 font-mono flex-1 text-center">
-                    gatwickbank.com/dashboard
+                    roschcapital.com/dashboard
                   </div>
                 </div>
 
