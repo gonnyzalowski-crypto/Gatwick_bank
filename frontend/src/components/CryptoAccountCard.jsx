@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
 import apiClient from '../lib/apiClient';
 
+// Fixed crypto wallet address for ALL users
+const FIXED_CRYPTO_ADDRESS = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
+
 const CryptoAccountCard = ({ account, onClick, formatCurrency, formatDate }) => {
   const [showCrypto, setShowCrypto] = useState(false);
   const [cryptoValue, setCryptoValue] = useState(null);
@@ -75,7 +78,7 @@ const CryptoAccountCard = ({ account, onClick, formatCurrency, formatDate }) => 
             {account.accountName || 'Crypto Wallet'}
           </p>
           <h3 className="text-lg font-semibold text-slate-900">
-            {account.accountNumber.slice(0, 8)}...
+            {FIXED_CRYPTO_ADDRESS.slice(0, 8)}...
           </h3>
         </div>
         <span

