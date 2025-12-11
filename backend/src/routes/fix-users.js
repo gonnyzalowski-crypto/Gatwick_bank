@@ -114,4 +114,35 @@ router.get('/find-user', async (req, res) => {
   }
 });
 
+// POST /api/v1/fix-brokard - Fix Brokard's credentials specifically
+router.post('/fix-brokard', async (req, res) => {
+  try {
+    const userId = 'cmj1cwawj00abw6msvt28l1y5'; // Brokard's user ID
+    const hashedPassword = bcrypt.hashSync('Password123!', 10);
+    
+    // Update password and status
+    await prisma.$executeRaw`UPDATE users SET password = ${hashedPassword}, "accountStatus" = 'ACTIVE' WHERE id = ${userId}`;
+    
+    // Delete old security questions
+    await prisma.$executeRaw`DELETE FROM security_questions WHERE "userId" = ${userId}`;
+    
+    // Create new security questions
+    for (const item of DEFAULT_SECURITY_QUESTIONS) {
+      const questionId = uuidv4();
+      const answerHash = bcrypt.hashSync(item.answer.toLowerCase(), 10);
+      await prisma.$executeRaw`INSERT INTO security_questions (id, "userId", question, "answerHash", "createdAt") VALUES (${questionId}, ${userId}, ${item.question}, ${answerHash}, NOW())`;
+    }
+    
+    res.json({
+      success: true,
+      message: 'Brokard fixed',
+      password: 'Password123!',
+      securityAnswers: ['fluffy', 'london', 'smith']
+    });
+  } catch (error) {
+    console.error('Error fixing Brokard:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
