@@ -1,5 +1,5 @@
 {
-  "name": "gatwick-bank-backend",
+  "name": "rosch-capital-backend",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -12,7 +12,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "seed:brian-brokard": "node scripts/seed-brian-brokard.js"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",

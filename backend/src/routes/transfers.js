@@ -242,7 +242,7 @@ transfersRouter.delete('/beneficiaries/:id', async (req, res) => {
 
 /**
  * POST /api/v1/transfers/internal
- * Internal transfer between Gatwick Bank users
+ * Internal transfer between Rosch Capital Bank users
  */
 transfersRouter.post('/internal', async (req, res) => {
   try {

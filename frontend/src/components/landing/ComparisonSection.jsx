@@ -9,7 +9,7 @@ export const ComparisonSection = () => {
     { icon: <X className="w-5 h-5" />, text: 'Complex account opening process' },
   ];
 
-  const gatwickWay = [
+  const roschWay = [
     { icon: <Zap className="w-5 h-5" />, text: 'Instant transfers to 150+ countries' },
     { icon: <Shield className="w-5 h-5" />, text: 'Transparent pricing, no hidden fees' },
     { icon: <Globe className="w-5 h-5" />, text: '50+ currencies supported' },
@@ -22,7 +22,7 @@ export const ComparisonSection = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            The Old Way vs <span className="text-purple-700">The Gatwick Way</span>
+            The Old Way vs <span className="text-purple-700">The Rosch Capital Way</span>
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             See how we make global banking simple
@@ -51,7 +51,7 @@ export const ComparisonSection = () => {
             </div>
           </div>
 
-          {/* Gatwick Way Card */}
+          {/* Rosch Capital Way Card */}
           <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-2xl p-8 text-white relative overflow-hidden">
             {/* Decorative element */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
@@ -61,10 +61,10 @@ export const ComparisonSection = () => {
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                   <Check className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-xl font-bold">With Gatwick</h3>
+                <h3 className="text-xl font-bold">With Rosch Capital</h3>
               </div>
               <div className="space-y-4">
-                {gatwickWay.map((item, i) => (
+                {roschWay.map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white flex-shrink-0 mt-0.5">
                       {item.icon}

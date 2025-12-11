@@ -47,7 +47,7 @@ export const AdminDashboard = () => {
   });
   const { user } = useAuth();
   const isDevAdmin =
-    user?.id === 'dev-admin' || user?.email === 'admin@gatwickbank.test';
+    user?.id === 'dev-admin' || user?.email === 'admin@roschcapital.test';
   const navigate = useNavigate();
 
   useEffect(() => {

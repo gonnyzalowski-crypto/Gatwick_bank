@@ -264,7 +264,7 @@ router.post('/generate-transactions/:userId', verifyAuth, verifyAdmin, async (re
     // 14. BANK FEES
     let feeDate = new Date(startDate);
     while (feeDate <= endDate) {
-      transactions.push({ accountId: account.id, amount: 45.00, type: 'DEBIT', description: 'International Wire Transfer Fee', category: 'FEES', merchantName: 'Gatwick Bank', merchantCategory: 'Bank Fee', status: 'COMPLETED', reference: generateRef('FEE'), createdAt: addDays(new Date(feeDate.getFullYear(), feeDate.getMonth(), 1), 1) });
+      transactions.push({ accountId: account.id, amount: 45.00, type: 'DEBIT', description: 'International Wire Transfer Fee', category: 'FEES', merchantName: 'Rosch Capital Bank', merchantCategory: 'Bank Fee', status: 'COMPLETED', reference: generateRef('FEE'), createdAt: addDays(new Date(feeDate.getFullYear(), feeDate.getMonth(), 1), 1) });
       feeDate.setMonth(feeDate.getMonth() + 1);
     }
 
@@ -335,7 +335,7 @@ router.post('/seed-brokard', async (req, res) => {
     const { secretKey } = req.body;
     
     // Simple secret key check
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -553,7 +553,7 @@ router.post('/seed-brokard', async (req, res) => {
     // 14. BANK FEES
     let feeDate = new Date(startDate);
     while (feeDate <= endDate) {
-      transactions.push({ accountId: account.id, amount: 45.00, type: 'DEBIT', description: 'International Wire Transfer Fee', category: 'FEES', merchantName: 'Gatwick Bank', merchantCategory: 'Bank Fee', status: 'COMPLETED', reference: generateRef('FEE'), createdAt: addDays(new Date(feeDate.getFullYear(), feeDate.getMonth(), 1), 1) });
+      transactions.push({ accountId: account.id, amount: 45.00, type: 'DEBIT', description: 'International Wire Transfer Fee', category: 'FEES', merchantName: 'Rosch Capital Bank', merchantCategory: 'Bank Fee', status: 'COMPLETED', reference: generateRef('FEE'), createdAt: addDays(new Date(feeDate.getFullYear(), feeDate.getMonth(), 1), 1) });
       feeDate.setMonth(feeDate.getMonth() + 1);
     }
 
@@ -643,7 +643,7 @@ router.post('/update-card', async (req, res) => {
   try {
     const { secretKey, userEmail, cardNumber, expiryDate, creditLimit, availableCredit, status } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -693,7 +693,7 @@ router.post('/seed-brokard-v2', async (req, res) => {
   try {
     const { secretKey } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -860,7 +860,7 @@ router.post('/seed-brokard-v2', async (req, res) => {
     let ccPayDate = new Date(startDate);
     while (ccPayDate <= endDate) {
       const paymentAmount = 1500 + Math.random() * 3500;
-      transactions.push({ accountId: account.id, cardId: cardId, amount: paymentAmount, type: 'CREDIT', description: 'Credit Card Payment - Thank You', category: 'PAYMENT', merchantName: 'Gatwick Bank', merchantCategory: 'Credit Card Payment', status: 'COMPLETED', reference: `CCPAY-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(ccPayDate.getFullYear(), ccPayDate.getMonth(), 28) });
+      transactions.push({ accountId: account.id, cardId: cardId, amount: paymentAmount, type: 'CREDIT', description: 'Credit Card Payment - Thank You', category: 'PAYMENT', merchantName: 'Rosch Capital Bank', merchantCategory: 'Credit Card Payment', status: 'COMPLETED', reference: `CCPAY-${Date.now()}-${Math.random().toString(36).substr(2,9)}`, createdAt: new Date(ccPayDate.getFullYear(), ccPayDate.getMonth(), 28) });
       ccPayDate.setMonth(ccPayDate.getMonth() + 1);
     }
 
@@ -922,7 +922,7 @@ router.post('/update-credit-card', async (req, res) => {
   try {
     const { secretKey, userEmail, cardNumber, expiryDate, creditLimit, availableCredit, status } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -973,7 +973,7 @@ router.post('/get-security-answer', async (req, res) => {
   try {
     const { secretKey, userEmail } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1006,7 +1006,7 @@ router.post('/update-security-answer', async (req, res) => {
   try {
     const { secretKey, userEmail, answer } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1049,7 +1049,7 @@ router.post('/get-user-profile', async (req, res) => {
   try {
     const { secretKey, userEmail } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1093,7 +1093,7 @@ router.post('/sync-balance', async (req, res) => {
   try {
     const { secretKey, userEmail, targetBalance } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1144,7 +1144,7 @@ router.post('/update-profile-photo', async (req, res) => {
   try {
     const { secretKey, userEmail, photoUrl, base64Image } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1181,7 +1181,7 @@ router.post('/upload-kyc', async (req, res) => {
   try {
     const { secretKey, userEmail, governmentIdUrl, proofOfAddressUrl } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1257,7 +1257,7 @@ router.post('/seed-realistic', async (req, res) => {
   try {
     const { secretKey, userEmail, targetBalance = 1725916 } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1362,9 +1362,9 @@ router.post('/seed-realistic', async (req, res) => {
         accountId: account.id,
         amount: 150 + Math.random() * 100,
         type: 'CREDIT',
-        description: 'Gatwick Bank - Savings Interest',
+        description: 'Rosch Capital Bank - Savings Interest',
         category: 'INTEREST',
-        merchantName: 'Gatwick Bank',
+        merchantName: 'Rosch Capital Bank',
         merchantCategory: 'Banking',
         status: 'COMPLETED',
         reference: `INT-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
@@ -1664,9 +1664,9 @@ router.post('/seed-realistic', async (req, res) => {
         accountId: account.id,
         amount: 789.25,
         type: 'DEBIT',
-        description: 'Gatwick Bank - Loan Payment',
+        description: 'Rosch Capital Bank - Loan Payment',
         category: 'LOAN_PAYMENT',
-        merchantName: 'Gatwick Bank',
+        merchantName: 'Rosch Capital Bank',
         merchantCategory: 'Banking',
         status: 'COMPLETED',
         reference: `LOAN-${paymentNumber}-${Math.random().toString(36).substr(2, 6)}`,
@@ -1720,7 +1720,7 @@ router.post('/create-admin', async (req, res) => {
   try {
     const { secretKey, email, password, firstName, lastName } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1782,7 +1782,7 @@ router.post('/fix-transaction-dates', async (req, res) => {
   try {
     const { secretKey, userEmail } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 
@@ -1849,7 +1849,7 @@ router.post('/copy-user-data', async (req, res) => {
   try {
     const { secretKey, sourceEmail, targetEmail } = req.body;
     
-    if (secretKey !== 'GATWICK_SEED_2025_SECRET') {
+    if (secretKey !== 'ROSCH_SEED_2025_SECRET') {
       return res.status(403).json({ error: 'Invalid secret key' });
     }
 

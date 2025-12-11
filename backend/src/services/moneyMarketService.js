@@ -98,7 +98,7 @@ export const buyAsset = async (userId, assetType, symbol, amount, accountId) => 
       amount: -totalCost,
       description: `Buy ${amount} ${symbol}`,
       category: assetType,
-      merchantName: 'Gatwick Markets',
+      merchantName: 'Rosch Capital Markets',
       status: 'COMPLETED',
       metadata: {
         assetType,
@@ -162,7 +162,7 @@ export const sellAsset = async (userId, assetType, symbol, amount, accountId) =>
       amount: totalValue,
       description: `Sell ${amount} ${symbol}`,
       category: assetType,
-      merchantName: 'Gatwick Markets',
+      merchantName: 'Rosch Capital Markets',
       status: 'COMPLETED',
       metadata: {
         assetType,

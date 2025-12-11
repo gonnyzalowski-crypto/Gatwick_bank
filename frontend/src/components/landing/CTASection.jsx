@@ -15,7 +15,7 @@ export const CTASection = () => {
           Start Managing Your Money Globally, Stress Free
         </h2>
         <p className="text-lg text-purple-200 max-w-2xl mx-auto mb-10">
-          Join 50,000+ professionals and businesses who trust Gatwick Bank for their cross-border banking needs.
+          Join 50,000+ professionals and businesses who trust Rosch Capital for their cross-border banking needs.
         </p>
 
         {/* CTA Buttons */}

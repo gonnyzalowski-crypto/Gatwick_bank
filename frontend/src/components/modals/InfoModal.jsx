@@ -15,7 +15,7 @@ export const InfoModal = ({ isOpen, onClose, title, content }) => {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-purple-950">{title}</h2>
-              <p className="text-sm text-purple-800">Gatwick Bank</p>
+              <p className="text-sm text-purple-800">Rosch Capital Bank</p>
             </div>
           </div>
           <button

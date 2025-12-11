@@ -60,7 +60,7 @@ const generateBackupCodesPDF = (codes, user) => {
     doc.on('error', reject);
     
     // Header
-    doc.fontSize(24).font('Helvetica-Bold').text('Gatwick Bank', { align: 'center' });
+    doc.fontSize(24).font('Helvetica-Bold').text('Rosch Capital Bank', { align: 'center' });
     doc.moveDown(0.5);
     doc.fontSize(18).font('Helvetica').text('Backup Authentication Codes', { align: 'center' });
     doc.moveDown(1);

@@ -196,7 +196,7 @@ export const generateChequeHTML = (cheque) => {
   <div class="cheque-container">
     <div class="cheque-inner">
       <div class="bank-header">
-        <div class="bank-logo">🏦 GATWICK BANK</div>
+        <div class="bank-logo">🏦 ROSCH CAPITAL BANK</div>
         <div class="bank-info">
           123 Financial District<br>
           New York, NY 10004<br>

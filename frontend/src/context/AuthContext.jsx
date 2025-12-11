@@ -248,7 +248,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const userData = {
         id: mockUser.id || 'dev-user-id',
-        email: mockUser.email || 'dev.user@gatwickbank.test',
+        email: mockUser.email || 'dev.user@roschcapital.test',
         firstName: mockUser.firstName || 'Dev',
         lastName: mockUser.lastName || 'User',
         isAdmin: !!mockUser.isAdmin,

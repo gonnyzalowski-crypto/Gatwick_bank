@@ -47,7 +47,7 @@ export const ServicesSection = () => {
               <span className="text-purple-700">Institutional Power.</span>
             </h2>
             <p className="text-lg text-slate-600 leading-relaxed mb-8">
-              We've combined the agility of a fintech with the robust capabilities of a top-tier regional bank. Whether you need to wire $500,000 for a closing or manage payroll for a global team, Gatwick is built to handle serious business.
+              We've combined the agility of a fintech with the robust capabilities of a top-tier regional bank. Whether you need to wire $500,000 for a closing or manage payroll for a global team, Rosch Capital is built to handle serious business.
             </p>
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg border border-slate-100">

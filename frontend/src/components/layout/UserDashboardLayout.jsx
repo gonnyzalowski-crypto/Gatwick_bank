@@ -260,7 +260,7 @@ const UserDashboardLayout = ({ children }) => {
                 <div className="text-sm font-semibold text-neutral-900 truncate">
                   {user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : user?.email?.split('@')[0] || 'User'}
                 </div>
-                <div className="text-xs text-neutral-500 truncate">{user?.email || 'customer@gatwickbank.test'}</div>
+                <div className="text-xs text-neutral-500 truncate">{user?.email || 'customer@roschcapital.com'}</div>
               </div>
               <ChevronDown className="h-4 w-4 text-neutral-400 group-hover:text-neutral-600" />
             </div>

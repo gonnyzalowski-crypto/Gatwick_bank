@@ -188,7 +188,7 @@ export const DomesticTransferPage = () => {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-neutral-900">Transfer Details</h2>
-              <p className="text-sm text-neutral-600">Send money to another Gatwick Bank user</p>
+              <p className="text-sm text-neutral-600">Send money to another Rosch Capital Bank user</p>
             </div>
           </div>
 

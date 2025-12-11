@@ -178,7 +178,7 @@ export const sendDepositRejectedEmail = async (user, deposit, reason) => {
           <p>If you believe this is an error or need assistance, please contact our support team.</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -225,7 +225,7 @@ export const sendWithdrawalApprovedEmail = async (user, withdrawal) => {
           <p>Funds will be transferred to your designated account within 1-3 business days.</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -273,7 +273,7 @@ export const sendLoanApprovedEmail = async (user, loan) => {
           <p>The loan amount has been disbursed to your account and is now available.</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -320,7 +320,7 @@ export const sendKYCApprovedEmail = async (user) => {
           <a href="${config.frontendUrl}/dashboard" class="button">Access Your Account</a>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -367,7 +367,7 @@ export const sendPasswordChangedEmail = async (user) => {
           </div>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -417,7 +417,7 @@ export const sendSupportReplyEmail = async (user, ticket, message) => {
           <a href="${config.frontendUrl}/support-tickets/${ticket.id}" class="button">View Ticket</a>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Gatwick Bank. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Rosch Capital Bank. All rights reserved.</p>
         </div>
       </div>
     </body>

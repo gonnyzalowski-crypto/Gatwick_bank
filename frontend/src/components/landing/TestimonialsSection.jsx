@@ -8,7 +8,7 @@ export const TestimonialsSection = () => {
       role: 'Founder & CEO',
       company: 'Mitchell Retail Group',
       rating: 5,
-      text: 'Gatwick Bank bridges the gap between modern fintech and traditional banking. I can run payroll for 50 employees and approve wire transfers instantly.',
+      text: 'Rosch Capital bridges the gap between modern fintech and traditional banking. I can run payroll for 50 employees and approve wire transfers instantly.',
       initials: 'SM',
       color: 'from-blue-500 to-cyan-600'
     },
@@ -17,7 +17,7 @@ export const TestimonialsSection = () => {
       role: 'Principal Broker',
       company: 'Thorne Real Estate',
       rating: 5,
-      text: 'In real estate, speed is everything. We move large sums for closings daily. Gatwick\'s high limits and instant wire execution have saved us countless deals.',
+      text: 'In real estate, speed is everything. We move large sums for closings daily. Rosch Capital\'s high limits and instant wire execution have saved us countless deals.',
       initials: 'MT',
       color: 'from-emerald-500 to-green-600'
     },
@@ -26,7 +26,7 @@ export const TestimonialsSection = () => {
       role: 'Director of Operations',
       company: 'Kova Logistics Global',
       rating: 5,
-      text: 'We manage imports across 12 countries. Gatwick\'s multi-currency accounts allow us to pay suppliers in local currency instantly, avoiding massive FX fees.',
+      text: 'We manage imports across 12 countries. Rosch Capital\'s multi-currency accounts allow us to pay suppliers in local currency instantly, avoiding massive FX fees.',
       initials: 'EK',
       color: 'from-purple-500 to-violet-600'
     },
@@ -53,7 +53,7 @@ export const TestimonialsSection = () => {
       role: 'Managing Partner',
       company: 'Silverstone Capital',
       rating: 5,
-      text: 'For our venture fund, we need robust treasury management. Gatwick provides institutional-grade security with the UX of a consumer app.',
+      text: 'For our venture fund, we need robust treasury management. Rosch Capital provides institutional-grade security with the UX of a consumer app.',
       initials: 'RV',
       color: 'from-slate-600 to-slate-800'
     },
@@ -62,7 +62,7 @@ export const TestimonialsSection = () => {
       role: 'General Manager',
       company: 'Aurora Hospitality Group',
       rating: 5,
-      text: 'Managing finances for 5 hotel locations used to be a nightmare. Gatwick centralized everything into one dashboard with sub-accounts for each property.',
+      text: 'Managing finances for 5 hotel locations used to be a nightmare. Rosch Capital centralized everything into one dashboard with sub-accounts for each property.',
       initials: 'SM',
       color: 'from-indigo-500 to-blue-600'
     },
@@ -71,7 +71,7 @@ export const TestimonialsSection = () => {
       role: 'Senior Partner',
       company: 'Quantum Legal Partners',
       rating: 5,
-      text: 'Trust accounts and client fund segregation are critical for us. Gatwick made compliance easy while giving us real-time visibility on all transactions.',
+      text: 'Trust accounts and client fund segregation are critical for us. Rosch Capital made compliance easy while giving us real-time visibility on all transactions.',
       initials: 'DC',
       color: 'from-teal-500 to-emerald-600'
     },
@@ -103,7 +103,7 @@ export const TestimonialsSection = () => {
             Powering the World's <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-blue-600">Most Ambitious Leaders</span>
           </h2>
           <p className="text-lg text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            From real estate moguls moving millions to global logistics firms managing complex FX needs, see why business leaders are switching to Gatwick.
+            From real estate moguls moving millions to global logistics firms managing complex FX needs, see why business leaders are switching to Rosch Capital.
           </p>
         </div>
 

@@ -241,7 +241,7 @@ export const productsCompanyModals = {
     title: 'Press & Media',
     content: (
       <div className="space-y-6">
-        <p className="text-lg font-semibold">Gatwick Bank in the News</p>
+        <p className="text-lg font-semibold">Rosch Capital Bank in the News</p>
         
         <section>
           <h3 className="text-xl font-bold mb-3">Media Resources</h3>

@@ -14,7 +14,7 @@ async function makeAdmin() {
     if (!existingUser) {
       console.log('❌ User not found with email:', email);
       console.log('\n📝 Please register this user first at:');
-      console.log('   https://gatwickbank.up.railway.app/register');
+      console.log('   https://roschcapital.com/register');
       console.log('\nThen run this script again.');
       return;
     }

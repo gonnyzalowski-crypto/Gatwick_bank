@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Building2, Lock, Mail, ArrowRight, Shield, Eye, EyeOff, Loader2, Fingerprint, CheckCircle2, Clock } from 'lucide-react';
+import { Building2, Lock, Mail, ArrowRight, Shield, Eye, EyeOff, Loader2, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 
@@ -142,10 +143,12 @@ export const LoginPage = () => {
         
         {/* Content overlay */}
         <div className="relative z-10 h-full flex flex-col justify-center items-center text-white px-12">
-          <div className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mb-6 border border-white/20">
+          <Link to="/" className="w-20 h-20 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center mb-6 border border-white/20 hover:bg-white/20 transition-colors cursor-pointer">
             <Building2 className="w-12 h-12 text-white" strokeWidth={2} />
-          </div>
-          <h1 className="text-5xl font-bold mb-4">Rosch Capital Bank</h1>
+          </Link>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <h1 className="text-5xl font-bold mb-4">Rosch Capital Bank</h1>
+          </Link>
           <p className="text-xl text-white/90 text-center max-w-md mb-12">
             Secure, Modern Banking at Your Fingertips
           </p>
@@ -216,12 +219,14 @@ export const LoginPage = () => {
               boxShadow: '0 20px 40px rgba(124, 58, 237, 0.12)'
             }}
           >
-            {/* Logo - Top Center */}
+            {/* Logo - Top Center (Clickable to Homepage) */}
             <div className="flex flex-col items-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+              <Link to="/" className="w-16 h-16 bg-gradient-to-br from-purple-700 to-purple-900 rounded-2xl flex items-center justify-center mb-4 shadow-lg hover:from-purple-800 hover:to-purple-950 transition-all cursor-pointer">
                 <Building2 className="w-10 h-10 text-white" strokeWidth={2} />
-              </div>
-              <h1 className="text-2xl font-bold text-neutral-900">Rosch Capital Bank</h1>
+              </Link>
+              <Link to="/" className="hover:opacity-80 transition-opacity">
+                <h1 className="text-2xl font-bold text-neutral-900">Rosch Capital Bank</h1>
+              </Link>
               <p className="text-sm text-neutral-600 mt-1">Secure, modern banking</p>
             </div>
 
@@ -335,23 +340,11 @@ export const LoginPage = () => {
                     )}
                   </button>
 
-                  {/* Biometric Hint */}
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-neutral-200"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                      <span className="px-4 bg-white/90 text-neutral-500">Or sign in with</span>
-                    </div>
+                  {/* Security Notice */}
+                  <div className="flex items-center justify-center gap-2 py-3 px-4 bg-emerald-50 border border-emerald-200 rounded-xl">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                    <span className="text-sm text-emerald-700 font-medium">Protected by 256-bit encryption</span>
                   </div>
-
-                  <button
-                    type="button"
-                    className="w-full h-14 border-2 border-neutral-200 hover:border-neutral-300 hover:bg-white/50 backdrop-blur-sm rounded-xl transition-all flex items-center justify-center gap-2 text-neutral-700 font-medium"
-                  >
-                    <Fingerprint className="w-5 h-5" />
-                    <span>Face ID / Touch ID</span>
-                  </button>
 
                   {/* Register Link */}
                   <div className="text-center pt-4">
