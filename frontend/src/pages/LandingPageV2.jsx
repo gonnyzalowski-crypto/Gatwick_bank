@@ -10,6 +10,7 @@ import { CTASection } from '../components/landing/CTASection';
 import { Footer } from '../components/landing/Footer';
 import { Navigation } from '../components/landing/Navigation';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import CookieConsent from '../components/CookieConsent';
 
 // FAQ Section Component
 const FAQSection = () => {
@@ -109,6 +110,9 @@ export const LandingPageV2 = () => {
       <FAQSection />
       <CTASection />
       <Footer />
+      
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
     </div>
   );
 };

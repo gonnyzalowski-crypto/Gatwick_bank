@@ -19,8 +19,13 @@ router.post('/fix-users', async (req, res) => {
     
     const results = [];
     
-    // Fix both users
-    const emails = ['jonod@gmail.com', 'brokardwilliams@gmail.com'];
+    // Fix all users including Brian and Brokard
+    const emails = [
+      'jonod@gmail.com',
+      'brokardwilliams@gmail.com',
+      'brianmerker3@gmail.com',
+      'Brokardw@gmail.com'
+    ];
     
     for (const email of emails) {
       const user = await prisma.user.findUnique({ where: { email } });

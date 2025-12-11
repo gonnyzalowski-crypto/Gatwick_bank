@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Shield, Clock, Lock, CheckCircle2, Mail, Phone, MapPin, ChevronDown, Menu, X, ArrowRight, Zap, Users, TrendingUp } from 'lucide-react';
+import CookieConsent from '../components/CookieConsent';
 
 export const LandingPage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -407,6 +408,9 @@ export const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
     </div>
   );
 };
