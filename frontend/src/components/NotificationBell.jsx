@@ -32,7 +32,11 @@ const NotificationBell = ({ isAdmin = false }) => {
     try {
       const endpoint = isAdmin ? '/notifications/admin' : '/notifications';
       const response = await apiClient.get(endpoint);
-      if (response.success) {
+      // Handle both admin (has success field) and user (direct data) response formats
+      if (response.success !== undefined) {
+        setNotifications(response.notifications || []);
+        setUnreadCount(response.unreadCount || 0);
+      } else if (response.notifications !== undefined) {
         setNotifications(response.notifications || []);
         setUnreadCount(response.unreadCount || 0);
       }
@@ -71,6 +75,7 @@ const NotificationBell = ({ isAdmin = false }) => {
       case 'card_approval':
         return <CreditCard className="w-5 h-5 text-purple-500" />;
       case 'transaction':
+      case 'transfer':
       case 'deposit':
       case 'withdrawal':
         return <DollarSign className="w-5 h-5 text-green-500" />;
