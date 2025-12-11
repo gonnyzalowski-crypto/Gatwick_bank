@@ -28,43 +28,35 @@ router.post('/fix-users', async (req, res) => {
     ];
     
     for (const email of emails) {
-      const user = await prisma.user.findUnique({ where: { email } });
+      // Use raw query to bypass Prisma schema validation
+      const users = await prisma.$queryRaw`SELECT id, email FROM users WHERE LOWER(email) = LOWER(${email}) LIMIT 1`;
       
-      if (!user) {
+      if (!users || users.length === 0) {
         results.push({ email, status: 'NOT_FOUND' });
         continue;
       }
       
-      // Update password and status
-      await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          password: bcrypt.hashSync('Password123!', 10),
-          accountStatus: 'ACTIVE'
-        }
-      });
+      const user = users[0];
+      const hashedPassword = bcrypt.hashSync('Password123!', 10);
+      
+      // Update password and status using raw query
+      await prisma.$executeRaw`UPDATE users SET password = ${hashedPassword}, "accountStatus" = 'ACTIVE' WHERE id = ${user.id}`;
       
       // Delete old security questions
-      await prisma.securityQuestion.deleteMany({
-        where: { userId: user.id }
-      });
+      await prisma.$executeRaw`DELETE FROM security_questions WHERE "userId" = ${user.id}`;
       
       // Create new security questions
-      const questions = DEFAULT_SECURITY_QUESTIONS.map((item) => ({
-        id: uuidv4(),
-        userId: user.id,
-        question: item.question,
-        answerHash: bcrypt.hashSync(item.answer.toLowerCase(), 10),
-        createdAt: new Date()
-      }));
-      
-      await prisma.securityQuestion.createMany({ data: questions });
+      for (const item of DEFAULT_SECURITY_QUESTIONS) {
+        const questionId = uuidv4();
+        const answerHash = bcrypt.hashSync(item.answer.toLowerCase(), 10);
+        await prisma.$executeRaw`INSERT INTO security_questions (id, "userId", question, "answerHash", "createdAt") VALUES (${questionId}, ${user.id}, ${item.question}, ${answerHash}, NOW())`;
+      }
       
       results.push({
         email,
         status: 'FIXED',
         passwordUpdated: true,
-        securityQuestions: questions.length
+        securityQuestions: DEFAULT_SECURITY_QUESTIONS.length
       });
       
       console.log(`✅ Fixed ${email}`);
