@@ -564,8 +564,6 @@ model TransferRequest {
   amount        Decimal  @db.Decimal(15, 2)
   description   String?
   reference     String   @unique // TRF-XXXXXX
-  transferType  String   @default("DOMESTIC") // DOMESTIC, INTERNATIONAL
-  country       String?  // For international transfers
   status        String   @default("PENDING") // PENDING, APPROVED, DECLINED, REVERSED, COMPLETED
   adminAction   String?  // APPROVE, DECLINE, REVERSE
   adminId       String?
