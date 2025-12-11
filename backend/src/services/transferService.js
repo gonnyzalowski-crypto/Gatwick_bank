@@ -36,7 +36,7 @@ export const validateRoutingNumber = async (routingNumber) => {
 
 // Create transfer request
 export const createTransferRequest = async (userId, transferData) => {
-  const { fromAccountId, destinationBank, routingNumber, accountNumber, accountName, amount, description, saveBeneficiary, beneficiaryNickname, transferType, country } = transferData;
+  const { fromAccountId, destinationBank, routingNumber, accountNumber, accountName, amount, description, saveBeneficiary, beneficiaryNickname } = transferData;
 
   // Verify account belongs to user
   const account = await prisma.account.findFirst({
@@ -55,8 +55,8 @@ export const createTransferRequest = async (userId, transferData) => {
     throw new Error(`Insufficient funds. Available: $${availableBalance.toFixed(2)}, Requested: $${amount.toFixed(2)}`);
   }
 
-  // Only validate routing number for domestic transfers (skip for international)
-  if (transferType !== 'INTERNATIONAL') {
+  // Verify bank exists (skip validation if routingNumber is a SWIFT code for international)
+  if (routingNumber && routingNumber.length === 9) {
     const bank = await prisma.bankList.findUnique({
       where: { routingNumber }
     });
@@ -82,7 +82,7 @@ export const createTransferRequest = async (userId, transferData) => {
       description,
       reference,
       status: 'PENDING',
-      estimatedCompletion: new Date(Date.now() + (transferType === 'INTERNATIONAL' ? 5 : 3) * 24 * 60 * 60 * 1000)
+      estimatedCompletion: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)
     }
   });
 
