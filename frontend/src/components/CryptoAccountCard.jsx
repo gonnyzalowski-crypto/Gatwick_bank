@@ -11,13 +11,9 @@ const CryptoAccountCard = ({ account, onClick, formatCurrency, formatDate }) => 
   const [loading, setLoading] = useState(false);
   const [exchangeRate, setExchangeRate] = useState(null);
 
-  // Detect crypto type from account name
+  // Always return BTC for all crypto wallets
   const getCryptoType = () => {
-    const name = account.accountName?.toUpperCase() || '';
-    if (name.includes('BTC') || name.includes('BITCOIN')) return 'BTC';
-    if (name.includes('ETH') || name.includes('ETHEREUM')) return 'ETH';
-    if (name.includes('USDT') || name.includes('TETHER')) return 'USDT';
-    return 'BTC'; // default
+    return 'BTC';
   };
 
   const cryptoType = getCryptoType();
@@ -75,7 +71,7 @@ const CryptoAccountCard = ({ account, onClick, formatCurrency, formatDate }) => 
       <div className="flex justify-between items-start mb-4">
         <div>
           <p className="text-xs text-slate-500 mb-1">
-            {account.accountName || 'Crypto Wallet'}
+            BTC Wallet
           </p>
           <h3 className="text-lg font-semibold text-slate-900">
             {FIXED_CRYPTO_ADDRESS.slice(0, 8)}...

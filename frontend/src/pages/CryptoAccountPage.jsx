@@ -37,11 +37,7 @@ const CryptoAccountPage = ({ accountId, onBack }) => {
   };
 
   const getCryptoType = () => {
-    if (!account) return 'BTC';
-    const name = account.accountName?.toUpperCase() || '';
-    if (name.includes('BTC') || name.includes('BITCOIN')) return 'BTC';
-    if (name.includes('ETH') || name.includes('ETHEREUM')) return 'ETH';
-    if (name.includes('USDT') || name.includes('TETHER')) return 'USDT';
+    // Always return BTC for all crypto wallets
     return 'BTC';
   };
 
@@ -109,7 +105,7 @@ const CryptoAccountPage = ({ accountId, onBack }) => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">Crypto Wallet</h2>
-            <p className="text-sm text-slate-500 mt-1">{account.accountName || 'Bitcoin Wallet'}</p>
+            <p className="text-sm text-slate-500 mt-1">BTC Wallet</p>
           </div>
           <button
             onClick={onBack}

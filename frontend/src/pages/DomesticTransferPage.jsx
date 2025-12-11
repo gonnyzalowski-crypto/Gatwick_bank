@@ -33,9 +33,11 @@ export const DomesticTransferPage = () => {
         ]);
         
         if (accountsRes.success) {
-          setAccounts(accountsRes.accounts);
-          if (accountsRes.accounts.length > 0) {
-            setFromAccount(accountsRes.accounts[0].id);
+          // Filter out crypto wallets for outgoing transfers
+          const nonCryptoAccounts = accountsRes.accounts.filter(acc => acc.accountType !== 'CRYPTO_WALLET');
+          setAccounts(nonCryptoAccounts);
+          if (nonCryptoAccounts.length > 0) {
+            setFromAccount(nonCryptoAccounts[0].id);
           }
         }
         
