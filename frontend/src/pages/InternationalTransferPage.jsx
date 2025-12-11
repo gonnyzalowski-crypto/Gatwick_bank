@@ -79,7 +79,7 @@ export const InternationalTransferPage = () => {
 
   const handleVerifyAndSubmit = async () => {
     if (!backupCode) {
-      setError('Please enter your backup code');
+      setError('Please enter your Auth Token');
       return;
     }
 
@@ -362,8 +362,8 @@ export const InternationalTransferPage = () => {
                   <Shield className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-neutral-900">Verify Backup Code</h3>
-                  <p className="text-sm text-neutral-500">Enter your backup code to proceed</p>
+                  <h3 className="text-lg font-bold text-neutral-900">Verify Auth Token</h3>
+                  <p className="text-sm text-neutral-500">Enter your Auth Token to proceed</p>
                 </div>
               </div>
               <button
@@ -384,13 +384,13 @@ export const InternationalTransferPage = () => {
               
               <div>
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Backup Code *
+                  Auth Token *
                 </label>
                 <input
                   type="text"
                   value={backupCode}
                   onChange={(e) => setBackupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Enter 6-digit backup code"
+                  placeholder="Enter 6-digit Auth Token"
                   maxLength={6}
                   className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-center text-xl tracking-widest font-mono"
                 />

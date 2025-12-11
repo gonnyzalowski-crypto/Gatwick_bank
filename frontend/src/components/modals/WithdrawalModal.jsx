@@ -4,7 +4,7 @@ import apiClient from '../../lib/apiClient';
 import { BrandFeedbackModal } from './BrandFeedbackModal';
 
 const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
-  const [step, setStep] = useState(1); // 1: Gateway, 2: Details, 3: Backup Code, 4: Success
+  const [step, setStep] = useState(1); // 1: Gateway, 2: Details, 3: Auth Token, 4: Success
   const [gateways, setGateways] = useState([]);
   const [selectedGateway, setSelectedGateway] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState('');
@@ -73,7 +73,7 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
     setError('');
     
     if (!backupCode || backupCode.length !== 6) {
-      setError('Please enter your 6-digit backup code');
+      setError('Please enter your 6-digit Auth Token');
       return;
     }
 
@@ -373,15 +373,15 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
                   <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-4">
                     <Key className="w-8 h-8 text-orange-600" />
                   </div>
-                  <h4 className="text-lg font-semibold text-slate-900 mb-2">Verify with Backup Code</h4>
+                  <h4 className="text-lg font-semibold text-slate-900 mb-2">Verify with Auth Token</h4>
                   <p className="text-sm text-slate-600">
-                    Enter your 6-digit backup code to authorize this withdrawal
+                    Enter your 6-digit Auth Token to authorize this withdrawal
                   </p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2 text-center">
-                    Backup Code
+                    Auth Token
                   </label>
                   <input
                     type="text"
@@ -395,7 +395,7 @@ const WithdrawalModal = ({ isOpen, onClose, accounts }) => {
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <p className="text-xs text-blue-700">
-                    <strong>Security:</strong> Backup codes are required for all withdrawal requests to ensure account security.
+                    <strong>Security:</strong> Auth Tokens are required for all withdrawal requests to ensure account security.
                   </p>
                 </div>
               </div>

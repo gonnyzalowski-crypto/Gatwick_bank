@@ -365,22 +365,22 @@ export const CardsPage = () => {
               </div>
             )}
 
-            {/* Backup Code */}
+            {/* Auth Token */}
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Backup Code *
+                Auth Token *
               </label>
               <input
                 type="text"
                 value={createBackupCode}
                 onChange={(e) => setCreateBackupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="Enter 6-digit backup code"
+                placeholder="Enter 6-digit Auth Token"
                 maxLength={6}
                 className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 text-sm text-center text-xl tracking-widest font-mono"
                 required
               />
               <p className="text-xs text-neutral-500 mt-1.5">
-                Enter one of your backup codes to verify this action
+                Enter one of your Auth Tokens to verify this action
               </p>
             </div>
 

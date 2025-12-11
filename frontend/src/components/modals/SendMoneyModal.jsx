@@ -85,7 +85,7 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
         isOpen: true,
         type: 'error',
         title: 'Invalid Code',
-        message: 'Please enter a valid 6-digit backup code'
+        message: 'Please enter a valid 6-digit Auth Token'
       });
       return;
     }
@@ -420,12 +420,12 @@ export const SendMoneyModal = ({ isOpen, onClose, userAccounts }) => {
               <div className="space-y-4">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-blue-700 text-sm">
-                    For security, please enter one of your 6-digit backup codes to authorize this transaction.
+                    For security, please enter one of your 6-digit Auth Tokens to authorize this transaction.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">6-Digit Backup Code *</label>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">6-Digit Auth Token *</label>
                   <input
                     type="text"
                     value={backupCode}

@@ -250,22 +250,22 @@ const CardCreationModal = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               )}
 
-              {/* Backup Code */}
+              {/* Auth Token */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Backup Code <span className="text-red-400">*</span>
+                  Auth Token <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={backupCode}
                   onChange={(e) => setBackupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Enter 6-digit backup code"
+                  placeholder="Enter 6-digit Auth Token"
                   maxLength={6}
                   className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-xl tracking-widest font-mono"
                   required
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  Enter one of your backup codes to verify this action
+                  Enter one of your Auth Tokens to verify this action
                 </p>
               </div>
             </>

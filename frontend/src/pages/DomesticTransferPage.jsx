@@ -87,7 +87,7 @@ export const DomesticTransferPage = () => {
 
   const handleVerifyAndSubmit = async () => {
     if (!backupCode) {
-      setError('Please enter your backup code');
+      setError('Please enter your Auth Token');
       return;
     }
 
@@ -341,7 +341,7 @@ export const DomesticTransferPage = () => {
             <div>
               <h3 className="text-sm font-semibold text-emerald-900 mb-1">Internal Transfers</h3>
               <p className="text-sm text-emerald-700">
-                Transfers between Rosch Capital Bank accounts are instant and free. Backup code verification is required for security.
+                Transfers between Rosch Capital Bank accounts are instant and free. Auth Token verification is required for security.
               </p>
             </div>
           </div>
@@ -356,8 +356,8 @@ export const DomesticTransferPage = () => {
                   <Shield className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-neutral-900">Verify Backup Code</h3>
-                  <p className="text-sm text-neutral-600">Enter your backup code to proceed</p>
+                  <h3 className="text-lg font-semibold text-neutral-900">Verify Auth Token</h3>
+                  <p className="text-sm text-neutral-600">Enter your Auth Token to proceed</p>
                 </div>
               </div>
 
@@ -369,13 +369,13 @@ export const DomesticTransferPage = () => {
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-neutral-700 mb-2">
-                  Backup Code *
+                  Auth Token *
                 </label>
                 <input
                   type="text"
                   value={backupCode}
                   onChange={(e) => setBackupCode(e.target.value)}
-                  placeholder="Enter your 6-digit backup code"
+                  placeholder="Enter your 6-digit Auth Token"
                   maxLength="6"
                   className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm text-center text-2xl tracking-widest font-mono"
                   autoFocus

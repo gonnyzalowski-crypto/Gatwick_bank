@@ -89,7 +89,7 @@ export const SettingsPage = () => {
     try {
       await apiClient.put('/auth/login-preference', { preference: newPreference });
       setLoginPreference(newPreference);
-      setSuccess(`Login verification method updated to ${newPreference === 'question' ? 'Security Question' : 'Backup Code'}`);
+      setSuccess(`Login verification method updated to ${newPreference === 'question' ? 'Security Question' : 'Auth Token'}`)
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update preference');
     }
@@ -201,7 +201,7 @@ export const SettingsPage = () => {
     }
 
     if (!passwordData.backupCode.trim() || passwordData.backupCode.length !== 6) {
-      setError('Please enter a valid 6-digit backup code');
+      setError('Please enter a valid 6-digit Auth Token');
       return;
     }
 
@@ -295,7 +295,7 @@ export const SettingsPage = () => {
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold text-neutral-900 mb-2">Change Password</h2>
                   <p className="text-sm text-neutral-600">
-                    For security, you must enter a backup code to change your password
+                    For security, you must enter an Auth Token to change your password
                   </p>
                 </div>
 
@@ -374,20 +374,20 @@ export const SettingsPage = () => {
 
                     <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
                       <p className="text-sm font-medium text-amber-900">
-                        Enter one of your backup codes to verify this action. Backup codes can only be used once.
+                        Enter one of your Auth Tokens to verify this action. Auth Tokens can only be used once.
                       </p>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-neutral-700 mb-2">
-                        Backup Code
+                        Auth Token
                       </label>
                       <input
                         type="text"
                         name="backupCode"
                         value={passwordData.backupCode}
                         onChange={handlePasswordChange}
-                        placeholder="Enter 6-digit backup code"
+                        placeholder="Enter 6-digit Auth Token"
                         maxLength="6"
                         className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm text-center text-xl tracking-widest font-mono"
                         required
@@ -496,7 +496,7 @@ export const SettingsPage = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <Key className="w-5 h-5 text-primary-600" />
-                          <h3 className="font-semibold text-neutral-900">Backup Code</h3>
+                          <h3 className="font-semibold text-neutral-900">Auth Token</h3>
                         </div>
                         <p className="text-sm text-neutral-600">
                           Check your email for a 6-digit authentication code
@@ -513,7 +513,7 @@ export const SettingsPage = () => {
                       <h3 className="text-sm font-semibold text-amber-900 mb-1">Important</h3>
                       <p className="text-sm text-amber-700">
                         {loginPreference === 'code' 
-                          ? 'When using backup codes, you will receive an email with your authentication code each time you log in.'
+                          ? 'When using Auth Tokens, you will receive an email with your authentication code each time you log in.'
                           : 'Make sure you remember the answers to your security questions.'
                         }
                       </p>

@@ -302,7 +302,7 @@ export const BankerLoginPage = () => {
                     }`}
                   >
                     <Fingerprint className="w-5 h-5 mx-auto mb-1" />
-                    <div className="text-xs">Backup Code</div>
+                    <div className="text-xs">Auth Token</div>
                   </button>
                 </div>
 
@@ -336,7 +336,7 @@ export const BankerLoginPage = () => {
                   ) : (
                     <div>
                       <label className="block text-sm font-semibold text-neutral-900 mb-2">
-                        Backup Code
+                        Auth Token
                       </label>
                       <input
                         type="text"
@@ -351,7 +351,7 @@ export const BankerLoginPage = () => {
                         placeholder="XXXX-XXXX-XXXX"
                       />
                       <p className="text-xs text-neutral-500 mt-2">
-                        Enter one of your backup codes from your secure storage
+                        Enter one of your Auth Tokens from your secure storage
                       </p>
                     </div>
                   )}

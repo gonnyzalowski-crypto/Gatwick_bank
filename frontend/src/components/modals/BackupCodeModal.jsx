@@ -35,7 +35,7 @@ const BackupCodeModal = ({ isOpen, onClose, cardId, cardType = 'debit' }) => {
         setTimeLeft(30);
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Invalid backup code');
+      setError(err.response?.data?.error || 'Invalid Auth Token');
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ const BackupCodeModal = ({ isOpen, onClose, cardId, cardType = 'debit' }) => {
             </div>
             <div>
               <h2 className="text-xl font-semibold text-white">Secure Verification</h2>
-              <p className="text-sm text-slate-400">Enter backup code to view card details</p>
+              <p className="text-sm text-slate-400">Enter Auth Token to view card details</p>
             </div>
           </div>
           <button
@@ -92,7 +92,7 @@ const BackupCodeModal = ({ isOpen, onClose, cardId, cardType = 'debit' }) => {
               {/* Warning */}
               <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
                 <p className="text-yellow-400 text-sm">
-                  <span className="font-semibold">Security Notice:</span> Backup codes can only be used once. 
+                  <span className="font-semibold">Security Notice:</span> Auth Tokens can only be used once. 
                   Make sure you're in a secure location before viewing sensitive card information.
                 </p>
               </div>
@@ -107,20 +107,20 @@ const BackupCodeModal = ({ isOpen, onClose, cardId, cardType = 'debit' }) => {
               {/* Backup Code Input */}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                  Backup Code <span className="text-red-400">*</span>
+                  Auth Token <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={backupCode}
                   onChange={(e) => setBackupCode(e.target.value.replace(/\s/g, ''))}
-                  placeholder="Enter 6-digit backup code"
+                  placeholder="Enter 6-digit Auth Token"
                   className="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-white text-center text-2xl font-mono tracking-widest placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                   maxLength={6}
                   required
                   autoFocus
                 />
                 <p className="text-xs text-slate-500 mt-2">
-                  Find your backup codes in your account security settings
+                  Find your Auth Tokens in your account security settings
                 </p>
               </div>
 

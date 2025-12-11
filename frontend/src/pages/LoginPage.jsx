@@ -416,7 +416,7 @@ export const LoginPage = () => {
                     </div>
                     <label className="block text-sm font-semibold text-neutral-900 mb-2">
                       <Shield className="w-4 h-4 inline mr-2" />
-                      Enter Backup Code
+                      Enter Auth Token
                     </label>
                     <input
                       type="text"
@@ -428,7 +428,7 @@ export const LoginPage = () => {
                       required
                     />
                     <p className="text-xs text-neutral-500 mt-2">
-                      Enter one of your backup codes from the PDF sent by admin
+                      Enter one of your Auth Tokens from the PDF sent by admin
                     </p>
                   </div>
                 )}
