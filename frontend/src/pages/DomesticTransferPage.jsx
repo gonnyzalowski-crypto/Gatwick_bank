@@ -95,7 +95,7 @@ export const DomesticTransferPage = () => {
 
       const response = await apiClient.post('/transfers/internal', {
         fromAccountId: fromAccount,
-        recipientAccountNumber,
+        toAccountNumber: recipientAccountNumber,
         recipientName,
         recipientEmail,
         amount: parseFloat(amount),
