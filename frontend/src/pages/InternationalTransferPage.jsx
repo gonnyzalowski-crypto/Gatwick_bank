@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../lib/apiClient';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import { ActionButton } from '../components/ui/ActionButton';
-import { Globe, CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Globe, CheckCircle2, AlertCircle, AlertTriangle, Shield, X, Loader2, Send } from 'lucide-react';
 
 export const InternationalTransferPage = () => {
   const navigate = useNavigate();
@@ -20,15 +20,20 @@ export const InternationalTransferPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showBackupCodeModal, setShowBackupCodeModal] = useState(false);
+  const [backupCode, setBackupCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
         const response = await apiClient.get('/accounts');
         if (response.success) {
-          setAccounts(response.accounts);
-          if (response.accounts.length > 0) {
-            setFromAccount(response.accounts[0].id);
+          // Filter out crypto wallets for outgoing transfers
+          const nonCryptoAccounts = response.accounts.filter(acc => acc.accountType !== 'CRYPTO_WALLET');
+          setAccounts(nonCryptoAccounts);
+          if (nonCryptoAccounts.length > 0) {
+            setFromAccount(nonCryptoAccounts[0].id);
           }
         }
       } catch (err) {
@@ -68,22 +73,36 @@ export const InternationalTransferPage = () => {
       return;
     }
 
+    // Show backup code modal
+    setShowBackupCodeModal(true);
+  };
+
+  const handleVerifyAndSubmit = async () => {
+    if (!backupCode) {
+      setError('Please enter your backup code');
+      return;
+    }
+
+    setVerifying(true);
+    setError('');
+
     try {
-      setLoading(true);
-      const response = await apiClient.post('/payments/international-transfer', {
+      const response = await apiClient.post('/transfers/international', {
         fromAccountId: fromAccount,
-        recipientName,
-        recipientIBAN,
-        recipientSWIFT: recipientSWIFT.toUpperCase(),
-        recipientBank,
-        recipientCountry,
-        recipientAddress,
+        bankName: recipientBank,
+        swiftCode: recipientSWIFT.toUpperCase(),
+        iban: recipientIBAN,
+        accountHolderName: recipientName,
+        country: recipientCountry,
         amount: parseFloat(amount),
         description,
+        backupCode
       });
 
       if (response.success) {
-        setSuccess(`International transfer of $${amount} initiated successfully`);
+        setShowBackupCodeModal(false);
+        setBackupCode('');
+        setSuccess(`International transfer of $${amount} submitted for approval!`);
         setAmount('');
         setRecipientName('');
         setRecipientIBAN('');
@@ -100,7 +119,7 @@ export const InternationalTransferPage = () => {
     } catch (err) {
       setError(err.response?.data?.error || 'International transfer failed');
     } finally {
-      setLoading(false);
+      setVerifying(false);
     }
   };
 
@@ -332,6 +351,72 @@ export const InternationalTransferPage = () => {
           </form>
         </div>
       </div>
+
+      {/* Backup Code Verification Modal */}
+      {showBackupCodeModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-neutral-900">Verify Backup Code</h3>
+                  <p className="text-sm text-neutral-500">Enter your backup code to proceed</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowBackupCodeModal(false); setBackupCode(''); setError(''); }}
+                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-neutral-500" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
+              
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Backup Code *
+                </label>
+                <input
+                  type="text"
+                  value={backupCode}
+                  onChange={(e) => setBackupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="Enter 6-digit backup code"
+                  maxLength={6}
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-center text-xl tracking-widest font-mono"
+                />
+              </div>
+              
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => { setShowBackupCodeModal(false); setBackupCode(''); setError(''); }}
+                  className="flex-1 px-4 py-3 border border-neutral-300 text-neutral-700 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleVerifyAndSubmit}
+                  disabled={verifying || backupCode.length !== 6}
+                  className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4" />}
+                  {verifying ? 'Verifying...' : 'Verify & Submit'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </UserDashboardLayout>
   );
 };
