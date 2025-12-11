@@ -3076,7 +3076,17 @@ router.get('/users/:userId/cards', verifyAuth, verifyAdmin, async (req, res) => 
 router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     const { cardId } = req.params;
-    const { cardNumber, expiryDate, dailyLimit, monthlyLimit, status } = req.body;
+    const {
+      cardNumber,
+      expiryDate,
+      dailyLimit,
+      monthlyLimit,
+      status,
+      // For credit cards
+      creditLimit,
+      availableCredit,
+      currentBalance
+    } = req.body;
     
     // Try to find as debit card first
     let debitCard = await prisma.debitCard.findUnique({
@@ -3118,16 +3128,50 @@ router.put('/cards/:cardId', verifyAuth, verifyAdmin, async (req, res) => {
     if (creditCard) {
       // Update credit card
       const updateData = {};
-      console.log('Updating credit card:', cardId, 'with data:', { cardNumber, expiryDate, dailyLimit, monthlyLimit, status });
+      console.log('Updating credit card:', cardId, 'with data:', {
+        cardNumber,
+        expiryDate,
+        dailyLimit,
+        monthlyLimit,
+        status,
+        creditLimit,
+        availableCredit,
+        currentBalance
+      });
       if (cardNumber !== undefined) {
         // Encode card number to base64
         updateData.cardNumber = Buffer.from(cardNumber).toString('base64');
       }
       if (expiryDate !== undefined) updateData.expiryDate = new Date(expiryDate);
-      // Credit cards use creditLimit, not dailyLimit/monthlyLimit
-      if (dailyLimit !== undefined && dailyLimit !== null && dailyLimit !== '') {
-        updateData.creditLimit = parseFloat(dailyLimit);
-        updateData.availableCredit = parseFloat(dailyLimit); // Also update available credit
+      
+      // --- Credit card amounts ---
+      // Prefer explicit creditLimit / availableCredit / currentBalance from admin UI
+      if (creditLimit !== undefined && creditLimit !== null && creditLimit !== '') {
+        updateData.creditLimit = parseFloat(creditLimit);
+      }
+
+      if (currentBalance !== undefined && currentBalance !== null && currentBalance !== '') {
+        updateData.currentBalance = parseFloat(currentBalance);
+      }
+
+      if (availableCredit !== undefined && availableCredit !== null && availableCredit !== '') {
+        updateData.availableCredit = parseFloat(availableCredit);
+      } else if (updateData.creditLimit !== undefined && updateData.currentBalance !== undefined) {
+        // Derive availableCredit if limit and balance are both known and explicit availableCredit not provided
+        updateData.availableCredit = updateData.creditLimit - updateData.currentBalance;
+      }
+
+      // Backwards compatibility: if older admin UI sends dailyLimit instead of creditLimit
+      if (dailyLimit !== undefined && dailyLimit !== null && dailyLimit !== '' && updateData.creditLimit === undefined) {
+        const parsedLimit = parseFloat(dailyLimit);
+        updateData.creditLimit = parsedLimit;
+
+        if (updateData.currentBalance !== undefined) {
+          updateData.availableCredit = parsedLimit - updateData.currentBalance;
+        } else if (availableCredit === undefined) {
+          // If admin did not explicitly set availableCredit, default it to the limit
+          updateData.availableCredit = parsedLimit;
+        }
       }
       if (status !== undefined) {
         const normalizedStatus = status.toUpperCase();

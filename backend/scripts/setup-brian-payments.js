@@ -43,78 +43,111 @@ async function main() {
 
   console.log('\n💸 Creating backdated internal transfers...');
 
-  for (const payment of payments) {
-    // Create internal transfer transaction (debit from checking)
-    await prisma.transaction.create({
-      data: {
-        accountId: checkingAccount.id,
-        amount: -payment.amount,
-        type: 'TRANSFER',
-        status: 'COMPLETED',
-        description: payment.description,
-        reference: `INT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        createdAt: payment.date,
-        updatedAt: payment.date
-      }
-    });
-
-    // Create internal transfer transaction (credit to savings)
-    await prisma.transaction.create({
-      data: {
-        accountId: savingsAccount.id,
-        amount: payment.amount,
-        type: 'TRANSFER',
-        status: 'COMPLETED',
-        description: payment.description,
-        reference: `INT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        createdAt: payment.date,
-        updatedAt: payment.date
-      }
-    });
-
-    console.log(`   ✓ ${payment.date.toLocaleDateString()}: $${payment.amount} from Checking → Savings`);
-  }
-
-  // Update account balances
-  // Checking: deduct $120,000 (3 x $40,000)
-  // Savings: add $120,000 (to pay off the -$120,000 debt)
-  const totalTransferred = 120000;
-
-  await prisma.account.update({
-    where: { id: checkingAccount.id },
-    data: { balance: { decrement: totalTransferred } }
-  });
-
-  await prisma.account.update({
-    where: { id: savingsAccount.id },
-    data: { balance: { increment: totalTransferred } }
-  });
-
-  console.log('\n✅ Account balances updated:');
-  console.log(`   Checking: $${parseFloat(checkingAccount.balance) - totalTransferred}`);
-  console.log(`   Savings: $${parseFloat(savingsAccount.balance) + totalTransferred}`);
-
-  // Create recurring payment for future ($20,000/month)
-  const nextPaymentDate = new Date('2026-01-11');
-  
-  await prisma.recurringPayment.create({
-    data: {
-      userId: brian.id,
-      fromAccountId: checkingAccount.id,
-      toAccountId: savingsAccount.id,
-      amount: 20000,
-      frequency: 'MONTHLY',
-      description: 'Monthly savings contribution',
-      nextPaymentDate: nextPaymentDate,
-      isActive: true,
-      createdAt: new Date()
+  // If one of the backdated payments already exists, assume theyve been applied and skip
+  const existingBackdated = await prisma.transaction.findFirst({
+    where: {
+      accountId: savingsAccount.id,
+      description: payments[0].description
     }
   });
 
-  console.log('\n📅 Created recurring payment:');
-  console.log(`   Amount: $20,000/month`);
-  console.log(`   From: Checking → Savings`);
-  console.log(`   Next Payment: ${nextPaymentDate.toLocaleDateString()}`);
+  if (existingBackdated) {
+    console.log('ℹ️ Backdated payments already exist, skipping creation to avoid duplicates.');
+  } else {
+    for (const payment of payments) {
+      // Create internal transfer transaction (debit from checking)
+      await prisma.transaction.create({
+        data: {
+          accountId: checkingAccount.id,
+          amount: -payment.amount,
+          type: 'TRANSFER',
+          status: 'COMPLETED',
+          description: payment.description,
+          reference: `INT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          createdAt: payment.date,
+          updatedAt: payment.date
+        }
+      });
+
+      // Create internal transfer transaction (credit to savings)
+      await prisma.transaction.create({
+        data: {
+          accountId: savingsAccount.id,
+          amount: payment.amount,
+          type: 'TRANSFER',
+          status: 'COMPLETED',
+          description: payment.description,
+          reference: `INT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          createdAt: payment.date,
+          updatedAt: payment.date
+        }
+      });
+
+      console.log(`   ✓ ${payment.date.toLocaleDateString()}: $${payment.amount} from Checking → Savings`);
+    }
+
+    // Update account balances
+    // Checking: deduct $120,000 (3 x $40,000)
+    // Savings: add $120,000 (to pay off the -$120,000 debt)
+    const totalTransferred = 120000;
+
+    await prisma.account.update({
+      where: { id: checkingAccount.id },
+      data: { balance: { decrement: totalTransferred } }
+    });
+
+    await prisma.account.update({
+      where: { id: savingsAccount.id },
+      data: { balance: { increment: totalTransferred } }
+    });
+
+    console.log('\n✅ Account balances updated to clear savings debt.');
+  }
+
+  // Create recurring payment for future ($20,000/month)
+  const startDate = new Date('2026-01-11T00:00:00.000Z');
+
+  const existingRecurring = await prisma.recurringPayment.findFirst({
+    where: {
+      userId: brian.id,
+      fromAccountId: checkingAccount.id,
+      toAccountId: savingsAccount.id,
+      description: 'Monthly savings contribution'
+    }
+  });
+
+  if (existingRecurring) {
+    console.log('\nℹ️ Recurring payment already exists, skipping creation.');
+  } else {
+    const reference = `REC-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+
+    await prisma.recurringPayment.create({
+      data: {
+        userId: brian.id,
+        fromAccountId: checkingAccount.id,
+        paymentType: 'INTERNAL',
+        // Internal transfer to Brians own savings account
+        recipientName: 'Internal Transfer - Savings',
+        recipientBank: null,
+        recipientAccount: null,
+        recipientRouting: null,
+        toAccountId: savingsAccount.id,
+        amount: 20000,
+        currency: 'USD',
+        description: 'Monthly savings contribution',
+        reference,
+        frequency: 'MONTHLY',
+        startDate,
+        nextExecutionDate: startDate,
+        dayOfMonth: 11
+      }
+    });
+
+    console.log('\n📅 Created recurring payment:');
+    console.log(`   Amount: $20,000/month`);
+    console.log('   From: Checking → Savings');
+    console.log(`   First Execution: ${startDate.toLocaleDateString()}`);
+  }
 
   // Update Brian's credit card limit to $450,000
   const creditCard = await prisma.creditCard.findFirst({

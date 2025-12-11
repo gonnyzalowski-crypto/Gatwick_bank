@@ -99,9 +99,12 @@ export const ServicesSection = () => {
               </p>
               <ul className="space-y-3 mb-6">
                 {service.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm text-slate-700 font-medium">
-                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500"></div>
-                    {feature}
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-slate-700 font-medium leading-relaxed"
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1"></div>
+                    <span>{feature}</span>
                   </li>
                 ))}
               </ul>
