@@ -22,7 +22,7 @@ const ProfileAvatarModal = ({ isOpen, onClose, user, accounts }) => {
             <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center mb-4 ring-4 ring-white/30 overflow-hidden">
               {user?.profilePhoto ? (
                 <img
-                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
+                  src={user.profilePhoto.startsWith('data:') || user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
                   alt={user?.firstName}
                   className="w-full h-full rounded-full object-cover"
                   onError={(e) => {

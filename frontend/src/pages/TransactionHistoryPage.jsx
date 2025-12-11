@@ -136,8 +136,10 @@ const TransactionHistoryPage = () => {
         const transactions = Array.isArray(data?.transactions) ? data.transactions : [];
 
         const mapped = transactions.map((tx) => {
-          const amountNumber = Number(tx.amount || 0);
-          const isDebit = tx.type?.toLowerCase() === 'debit';
+          const amountNumber = Math.abs(Number(tx.amount || 0));
+          const txType = tx.type?.toUpperCase() || '';
+          // Determine if it's a debit (money out) based on type or negative amount
+          const isDebit = ['DEBIT', 'WITHDRAWAL', 'PAYMENT', 'TRANSFER'].includes(txType) || Number(tx.amount) < 0;
 
           return {
             id: tx.id,
@@ -150,6 +152,7 @@ const TransactionHistoryPage = () => {
             currency: tx.account?.currency || 'USD',
             merchantName: tx.merchantName || '',
             reference: tx.reference || '',
+            status: tx.status || 'COMPLETED',
           };
         });
 
@@ -262,29 +265,6 @@ const TransactionHistoryPage = () => {
           </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Total Transactions</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{stats.totalTransactions}</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Money In</p>
-            <p className="text-2xl font-bold text-emerald-600 mt-1">+${formatAmount(stats.totalCredits)}</p>
-            <p className="text-xs text-slate-400">{stats.creditCount} transactions</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Money Out</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">-${formatAmount(stats.totalDebits)}</p>
-            <p className="text-xs text-slate-400">{stats.debitCount} transactions</p>
-          </div>
-          <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
-            <p className="text-xs text-slate-500 uppercase tracking-wide">Net Flow</p>
-            <p className={`text-2xl font-bold mt-1 ${stats.totalCredits - stats.totalDebits >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-              {stats.totalCredits - stats.totalDebits >= 0 ? '+' : '-'}${formatAmount(Math.abs(stats.totalCredits - stats.totalDebits))}
-            </p>
-          </div>
-        </div>
 
         {/* Search and Filters */}
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm">
@@ -469,14 +449,26 @@ const TransactionHistoryPage = () => {
                       </div>
                     </div>
 
-                    {/* Amount */}
+                    {/* Amount & Status */}
                     <div className="text-right">
                       <p className={`text-lg font-semibold ${
                         row.type === 'credit' ? 'text-emerald-600' : 'text-red-600'
                       }`}>
                         {row.type === 'credit' ? '+' : '-'}${formatAmount(row.amount)}
                       </p>
-                      <p className="text-xs text-slate-400">{row.currency}</p>
+                      <div className="flex items-center justify-end gap-2">
+                        <p className="text-xs text-slate-400">{row.currency}</p>
+                        {row.status && row.status !== 'COMPLETED' && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                            row.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                            row.status === 'DECLINED' ? 'bg-red-100 text-red-700' :
+                            row.status === 'REVERSED' ? 'bg-gray-100 text-gray-700' :
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {row.status}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

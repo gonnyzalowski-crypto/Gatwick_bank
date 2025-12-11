@@ -71,7 +71,7 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
           <div className="flex items-center gap-4">
             {userData?.profilePhoto ? (
               <img 
-                src={userData.profilePhoto.startsWith('http') ? userData.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${userData.profilePhoto}`}
+                src={userData.profilePhoto.startsWith('data:') || userData.profilePhoto.startsWith('http') ? userData.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${userData.profilePhoto}`}
                 alt="Profile"
                 className="w-16 h-16 rounded-full object-cover ring-2 ring-white/30"
                 onError={(e) => {

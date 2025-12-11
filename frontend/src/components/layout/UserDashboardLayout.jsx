@@ -242,7 +242,7 @@ const UserDashboardLayout = ({ children }) => {
             <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-colors cursor-pointer group">
               {user?.profilePhoto ? (
                 <img 
-                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
+                  src={user.profilePhoto.startsWith('data:') || user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
                   alt="Profile"
                   className="h-10 w-10 rounded-full object-cover shadow-sm"
                   onError={(e) => {
@@ -305,7 +305,7 @@ const UserDashboardLayout = ({ children }) => {
             >
               {user?.profilePhoto ? (
                 <img 
-                  src={user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
+                  src={user.profilePhoto.startsWith('data:') || user.profilePhoto.startsWith('http') ? user.profilePhoto : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${user.profilePhoto}`}
                   alt="Profile"
                   className="h-8 w-8 rounded-full object-cover"
                   onError={(e) => {

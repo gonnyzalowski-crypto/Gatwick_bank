@@ -116,6 +116,16 @@ export const SettingsPage = () => {
     }
   };
 
+  // Convert file to base64
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handlePhotoUpload = async () => {
     if (!profilePhoto) {
       setError('Please select a photo');
@@ -143,11 +153,11 @@ export const SettingsPage = () => {
       
       console.log('Uploading profile photo:', profilePhoto.name, profilePhoto.size, profilePhoto.type);
       
-      const formData = new FormData();
-      formData.append('profilePhoto', profilePhoto);
-
-      // Don't set Content-Type manually - browser will set it with correct boundary for FormData
-      const response = await apiClient.post('/auth/users/profile-photo', formData);
+      // Convert file to base64
+      const base64Image = await fileToBase64(profilePhoto);
+      
+      // Send base64 to backend
+      const response = await apiClient.post('/auth/profile-photo-base64', { base64Image });
 
       console.log('Profile photo upload response:', response);
 
@@ -157,12 +167,9 @@ export const SettingsPage = () => {
       // Refresh user data to update avatar everywhere
       await refreshUser();
       
-      // Update photo preview with the new photo from response
+      // Update photo preview with the base64 image from response
       if (response.user?.profilePhoto) {
-        const photoUrl = response.user.profilePhoto.startsWith('http') 
-          ? response.user.profilePhoto 
-          : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || ''}${response.user.profilePhoto}`;
-        setPhotoPreview(photoUrl);
+        setPhotoPreview(response.user.profilePhoto);
       }
     } catch (err) {
       console.error('Profile photo upload error:', err);
