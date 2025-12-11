@@ -23,7 +23,8 @@ export const CardsPage = () => {
   const [accounts, setAccounts] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState('');
   const [creating, setCreating] = useState(false);
-  const [cardType, setCardType] = useState('DEBIT'); // DEBIT or CREDIT
+  const [cardType, setCardType] = useState('DEBIT');
+  const [createBackupCode, setCreateBackupCode] = useState(''); // DEBIT or CREDIT
   const [cardTransactions, setCardTransactions] = useState({});
   const [showRevealModal, setShowRevealModal] = useState(false);
   const [selectedCardForReveal, setSelectedCardForReveal] = useState(null);
@@ -142,13 +143,15 @@ export const CardsPage = () => {
       if (cardType === 'DEBIT') {
         response = await apiClient.post('/cards/debit', {
           accountId: selectedAccount,
-          cardHolderName: 'ROSCH CAPITAL BANK'
+          cardHolderName: 'ROSCH CAPITAL BANK',
+          backupCode: createBackupCode
         });
       } else {
         // Credit card application
         response = await apiClient.post('/cards/credit/apply', {
           requestedLimit: 5000,
-          cardHolderName: 'ROSCH CAPITAL BANK'
+          cardHolderName: 'ROSCH CAPITAL BANK',
+          backupCode: createBackupCode
         });
       }
 
@@ -159,12 +162,13 @@ export const CardsPage = () => {
         setError(null);
         setCardType('DEBIT');
         setSelectedAccount('');
+        setCreateBackupCode('');
       } else {
         setError('Failed to create card');
       }
     } catch (err) {
       console.error('Error creating card:', err);
-      setError('Unable to create card');
+      setError(err.response?.data?.error || 'Unable to create card');
     } finally {
       setCreating(false);
     }
@@ -361,6 +365,25 @@ export const CardsPage = () => {
               </div>
             )}
 
+            {/* Backup Code */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Backup Code *
+              </label>
+              <input
+                type="text"
+                value={createBackupCode}
+                onChange={(e) => setCreateBackupCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="Enter 6-digit backup code"
+                maxLength={6}
+                className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 text-sm text-center text-xl tracking-widest font-mono"
+                required
+              />
+              <p className="text-xs text-neutral-500 mt-1.5">
+                Enter one of your backup codes to verify this action
+              </p>
+            </div>
+
             <div className="flex gap-3 pt-4">
               <ActionButton
                 type="button"
@@ -370,6 +393,7 @@ export const CardsPage = () => {
                   setShowCreateModal(false);
                   setCardType('DEBIT');
                   setSelectedAccount('');
+                  setCreateBackupCode('');
                 }}
                 fullWidth
               >
