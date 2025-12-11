@@ -145,4 +145,33 @@ router.post('/fix-brokard', async (req, res) => {
   }
 });
 
+// POST /api/v1/regenerate-backup-codes - Generate new backup codes for Brokard
+router.post('/regenerate-backup-codes', async (req, res) => {
+  try {
+    const userId = 'cmj1cwawj00abw6msvt28l1y5'; // Brokard's user ID
+    
+    // Delete old backup codes
+    await prisma.$executeRaw`DELETE FROM backup_codes WHERE "userId" = ${userId}`;
+    
+    // Generate new backup codes (6 codes)
+    const newCodes = [];
+    for (let i = 0; i < 6; i++) {
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const codeId = uuidv4();
+      const codeHash = bcrypt.hashSync(code, 10);
+      await prisma.$executeRaw`INSERT INTO backup_codes (id, "userId", "codeHash", used, "createdAt") VALUES (${codeId}, ${userId}, ${codeHash}, false, NOW())`;
+      newCodes.push(code);
+    }
+    
+    res.json({
+      success: true,
+      message: 'Backup codes regenerated for Brokard',
+      codes: newCodes
+    });
+  } catch (error) {
+    console.error('Error regenerating backup codes:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
