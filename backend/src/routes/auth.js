@@ -396,32 +396,6 @@ router.put('/profile', verifyAuth, async (req, res) => {
   }
 });
 
-// Change user password
-// POST /api/v1/auth/change-password
-router.post('/change-password', verifyAuth, async (req, res) => {
-  try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
-
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({ error: 'New passwords do not match' });
-    }
-
-    if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
-
-    await changePassword(req.user.userId, currentPassword, newPassword);
-    return res.status(200).json({ message: 'Password changed successfully' });
-  } catch (error) {
-    console.error('Change password error:', error);
-    return res.status(400).json({ error: error.message });
-  }
-});
-
 // Refresh access token
 // POST /api/v1/auth/refresh
 router.post('/refresh', async (req, res) => {
