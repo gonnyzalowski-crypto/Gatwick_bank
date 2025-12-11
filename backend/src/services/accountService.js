@@ -50,6 +50,18 @@ export const createAccount = async (userId, accountType, accountName) => {
   
   // Generate wallet address for crypto accounts, regular account number for others
   if (accountType === 'CRYPTO_WALLET') {
+    // Check if user already has a crypto wallet - only one allowed per user
+    const existingCryptoWallet = await prisma.account.findFirst({
+      where: {
+        userId,
+        accountType: 'CRYPTO_WALLET'
+      }
+    });
+    
+    if (existingCryptoWallet) {
+      throw new Error('You can only have one crypto wallet account');
+    }
+    
     const cryptoType = detectCryptoType(accountName);
     accountNumber = generateCryptoWalletAddress(cryptoType);
   } else {

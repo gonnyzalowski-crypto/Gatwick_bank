@@ -17,7 +17,7 @@ export const SettingsPage = () => {
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-    answer: ''
+    backupCode: ''
   });
   const [securityQuestion, setSecurityQuestion] = useState(null);
   const [loginPreference, setLoginPreference] = useState('question');
@@ -200,8 +200,8 @@ export const SettingsPage = () => {
       return;
     }
 
-    if (!passwordData.answer.trim()) {
-      setError('Please answer the security question');
+    if (!passwordData.backupCode.trim() || passwordData.backupCode.length !== 6) {
+      setError('Please enter a valid 6-digit backup code');
       return;
     }
 
@@ -211,8 +211,7 @@ export const SettingsPage = () => {
       await apiClient.post('/auth/change-password', {
         currentPassword: passwordData.currentPassword,
         newPassword: passwordData.newPassword,
-        questionId: securityQuestion.questionId,
-        answer: passwordData.answer
+        backupCode: passwordData.backupCode
       });
 
       setSuccess('Password changed successfully!');
@@ -220,10 +219,8 @@ export const SettingsPage = () => {
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
-        answer: ''
+        backupCode: ''
       });
-      
-      fetchRandomQuestion();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to change password');
     }
@@ -298,7 +295,7 @@ export const SettingsPage = () => {
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold text-neutral-900 mb-2">Change Password</h2>
                   <p className="text-sm text-neutral-600">
-                    For security, you must answer a security question to change your password
+                    For security, you must enter a backup code to change your password
                   </p>
                 </div>
 
@@ -368,41 +365,34 @@ export const SettingsPage = () => {
                     />
                   </div>
 
-                  {/* Security Question */}
+                  {/* Backup Code Verification */}
                   <div className="border-t border-neutral-200 pt-5 mt-6">
                     <div className="flex items-center gap-2 mb-4">
                       <Shield className="w-5 h-5 text-primary-600" />
                       <h3 className="text-sm font-semibold text-neutral-900">Security Verification</h3>
                     </div>
 
-                    {securityQuestion ? (
-                      <>
-                        <div className="mb-4 p-4 bg-primary-50 border border-primary-200 rounded-xl">
-                          <p className="text-sm font-medium text-primary-900">
-                            {securityQuestion.question}
-                          </p>
-                        </div>
+                    <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                      <p className="text-sm font-medium text-amber-900">
+                        Enter one of your backup codes to verify this action. Backup codes can only be used once.
+                      </p>
+                    </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-neutral-700 mb-2">
-                            Your Answer
-                          </label>
-                          <input
-                            type="text"
-                            name="answer"
-                            value={passwordData.answer}
-                            onChange={handlePasswordChange}
-                            placeholder="Enter your answer"
-                            className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm"
-                            required
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-neutral-500 text-sm">Loading security question...</p>
-                      </div>
-                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
+                        Backup Code
+                      </label>
+                      <input
+                        type="text"
+                        name="backupCode"
+                        value={passwordData.backupCode}
+                        onChange={handlePasswordChange}
+                        placeholder="Enter 6-digit backup code"
+                        maxLength="6"
+                        className="w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-neutral-900 placeholder-neutral-400 text-sm text-center text-xl tracking-widest font-mono"
+                        required
+                      />
+                    </div>
                   </div>
 
                   {/* Submit Button */}
@@ -412,7 +402,7 @@ export const SettingsPage = () => {
                       variant="primary"
                       size="lg"
                       loading={isLoading}
-                      disabled={!securityQuestion}
+                      disabled={passwordData.backupCode.length !== 6}
                       fullWidth
                     >
                       {isLoading ? 'Changing Password...' : 'Change Password'}

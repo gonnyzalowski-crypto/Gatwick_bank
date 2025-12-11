@@ -16,6 +16,7 @@ import {
   getBeneficiaries,
   deleteBeneficiary
 } from '../services/transferService.js';
+import { verifyBackupCode } from '../services/securityService.js';
 
 export const transfersRouter = Router();
 
@@ -91,7 +92,7 @@ transfersRouter.post('/', checkDebitEligibility, async (req, res) => {
 /**
  * POST /api/v1/transfers/domestic
  * Create domestic transfer request (same as regular transfer)
- * TEST PROJECT: Backup code verification is optional
+ * Requires backup code verification for security
  */
 transfersRouter.post('/domestic', async (req, res) => {
   try {
@@ -101,8 +102,15 @@ transfersRouter.post('/domestic', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    // TEST PROJECT: Skip backup code verification for testing
-    // In production, verify backup code here
+    // Verify backup code - REQUIRED for all debit transactions
+    if (!backupCode) {
+      return res.status(400).json({ error: 'Backup code is required for transfers' });
+    }
+    
+    const backupResult = await verifyBackupCode(req.user.userId, backupCode);
+    if (!backupResult.valid) {
+      return res.status(401).json({ error: backupResult.error || 'Invalid backup code', alreadyUsed: backupResult.alreadyUsed });
+    }
     
     const result = await createTransferRequest(req.user.userId, {
       fromAccountId,
@@ -125,7 +133,7 @@ transfersRouter.post('/domestic', async (req, res) => {
 /**
  * POST /api/v1/transfers/international
  * Create international transfer request
- * TEST PROJECT: Backup code verification is optional
+ * Requires backup code verification for security
  */
 transfersRouter.post('/international', async (req, res) => {
   try {
@@ -135,7 +143,15 @@ transfersRouter.post('/international', async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    // TEST PROJECT: Skip backup code verification for testing
+    // Verify backup code - REQUIRED for all debit transactions
+    if (!backupCode) {
+      return res.status(400).json({ error: 'Backup code is required for transfers' });
+    }
+    
+    const backupResult = await verifyBackupCode(req.user.userId, backupCode);
+    if (!backupResult.valid) {
+      return res.status(401).json({ error: backupResult.error || 'Invalid backup code', alreadyUsed: backupResult.alreadyUsed });
+    }
     
     const result = await createTransferRequest(req.user.userId, {
       fromAccountId,
@@ -243,15 +259,26 @@ transfersRouter.delete('/beneficiaries/:id', async (req, res) => {
 /**
  * POST /api/v1/transfers/internal
  * Internal transfer between Rosch Capital Bank users
+ * Requires backup code verification for security
  */
 transfersRouter.post('/internal', async (req, res) => {
   try {
-    const { fromAccountId, toAccountNumber, amount, description } = req.body;
+    const { fromAccountId, toAccountNumber, amount, description, backupCode } = req.body;
     
     console.log('Internal transfer request:', { fromAccountId, toAccountNumber, amount, description });
     
     if (!fromAccountId || !toAccountNumber || !amount) {
       return res.status(400).json({ error: 'Missing required fields: fromAccountId, toAccountNumber, and amount are required' });
+    }
+    
+    // Verify backup code - REQUIRED for all debit transactions
+    if (!backupCode) {
+      return res.status(400).json({ error: 'Backup code is required for transfers' });
+    }
+    
+    const backupResult = await verifyBackupCode(req.user.userId, backupCode);
+    if (!backupResult.valid) {
+      return res.status(401).json({ error: backupResult.error || 'Invalid backup code', alreadyUsed: backupResult.alreadyUsed });
     }
     
     if (amount <= 0) {

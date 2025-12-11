@@ -333,7 +333,7 @@ const UserDashboardLayout = ({ children }) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 lg:p-8 overflow-y-auto bg-neutral-50">{children}</main>
+        <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-neutral-50">{children}</main>
       </div>
 
       {/* User Profile Modal */}

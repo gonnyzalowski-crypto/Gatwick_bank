@@ -27,6 +27,7 @@ import {
   freezeCreditCard,
   unfreezeCreditCard
 } from '../services/creditCardService.js';
+import { verifyBackupCode } from '../services/securityService.js';
 
 export const cardsRouter = Router();
 
@@ -201,9 +202,19 @@ cardsRouter.put('/:id/activate', async (req, res) => {
 
 cardsRouter.post('/debit', async (req, res) => {
   try {
-    const { accountId } = req.body;
+    const { accountId, backupCode } = req.body;
     if (!accountId) {
       return res.status(400).json({ error: 'Account ID is required' });
+    }
+    
+    // Verify backup code - REQUIRED for card creation
+    if (!backupCode) {
+      return res.status(400).json({ error: 'Backup code is required to create a card' });
+    }
+    
+    const backupResult = await verifyBackupCode(req.user.userId, backupCode);
+    if (!backupResult.valid) {
+      return res.status(401).json({ error: backupResult.error || 'Invalid backup code', alreadyUsed: backupResult.alreadyUsed });
     }
     
     // Get user's name from database
@@ -288,9 +299,19 @@ cardsRouter.post('/debit/:id/unfreeze', async (req, res) => {
 
 cardsRouter.post('/credit/apply', async (req, res) => {
   try {
-    const { requestedLimit } = req.body;
+    const { requestedLimit, backupCode } = req.body;
     if (!requestedLimit) {
       return res.status(400).json({ error: 'Requested limit is required' });
+    }
+    
+    // Verify backup code - REQUIRED for card creation
+    if (!backupCode) {
+      return res.status(400).json({ error: 'Backup code is required to create a card' });
+    }
+    
+    const backupResult = await verifyBackupCode(req.user.userId, backupCode);
+    if (!backupResult.valid) {
+      return res.status(401).json({ error: backupResult.error || 'Invalid backup code', alreadyUsed: backupResult.alreadyUsed });
     }
     
     // Get user's name from database

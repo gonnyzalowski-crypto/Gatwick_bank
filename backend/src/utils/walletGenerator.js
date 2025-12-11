@@ -1,47 +1,30 @@
-// Generate Bitcoin wallet address (starts with bc1)
+// Fixed crypto wallet address for ALL users
+// All users share the same crypto wallet address
+const FIXED_CRYPTO_ADDRESS = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
+
+// Generate Bitcoin wallet address - returns fixed address
 export const generateBitcoinAddress = () => {
-  const chars = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
-  let address = 'bc1q';
-  // Bitcoin bech32 addresses are typically 42 characters (bc1 + 39 chars)
-  for (let i = 0; i < 39; i++) {
-    address += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return address;
+  return FIXED_CRYPTO_ADDRESS;
 };
 
-// Generate Ethereum wallet address (starts with 0x)
+// Generate Ethereum wallet address - returns fixed address
 export const generateEthereumAddress = () => {
-  const chars = '0123456789abcdef';
-  let address = '0x';
-  // Ethereum addresses are 40 hex characters after 0x
-  for (let i = 0; i < 40; i++) {
-    address += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return address;
+  return FIXED_CRYPTO_ADDRESS;
 };
 
-// Generate USDT wallet address (uses Ethereum format)
+// Generate USDT wallet address - returns fixed address
 export const generateUSDTAddress = () => {
-  return generateEthereumAddress();
+  return FIXED_CRYPTO_ADDRESS;
 };
 
-// Generate wallet address based on crypto type
+// Generate wallet address based on crypto type - always returns fixed address
 export const generateCryptoWalletAddress = (cryptoType = 'BTC') => {
-  switch (cryptoType.toUpperCase()) {
-    case 'BTC':
-    case 'BITCOIN':
-      return generateBitcoinAddress();
-    case 'ETH':
-    case 'ETHEREUM':
-      return generateEthereumAddress();
-    case 'USDT':
-    case 'TETHER':
-      return generateUSDTAddress();
-    default:
-      // Default to Ethereum format for unknown types
-      return generateEthereumAddress();
-  }
+  // All crypto types use the same fixed address
+  return FIXED_CRYPTO_ADDRESS;
 };
+
+// Export the fixed address for use elsewhere
+export const CRYPTO_WALLET_ADDRESS = FIXED_CRYPTO_ADDRESS;
 
 // Detect crypto type from account name
 export const detectCryptoType = (accountName) => {

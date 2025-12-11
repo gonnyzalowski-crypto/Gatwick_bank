@@ -412,16 +412,16 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
-// Change password with security question verification
+// Change password with backup code verification
 // POST /api/v1/auth/change-password
 router.post('/change-password', passwordResetLimiter, verifyAuth, async (req, res) => {
   try {
-    const { currentPassword, newPassword, questionId, answer } = req.body;
+    const { currentPassword, newPassword, backupCode } = req.body;
     const userId = req.user.userId;
 
     // Validate input
-    if (!currentPassword || !newPassword || !questionId || !answer) {
-      return res.status(400).json({ error: 'All fields are required' });
+    if (!currentPassword || !newPassword || !backupCode) {
+      return res.status(400).json({ error: 'Current password, new password, and backup code are required' });
     }
 
     if (newPassword.length < 8) {
@@ -445,13 +445,13 @@ router.post('/change-password', passwordResetLimiter, verifyAuth, async (req, re
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
-    // Verify security question answer
-    const isAnswerValid = await verifySecurityAnswer(userId, questionId, answer);
-    if (!isAnswerValid) {
+    // Verify backup code - REQUIRED for password change
+    const backupResult = await verifyBackupCode(userId, backupCode);
+    if (!backupResult.valid) {
       await logAction(userId, 'PASSWORD_CHANGE_FAILED', req.ip, req.get('user-agent'), {
-        reason: 'Invalid security answer'
+        reason: 'Invalid backup code'
       });
-      return res.status(401).json({ error: 'Security answer is incorrect' });
+      return res.status(401).json({ error: backupResult.error || 'Invalid backup code', alreadyUsed: backupResult.alreadyUsed });
     }
 
     // Hash new password

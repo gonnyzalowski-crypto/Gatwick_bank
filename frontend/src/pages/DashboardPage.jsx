@@ -139,7 +139,7 @@ export const DashboardPage = () => {
     <UserDashboardLayout>
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Hero Section - Total Balance */}
-        <div className="bg-gradient-to-br from-purple-700 via-purple-800 to-primary-800 rounded-2xl p-8 md:p-10 text-white shadow-xl relative overflow-hidden">
+        <div className="bg-gradient-to-br from-purple-700 via-purple-800 to-primary-800 rounded-2xl p-4 sm:p-6 md:p-10 text-white shadow-xl relative overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -147,10 +147,10 @@ export const DashboardPage = () => {
           </div>
 
           <div className="relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-              <div>
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-6">
+              <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-2">
-                  <p className="text-purple-100 text-sm font-medium uppercase tracking-wide">
+                  <p className="text-purple-100 text-xs sm:text-sm font-medium uppercase tracking-wide">
                     Total Balance
                   </p>
                   <div className="group relative">
@@ -165,7 +165,7 @@ export const DashboardPage = () => {
                     </div>
                   </div>
                 </div>
-                <h1 className="text-5xl md:text-6xl font-bold mb-2 tracking-tight">
+                <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-2 tracking-tight break-all sm:break-normal">
                   {formatCurrency(summary.totalBalance || 0)}
                 </h1>
                 <div className="flex gap-4 mb-2">

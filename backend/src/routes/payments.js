@@ -7,6 +7,7 @@ import { transactionLimiter, uploadLimiter } from '../middleware/rateLimiter.js'
 import prisma from '../config/prisma.js';
 import * as paymentService from '../services/paymentService.js';
 import { validateSWIFT, validateIBAN, validateRecipientName, validateBankName } from '../utils/bankValidation.js';
+import { verifyBackupCode } from '../services/securityService.js';
 
 const paymentsRouter = express.Router();
 
@@ -94,7 +95,7 @@ paymentsRouter.post('/deposit', uploadLimiter, verifyAuth, upload.single('paymen
  * POST /api/v1/payments/withdrawal
  * Create a withdrawal request (pending admin approval)
  * PND and SUSPENDED users cannot make withdrawals
- * TEST PROJECT: Backup code verification is optional
+ * Requires backup code verification for security
  */
 paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, checkDebitEligibility, async (req, res) => {
   try {
@@ -114,10 +115,22 @@ paymentsRouter.post('/withdrawal', transactionLimiter, verifyAuth, checkDebitEli
       });
     }
 
-    // TEST PROJECT: Skip backup code verification entirely
-    // In production, this would verify the backup code
-    let validBackupCode = null;
-    // Backup code verification is disabled for testing purposes
+    // Verify backup code - REQUIRED for all debit transactions
+    if (!backupCode) {
+      return res.status(400).json({
+        success: false,
+        error: 'Backup code is required for withdrawals',
+      });
+    }
+    
+    const backupResult = await verifyBackupCode(req.user.userId, backupCode);
+    if (!backupResult.valid) {
+      return res.status(401).json({
+        success: false,
+        error: backupResult.error || 'Invalid backup code',
+        alreadyUsed: backupResult.alreadyUsed
+      });
+    }
 
     // Verify account ownership
     const account = await prisma.account.findFirst({
