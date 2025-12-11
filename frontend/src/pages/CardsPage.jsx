@@ -453,17 +453,30 @@ export const CardsPage = () => {
                           </div>
                         </div>
                         
-                        {/* Card Number */}
+                        {/* Card Number - Embossed Style */}
                         <div className="relative z-10">
-                          <p className="text-sm font-mono tracking-wider mb-4 drop-shadow-md">
+                          <p className="text-lg font-mono tracking-[0.2em] mb-3" style={{
+                            textShadow: '1px 1px 1px rgba(0,0,0,0.3), -1px -1px 1px rgba(255,255,255,0.2)',
+                            fontWeight: '600'
+                          }}>
                             {formatCardNumber(card.cardNumber, card.cardType)}
                           </p>
                           
-                          {/* Card Holder Only - Expiry Hidden */}
+                          {/* Card Holder & Expiry - Embossed Style */}
                           <div className="flex justify-between items-end">
                             <div>
                               <p className="text-[10px] font-medium text-white/70 mb-1 uppercase tracking-wider">Card Holder</p>
-                              <p className="text-sm font-semibold tracking-wide">{card.cardHolderName || 'CARD HOLDER'}</p>
+                              <p className="text-sm tracking-wide uppercase" style={{
+                                textShadow: '1px 1px 1px rgba(0,0,0,0.3), -1px -1px 1px rgba(255,255,255,0.2)',
+                                fontWeight: '600'
+                              }}>{card.cardHolderName || 'CARD HOLDER'}</p>
+                              {/* Expiry Date - Embossed */}
+                              <p className="text-xs mt-1 tracking-wider" style={{
+                                textShadow: '1px 1px 1px rgba(0,0,0,0.3), -1px -1px 1px rgba(255,255,255,0.2)',
+                                fontWeight: '500'
+                              }}>
+                                {card.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : 'MM/YY'}
+                              </p>
                             </div>
                           </div>
                         </div>

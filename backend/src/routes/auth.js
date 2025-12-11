@@ -713,4 +713,70 @@ router.post('/profile-photo-base64', verifyAuth, async (req, res) => {
   }
 });
 
+// Get auto-debit settings
+// GET /api/v1/auth/auto-debit-settings
+router.get('/auto-debit-settings', verifyAuth, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { autoDebitEnabled: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    return res.status(200).json({
+      enabled: user.autoDebitEnabled ?? true,
+      excludedAccountTypes: ['CRYPTO_WALLET'],
+      priority: ['SAVINGS', 'CHECKING', 'BUSINESS'],
+      policy: {
+        title: 'Automatic Balance Protection',
+        description: 'When enabled, negative balances in your accounts will be automatically covered by transferring funds from your other accounts.',
+        rules: [
+          'Crypto wallets are excluded from auto-debit (investment proceeds are protected)',
+          'Savings account is used first, then Checking',
+          'You will receive a notification for each auto-debit transfer',
+          'This feature helps avoid overdraft fees and account restrictions'
+        ]
+      }
+    });
+  } catch (error) {
+    console.error('Get auto-debit settings error:', error);
+    return res.status(500).json({ error: 'Failed to get auto-debit settings' });
+  }
+});
+
+// Update auto-debit settings
+// PUT /api/v1/auth/auto-debit-settings
+router.put('/auto-debit-settings', verifyAuth, async (req, res) => {
+  try {
+    const { enabled } = req.body;
+    const userId = req.user.userId;
+
+    if (typeof enabled !== 'boolean') {
+      return res.status(400).json({ error: 'Invalid value for enabled. Must be true or false' });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { autoDebitEnabled: enabled }
+    });
+
+    await logAction(userId, 'AUTO_DEBIT_SETTINGS_CHANGED', req.ip, req.get('user-agent'), {
+      enabled
+    });
+
+    return res.status(200).json({
+      message: 'Auto-debit settings updated successfully',
+      enabled
+    });
+  } catch (error) {
+    console.error('Update auto-debit settings error:', error);
+    return res.status(500).json({ error: 'Failed to update auto-debit settings' });
+  }
+});
+
 export default router;

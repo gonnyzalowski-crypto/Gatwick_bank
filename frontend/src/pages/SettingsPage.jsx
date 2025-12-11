@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Shield, CheckCircle2, AlertCircle, Key, RefreshCw, User, Upload } from 'lucide-react';
+import { Lock, Shield, CheckCircle2, AlertCircle, Key, RefreshCw, User, Upload, Wallet, Info } from 'lucide-react';
 import apiClient from '../lib/apiClient';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import { ActionButton } from '../components/ui/ActionButton';
@@ -25,10 +25,13 @@ export const SettingsPage = () => {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(user?.profilePhoto || null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [autoDebitSettings, setAutoDebitSettings] = useState(null);
+  const [autoDebitLoading, setAutoDebitLoading] = useState(false);
 
   useEffect(() => {
     fetchRandomQuestion();
     fetchLoginPreference();
+    fetchAutoDebitSettings();
   }, []);
 
   const fetchRandomQuestion = async () => {
@@ -48,6 +51,34 @@ export const SettingsPage = () => {
     } catch (err) {
       console.error('Failed to fetch login preference:', err);
     }
+  };
+
+  const fetchAutoDebitSettings = async () => {
+    try {
+      const response = await apiClient.get('/auth/auto-debit-settings');
+      setAutoDebitSettings(response);
+    } catch (err) {
+      console.error('Failed to fetch auto-debit settings:', err);
+    }
+  };
+
+  const handleAutoDebitToggle = async () => {
+    if (!autoDebitSettings) return;
+    
+    setAutoDebitLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const newValue = !autoDebitSettings.enabled;
+      await apiClient.put('/auth/auto-debit-settings', { enabled: newValue });
+      setAutoDebitSettings({ ...autoDebitSettings, enabled: newValue });
+      setSuccess(`Auto-debit protection ${newValue ? 'enabled' : 'disabled'} successfully`);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to update auto-debit settings');
+    }
+
+    setAutoDebitLoading(false);
   };
 
   const handlePreferenceChange = async (newPreference) => {
@@ -245,6 +276,17 @@ export const SettingsPage = () => {
               >
                 <User className="w-4 h-4 inline mr-2" />
                 Profile Photo
+              </button>
+              <button
+                onClick={() => setActiveTab('autodebit')}
+                className={`px-6 py-4 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === 'autodebit'
+                    ? 'border-primary-600 text-primary-700'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-700 hover:border-neutral-300'
+                }`}
+              >
+                <Wallet className="w-4 h-4 inline mr-2" />
+                Balance Protection
               </button>
             </nav>
           </div>
@@ -575,6 +617,117 @@ export const SettingsPage = () => {
                       </ActionButton>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Auto-Debit / Balance Protection Tab */}
+          {activeTab === 'autodebit' && (
+            <div className="p-6">
+              <div className="max-w-2xl">
+                <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-neutral-900 mb-2">Automatic Balance Protection</h2>
+                  <p className="text-sm text-neutral-600">
+                    Protect your accounts from overdraft by automatically covering negative balances
+                  </p>
+                </div>
+
+                {/* Success Message */}
+                {success && (
+                  <div className="mb-6 bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-emerald-700 text-sm font-medium">{success}</p>
+                  </div>
+                )}
+
+                {/* Error Message */}
+                {error && (
+                  <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                  </div>
+                )}
+
+                {/* Toggle Card */}
+                <div className="bg-white border border-neutral-200 rounded-xl p-6 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        autoDebitSettings?.enabled ? 'bg-emerald-100' : 'bg-neutral-100'
+                      }`}>
+                        <Wallet className={`w-6 h-6 ${
+                          autoDebitSettings?.enabled ? 'text-emerald-600' : 'text-neutral-400'
+                        }`} />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-neutral-900">Auto-Debit Protection</h3>
+                        <p className="text-sm text-neutral-500">
+                          {autoDebitSettings?.enabled ? 'Currently enabled' : 'Currently disabled'}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleAutoDebitToggle}
+                      disabled={autoDebitLoading}
+                      className={`relative w-14 h-8 rounded-full transition-colors ${
+                        autoDebitSettings?.enabled ? 'bg-emerald-500' : 'bg-neutral-300'
+                      } ${autoDebitLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                      <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow transition-transform ${
+                        autoDebitSettings?.enabled ? 'translate-x-7' : 'translate-x-1'
+                      }`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Policy Information */}
+                {autoDebitSettings?.policy && (
+                  <div className="bg-purple-50 border border-purple-200 rounded-xl p-6 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <Info className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h3 className="font-semibold text-purple-900 mb-2">{autoDebitSettings.policy.title}</h3>
+                        <p className="text-sm text-purple-700 mb-4">{autoDebitSettings.policy.description}</p>
+                        
+                        <h4 className="font-medium text-purple-900 mb-2">Policy Rules:</h4>
+                        <ul className="space-y-2">
+                          {autoDebitSettings.policy.rules.map((rule, index) => (
+                            <li key={index} className="flex items-start gap-2 text-sm text-purple-700">
+                              <CheckCircle2 className="w-4 h-4 text-purple-500 flex-shrink-0 mt-0.5" />
+                              <span>{rule}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Account Priority */}
+                <div className="mt-6 bg-neutral-50 border border-neutral-200 rounded-xl p-6">
+                  <h3 className="font-semibold text-neutral-900 mb-4">Account Priority Order</h3>
+                  <p className="text-sm text-neutral-600 mb-4">
+                    When auto-debit is triggered, funds will be sourced in this order:
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
+                      <span className="w-6 h-6 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                      <span className="text-sm font-medium text-neutral-700">Savings Account</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
+                      <span className="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                      <span className="text-sm font-medium text-neutral-700">Checking Account</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-200">
+                      <span className="w-6 h-6 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                      <span className="text-sm font-medium text-neutral-700">Business Account</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                      <span className="w-6 h-6 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-xs font-bold">✕</span>
+                      <span className="text-sm font-medium text-red-700">Crypto Wallet (Protected - Never used for auto-debit)</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

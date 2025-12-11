@@ -143,9 +143,10 @@ const CryptoAccountPage = ({ accountId, onBack }) => {
             <div className="bg-white/10 rounded-lg p-4">
               <p className="text-xs text-purple-100 mb-1">Available</p>
               <p className="text-xl font-semibold">
+                {/* For crypto wallets: Available = Total Balance - Pending */}
                 {showCrypto && cryptoValue !== null
-                  ? `${formatCrypto((account.availableBalance || 0) * exchangeRate)} ${cryptoType}`
-                  : formatCurrency(account.availableBalance || 0)}
+                  ? `${formatCrypto((account.balance - (account.pendingBalance || 0)) * exchangeRate)} ${cryptoType}`
+                  : formatCurrency(account.balance - (account.pendingBalance || 0))}
               </p>
             </div>
             <div className="bg-white/10 rounded-lg p-4">

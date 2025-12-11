@@ -57,6 +57,7 @@ model User {
   kycReviewedBy    String?  // Admin ID who reviewed
   totalSentAmount  Decimal  @default(0) @db.Decimal(10, 2) // Track cumulative transfers for LIMITED users
   loginPreference  String   @default("question") // question | code - User's preferred 2FA method
+  autoDebitEnabled Boolean  @default(true) // Auto-cover negative balances from other accounts
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
