@@ -1,4 +1,5 @@
 import express from 'express';
+import bcrypt from 'bcryptjs';
 import config from '../config/app.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { authLimiter, registerLimiter, passwordResetLimiter } from '../middleware/rateLimiter.js';
@@ -20,6 +21,7 @@ import {
   verifyBackupCode,
 } from '../services/securityService.js';
 import { logAction } from '../services/auditService.js';
+import { createNotification } from '../services/notificationService.js';
 import { SECURITY_QUESTIONS } from '../constants/securityQuestions.js';
 import { validateRequest, registerSchema, loginSchema } from '../utils/validation.js';
 import { profilePhotoUpload } from '../middleware/profilePhotoUpload.js';
