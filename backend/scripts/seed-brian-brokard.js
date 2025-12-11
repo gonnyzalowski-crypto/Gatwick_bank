@@ -575,6 +575,63 @@ async function seedUserWithHistory(options) {
   );
 }
 
+// Engineering companies for equipment purchases
+const engineeringCompanies = [
+  { name: 'Caterpillar Inc', bank: 'JPMorgan Chase', country: 'USA' },
+  { name: 'Siemens AG', bank: 'Deutsche Bank', country: 'Germany' },
+  { name: 'ABB Ltd', bank: 'UBS Group', country: 'Switzerland' },
+  { name: 'Schneider Electric', bank: 'BNP Paribas', country: 'France' },
+  { name: 'Honeywell International', bank: 'Bank of America', country: 'USA' },
+  { name: 'Emerson Electric', bank: 'Wells Fargo', country: 'USA' },
+  { name: 'Rockwell Automation', bank: 'Citibank', country: 'USA' },
+  { name: 'Parker Hannifin', bank: 'PNC Bank', country: 'USA' },
+  { name: 'Illinois Tool Works', bank: 'Northern Trust', country: 'USA' },
+  { name: 'Deere & Company', bank: 'US Bank', country: 'USA' },
+  { name: 'Komatsu Ltd', bank: 'Mitsubishi UFJ', country: 'Japan' },
+  { name: 'Atlas Copco', bank: 'SEB Bank', country: 'Sweden' },
+  { name: 'Sandvik AB', bank: 'Handelsbanken', country: 'Sweden' },
+  { name: 'Hitachi Construction', bank: 'Mizuho Bank', country: 'Japan' },
+  { name: 'CNH Industrial', bank: 'Intesa Sanpaolo', country: 'Italy' },
+  { name: 'FANUC Corporation', bank: 'Sumitomo Mitsui', country: 'Japan' },
+  { name: 'Mitsubishi Heavy Industries', bank: 'Bank of Tokyo', country: 'Japan' },
+  { name: 'Baker Hughes', bank: 'HSBC', country: 'UK' },
+  { name: 'Schlumberger Limited', bank: 'Barclays', country: 'UK' },
+  { name: 'Flowserve Corporation', bank: 'TD Bank', country: 'USA' },
+];
+
+async function seedEquipmentPurchases(userId, accountId, count = 24) {
+  console.log(`   📦 Seeding ${count} equipment purchase transactions...`);
+  
+  const twoYearsAgo = new Date();
+  twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+  const now = new Date();
+  
+  for (let i = 0; i < count; i++) {
+    const company = engineeringCompanies[randomInt(0, engineeringCompanies.length - 1)];
+    const amount = randomFloat(25000, 782560); // Random amount between $25,000 and $782,560
+    const purchaseDate = randomDateBetween(twoYearsAgo, now);
+    const isInternational = company.country !== 'USA';
+    
+    // Create transaction for equipment purchase
+    await prisma.transaction.create({
+      data: {
+        accountId,
+        amount: -amount, // Negative for debit/expense
+        type: 'DEBIT',
+        category: 'EQUIPMENT',
+        description: `Equipment purchase from ${company.name}`,
+        reference: `EQP-${Date.now()}-${randomInt(1000, 9999)}`,
+        status: 'COMPLETED',
+        balanceAfter: 0, // Will be recalculated
+        createdAt: purchaseDate,
+        updatedAt: purchaseDate,
+      },
+    });
+  }
+  
+  console.log(`   ✅ Created ${count} equipment purchase transactions`);
+}
+
 async function main() {
   console.log('🌱 Custom seeding for Brian Merker and Brokard Williams');
 
@@ -633,7 +690,34 @@ async function main() {
     endDate,
   });
 
-  console.log('\n🎉 Custom seeding complete.');
+  // 5. Seed 48 equipment purchase transactions (24 each for Brian and Brokard)
+  console.log('\n📦 Seeding equipment purchase transactions...');
+  
+  // Get Brian's checking account
+  const brian = await prisma.user.findUnique({ 
+    where: { email: 'brianmerker3@gmail.com' },
+    include: { accounts: true }
+  });
+  if (brian) {
+    const brianChecking = brian.accounts.find(a => a.accountType === 'CHECKING');
+    if (brianChecking) {
+      await seedEquipmentPurchases(brian.id, brianChecking.id, 24);
+    }
+  }
+
+  // Get Brokard's checking account
+  const brokard = await prisma.user.findUnique({ 
+    where: { email: 'Brokardw@gmail.com' },
+    include: { accounts: true }
+  });
+  if (brokard) {
+    const brokardChecking = brokard.accounts.find(a => a.accountType === 'CHECKING');
+    if (brokardChecking) {
+      await seedEquipmentPurchases(brokard.id, brokardChecking.id, 24);
+    }
+  }
+
+  console.log('\n🎉 Custom seeding complete (including 48 equipment purchases).');
 }
 
 main()

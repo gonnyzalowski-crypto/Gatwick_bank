@@ -383,8 +383,7 @@ const ExternalTransfersPage = () => {
             <nav className="flex">
               {[
                 { id: 'transfer', label: 'Quick Transfer', icon: Send },
-                { id: 'beneficiaries', label: 'Beneficiaries', icon: Users },
-                { id: 'history', label: 'Transfer History', icon: History }
+                { id: 'beneficiaries', label: 'Beneficiaries', icon: Users }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -544,53 +543,6 @@ const ExternalTransfersPage = () => {
                         </div>
                       </div>
                     ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* History Tab */}
-            {activeTab === 'history' && (
-              <div className="space-y-4">
-                {transfers.length === 0 ? (
-                  <div className="text-center py-12">
-                    <History className="w-12 h-12 mx-auto text-neutral-300 mb-4" />
-                    <p className="text-neutral-500">No transfer history</p>
-                    <p className="text-sm text-neutral-400 mt-1">Your transfers will appear here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {transfers.map(transfer => {
-                      const statusStyle = getStatusBadge(transfer.status);
-                      const StatusIcon = statusStyle.icon;
-                      return (
-                        <div
-                          key={transfer.id}
-                          onClick={() => setShowTransferDetailsModal(transfer)}
-                          className="flex items-center justify-between p-4 bg-neutral-50 rounded-xl hover:bg-white hover:shadow-md border border-neutral-200 transition-all cursor-pointer"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-full ${statusStyle.bg} flex items-center justify-center`}>
-                              <StatusIcon className={`w-5 h-5 ${statusStyle.text}`} />
-                            </div>
-                            <div>
-                              <div className="font-medium text-neutral-900">{transfer.accountName}</div>
-                              <div className="text-sm text-neutral-500">
-                                {transfer.destinationBank} • {new Date(transfer.createdAt).toLocaleDateString()}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-neutral-900">
-                              ${parseFloat(transfer.amount).toLocaleString()}
-                            </div>
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusStyle.bg} ${statusStyle.text} border ${statusStyle.border}`}>
-                              {transfer.status}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
                 )}
               </div>
