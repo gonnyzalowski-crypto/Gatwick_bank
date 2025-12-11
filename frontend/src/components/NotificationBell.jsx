@@ -66,6 +66,19 @@ const NotificationBell = ({ isAdmin = false }) => {
     }
   };
 
+  const clearAllNotifications = async () => {
+    try {
+      setLoading(true);
+      await apiClient.delete('/notifications/clear-all');
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to clear notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'kyc':
@@ -177,15 +190,26 @@ const NotificationBell = ({ isAdmin = false }) => {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-200">
             <h3 className="font-semibold text-slate-900">Notifications</h3>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                disabled={loading}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
-              >
-                Mark all read
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  disabled={loading}
+                  className="text-xs text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                >
+                  Mark all read
+                </button>
+              )}
+              {notifications.length > 0 && (
+                <button
+                  onClick={clearAllNotifications}
+                  disabled={loading}
+                  className="text-xs text-red-600 hover:text-red-700 font-medium disabled:opacity-50"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Notifications List */}

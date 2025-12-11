@@ -158,6 +158,25 @@ router.get('/admin', verifyAuth, async (req, res) => {
   }
 });
 
+// Clear all notifications
+// DELETE /api/v1/notifications/clear-all
+router.delete('/clear-all', verifyAuth, async (req, res) => {
+  try {
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+    
+    await prisma.notification.deleteMany({
+      where: { userId: req.user.userId }
+    });
+    
+    await prisma.$disconnect();
+    return res.json({ message: 'All notifications cleared' });
+  } catch (error) {
+    console.error('Clear all notifications error:', error);
+    return res.status(500).json({ error: 'Failed to clear notifications' });
+  }
+});
+
 // Delete notification
 // DELETE /api/v1/notifications/:id
 router.delete('/:id', verifyAuth, async (req, res) => {

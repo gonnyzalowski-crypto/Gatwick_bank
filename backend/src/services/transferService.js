@@ -86,6 +86,25 @@ export const createTransferRequest = async (userId, transferData) => {
     }
   });
 
+  // Create a PENDING transaction so it shows in transaction history
+  await prisma.transaction.create({
+    data: {
+      accountId: fromAccountId,
+      type: 'TRANSFER',
+      amount: -Math.abs(Number(amount)),
+      description: description || `Transfer to ${accountName} at ${destinationBank}`,
+      category: 'TRANSFER',
+      status: 'PENDING',
+      reference,
+      metadata: {
+        transferId: transfer.id,
+        recipientName: accountName,
+        recipientBank: destinationBank,
+        recipientAccount: accountNumber
+      }
+    }
+  });
+
   // Deduct from available balance (move to pending)
   await prisma.account.update({
     where: { id: fromAccountId },
@@ -243,6 +262,17 @@ export const approveTransfer = async (transferId, adminId, notes) => {
     }
   });
 
+  // Update the transaction status from PENDING to COMPLETED
+  await prisma.transaction.updateMany({
+    where: { 
+      reference: transfer.reference,
+      status: 'PENDING'
+    },
+    data: {
+      status: 'COMPLETED'
+    }
+  });
+
   // Move from pending to completed (deduct from pending balance)
   await prisma.account.update({
     where: { id: transfer.fromAccountId },
@@ -296,6 +326,17 @@ export const declineTransfer = async (transferId, adminId, reason) => {
       adminId,
       adminNotes: reason,
       processedAt: new Date()
+    }
+  });
+
+  // Update the transaction status from PENDING to DECLINED
+  await prisma.transaction.updateMany({
+    where: { 
+      reference: transfer.reference,
+      status: 'PENDING'
+    },
+    data: {
+      status: 'DECLINED'
     }
   });
 
@@ -363,6 +404,16 @@ export const reverseTransfer = async (transferId, adminId, reason = 'Admin rever
       adminId,
       adminNotes: `Reversed: ${reason || 'Admin reversal'}. RVSL ID: ${rvslReference}`,
       processedAt: new Date()
+    }
+  });
+
+  // Update the original transaction status to REVERSED
+  await prisma.transaction.updateMany({
+    where: { 
+      reference: transfer.reference
+    },
+    data: {
+      status: 'REVERSED'
     }
   });
 
