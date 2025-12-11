@@ -12,6 +12,24 @@ const DEFAULT_SECURITY_QUESTIONS = [
   { question: "What is your mother's maiden name?", answer: 'smith' }
 ];
 
+// POST /api/v1/fix-schema - Add missing columns to fix Prisma schema mismatch
+router.post('/fix-schema', async (req, res) => {
+  try {
+    console.log('🔧 FIXING SCHEMA...');
+    
+    // Add missing autoDebitEnabled column if it doesn't exist
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS "autoDebitEnabled" BOOLEAN DEFAULT false
+    `);
+    
+    console.log('✅ Schema fixed');
+    res.json({ success: true, message: 'Schema fixed - autoDebitEnabled column added' });
+  } catch (error) {
+    console.error('❌ Error fixing schema:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // POST /api/v1/fix-users (ONE-TIME USE ONLY)
 router.post('/fix-users', async (req, res) => {
   try {
