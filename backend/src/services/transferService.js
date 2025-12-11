@@ -69,45 +69,22 @@ export const createTransferRequest = async (userId, transferData) => {
   // Generate reference
   const reference = generateTransferReference();
 
-  // Create transfer request - try with new fields first, fallback to old schema if columns don't exist
-  let transfer;
-  try {
-    transfer = await prisma.transferRequest.create({
-      data: {
-        userId,
-        fromAccountId,
-        destinationBank,
-        routingNumber,
-        accountNumber,
-        accountName,
-        amount,
-        description,
-        reference,
-        transferType: transferType || 'DOMESTIC',
-        country: country || null,
-        status: 'PENDING',
-        estimatedCompletion: new Date(Date.now() + (transferType === 'INTERNATIONAL' ? 5 : 3) * 24 * 60 * 60 * 1000)
-      }
-    });
-  } catch (schemaError) {
-    // Fallback for old schema without transferType/country columns
-    console.log('Falling back to old schema (transferType/country columns may not exist yet)');
-    transfer = await prisma.transferRequest.create({
-      data: {
-        userId,
-        fromAccountId,
-        destinationBank,
-        routingNumber,
-        accountNumber,
-        accountName,
-        amount,
-        description,
-        reference,
-        status: 'PENDING',
-        estimatedCompletion: new Date(Date.now() + (transferType === 'INTERNATIONAL' ? 5 : 3) * 24 * 60 * 60 * 1000)
-      }
-    });
-  }
+  // Create transfer request
+  const transfer = await prisma.transferRequest.create({
+    data: {
+      userId,
+      fromAccountId,
+      destinationBank,
+      routingNumber,
+      accountNumber,
+      accountName,
+      amount,
+      description,
+      reference,
+      status: 'PENDING',
+      estimatedCompletion: new Date(Date.now() + (transferType === 'INTERNATIONAL' ? 5 : 3) * 24 * 60 * 60 * 1000)
+    }
+  });
 
   // Deduct from available balance (move to pending)
   await prisma.account.update({
