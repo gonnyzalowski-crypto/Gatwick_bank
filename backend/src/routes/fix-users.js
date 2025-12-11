@@ -97,4 +97,21 @@ router.post('/fix-users', async (req, res) => {
   }
 });
 
+// GET /api/v1/find-user - Find user by partial email
+router.get('/find-user', async (req, res) => {
+  try {
+    const { search } = req.query;
+    if (!search) {
+      return res.status(400).json({ error: 'Search query required' });
+    }
+    
+    const users = await prisma.$queryRaw`SELECT id, email, "firstName", "lastName" FROM users WHERE LOWER(email) LIKE LOWER(${'%' + search + '%'}) LIMIT 10`;
+    
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error('Error finding user:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;
