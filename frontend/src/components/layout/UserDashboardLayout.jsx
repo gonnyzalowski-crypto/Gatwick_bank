@@ -117,6 +117,8 @@ const UserDashboardLayout = ({ children }) => {
                   <button
                     onClick={() => setPaymentsExpanded(!paymentsExpanded)}
                     className="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    aria-label="Payments - Pay merchants and fund your accounts"
+                    title="Pay merchants and fund your accounts"
                   >
                     <div className="flex items-center gap-3">
                       <DollarSign className="h-5 w-5" />
@@ -155,6 +157,8 @@ const UserDashboardLayout = ({ children }) => {
                   <button
                     onClick={() => setTransfersExpanded(!transfersExpanded)}
                     className="w-full flex items-center justify-between gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                    aria-label="Transfers - Move money between your accounts or to other banks"
+                    title="Move money between your accounts or to other banks"
                   >
                     <div className="flex items-center gap-3">
                       <ArrowLeftRight className="h-5 w-5" />

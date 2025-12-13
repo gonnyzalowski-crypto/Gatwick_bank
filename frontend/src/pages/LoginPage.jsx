@@ -260,13 +260,19 @@ export const LoginPage = () => {
 
                   {/* Email Field */}
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                    <label
+                      htmlFor="login-email"
+                      className="block text-sm font-semibold text-neutral-900 mb-2"
+                    >
                       Email Address
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
                       <input
                         type="email"
+                        id="login-email"
+                        name="email"
+                        autoComplete="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         onFocus={() => setEmailFocused(true)}
@@ -285,18 +291,23 @@ export const LoginPage = () => {
 
                   {/* Password Field */}
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-900 mb-2">
+                    <label
+                      htmlFor="login-password"
+                      className="block text-sm font-semibold text-neutral-900 mb-2"
+                    >
                       Password
                     </label>
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" />
                       <input
                         type={showPassword ? 'text' : 'password'}
+                        id="login-password"
                         value={formData.password}
                         onChange={handleChange}
                         onFocus={() => setPasswordFocused(true)}
                         onBlur={() => setPasswordFocused(false)}
                         name="password"
+                        autoComplete="current-password"
                         placeholder="Enter your password"
                         style={{
                           background: 'rgba(255, 255, 255, 0.85)',
@@ -309,6 +320,7 @@ export const LoginPage = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -334,7 +346,7 @@ export const LoginPage = () => {
                       </>
                     ) : (
                       <>
-                        <span>Continue</span>
+                        <span>Sign In</span>
                         <ArrowRight className="w-5 h-5" />
                       </>
                     )}
