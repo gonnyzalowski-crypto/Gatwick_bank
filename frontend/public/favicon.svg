@@ -1,10 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Rosch Capital Bank logo">
   <defs>
-    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#7c3aed"/>
-      <stop offset="100%" style="stop-color:#581c87"/>
+    <linearGradient id="rcb-core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="45%" stop-color="#6d28d9"/>
+      <stop offset="100%" stop-color="#3b0d71"/>
+    </linearGradient>
+    <radialGradient id="rcb-glow" cx="30%" cy="20%" r="80%">
+      <stop offset="0%" stop-color="#f4f1ff" stop-opacity="0.9"/>
+      <stop offset="70%" stop-color="#cfc1ff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#c4b5fd" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rcb-columns" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d9d7ff"/>
+    </linearGradient>
+    <linearGradient id="rcb-door" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fdf2ff"/>
+      <stop offset="100%" stop-color="#cdbcf8"/>
     </linearGradient>
   </defs>
-  <rect width="100" height="100" rx="20" fill="url(#purpleGrad)"/>
-  <text x="50" y="68" font-family="Arial, sans-serif" font-size="55" font-weight="bold" fill="white" text-anchor="middle">R</text>
+  <rect width="128" height="128" rx="28" fill="url(#rcb-core)"/>
+  <rect width="128" height="128" rx="28" fill="url(#rcb-glow)" opacity="0.85"/>
+  <path d="M20 74c0-16 12-26 30-26h28c18 0 30 10 30 26v14c0 16-12 26-30 26H50c-18 0-30-10-30-26z" fill="#2d0d59" opacity="0.55"/>
+  <path d="M36 96h56" stroke="#d8ccff" stroke-width="6" stroke-linecap="round"/>
+  <path d="M30 104h68" stroke="#bba1ff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M64 24l20 12v8H44v-8z" fill="#f7f4ff" opacity="0.95"/>
+  <path d="M44 44h40v54H44z" fill="url(#rcb-columns)" opacity="0.35"/>
+  <g fill="none" stroke="url(#rcb-columns)" stroke-width="6" stroke-linecap="round">
+    <path d="M44 44v56"/>
+    <path d="M56 44v56"/>
+    <path d="M72 44v56"/>
+    <path d="M84 44v56"/>
+  </g>
+  <path d="M56 62h16v30H56z" fill="url(#rcb-door)"/>
+  <path d="M52 96h24" stroke="#f7f4ff" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="64" cy="104" r="6" fill="#ffffff"/>
 </svg>
