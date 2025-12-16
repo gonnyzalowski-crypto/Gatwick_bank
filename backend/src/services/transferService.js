@@ -96,12 +96,8 @@ export const createTransferRequest = async (userId, transferData) => {
       category: 'TRANSFER',
       status: 'PENDING',
       reference,
-      metadata: {
-        transferId: transfer.id,
-        recipientName: accountName,
-        recipientBank: destinationBank,
-        recipientAccount: accountNumber
-      }
+      merchantName: accountName,
+      merchantCategory: destinationBank
     }
   });
 
@@ -444,16 +440,10 @@ export const reverseTransfer = async (transferId, adminId, reason = 'Admin rever
       accountId: transfer.fromAccountId,
       type: 'CREDIT',
       amount: transfer.amount,
-      description: `Transfer Reversal - ${rvslReference}`,
+      description: `Transfer Reversal - ${rvslReference} (Reason: ${reason || 'Admin reversal'})`,
       reference: rvslReference,
       status: 'COMPLETED',
-      balanceAfter: parseFloat(transfer.account.balance) + transfer.amount,
-      metadata: {
-        originalTransferId: transfer.id,
-        originalReference: transfer.reference,
-        reversalReason: reason || 'Admin reversal',
-        reversedBy: adminId
-      }
+      category: 'REVERSAL'
     }
   });
 

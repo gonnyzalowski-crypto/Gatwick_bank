@@ -347,12 +347,9 @@ transfersRouter.post('/internal', async (req, res) => {
           description: description || `Transfer to ${toAccount.user.firstName} ${toAccount.user.lastName}`,
           reference,
           status: 'COMPLETED',
-          balanceAfter: parseFloat(fromAccount.balance) - parseFloat(amount),
-          metadata: {
-            transferType: 'INTERNAL',
-            recipientAccount: toAccountNumber,
-            recipientName: `${toAccount.user.firstName} ${toAccount.user.lastName}`
-          }
+          category: 'INTERNAL_TRANSFER',
+          merchantName: `${toAccount.user.firstName} ${toAccount.user.lastName}`,
+          merchantCategory: toAccountNumber
         }
       });
       
@@ -365,11 +362,9 @@ transfersRouter.post('/internal', async (req, res) => {
           description: description || `Transfer from ${fromAccount.accountNumber}`,
           reference,
           status: 'COMPLETED',
-          balanceAfter: parseFloat(toAccount.balance) + parseFloat(amount),
-          metadata: {
-            transferType: 'INTERNAL',
-            senderAccount: fromAccount.accountNumber
-          }
+          category: 'INTERNAL_TRANSFER',
+          merchantName: fromAccount.accountNumber,
+          merchantCategory: 'Internal Transfer'
         }
       });
       
