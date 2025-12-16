@@ -2867,6 +2867,144 @@ router.get('/users/:userId/accounts', verifyAuth, verifyAdmin, async (req, res) 
   }
 });
 
+// Update a user's account (account number, balances, status)
+router.put('/users/:userId/accounts/:accountId', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { userId, accountId } = req.params;
+    const {
+      accountNumber,
+      accountType,
+      balance,
+      availableBalance,
+      pendingBalance,
+      isPrimary,
+      isActive
+    } = req.body;
+
+    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    if (!account || account.userId !== userId) {
+      return res.status(404).json({ error: 'Account not found for this user' });
+    }
+
+    const updateData = {};
+
+    if (accountNumber !== undefined) {
+      const normalizedNumber = accountNumber.toString().trim();
+      if (!/^\d{6,20}$/.test(normalizedNumber)) {
+        return res.status(400).json({ error: 'Account number must be 6-20 digits with no letters or spaces' });
+      }
+
+      const existingAccountNumber = await prisma.account.findUnique({
+        where: { accountNumber: normalizedNumber }
+      });
+
+      if (existingAccountNumber && existingAccountNumber.id !== accountId) {
+        return res.status(400).json({ error: 'Account number already in use by another account' });
+      }
+
+      updateData.accountNumber = normalizedNumber;
+    }
+
+    if (accountType && typeof accountType === 'string') {
+      updateData.accountType = accountType.toUpperCase();
+    }
+
+    const numericFields = [
+      { key: 'balance', value: balance },
+      { key: 'availableBalance', value: availableBalance },
+      { key: 'pendingBalance', value: pendingBalance }
+    ];
+
+    numericFields.forEach(({ key, value }) => {
+      if (value !== undefined && value !== null && value !== '') {
+        const parsed = parseFloat(value);
+        if (Number.isNaN(parsed)) {
+          throw new Error(`${key} must be a valid number`);
+        }
+        updateData[key] = parsed;
+      }
+    });
+
+    if (isPrimary !== undefined) {
+      updateData.isPrimary = Boolean(isPrimary);
+    }
+
+    if (isActive !== undefined) {
+      updateData.isActive = Boolean(isActive);
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No valid fields provided for update' });
+    }
+
+    // If setting account as primary, demote other accounts
+    if (updateData.isPrimary) {
+      await prisma.account.updateMany({
+        where: {
+          userId,
+          id: { not: accountId }
+        },
+        data: { isPrimary: false }
+      });
+    }
+
+    // Ensure available balance defaults to balance when not provided but balance is updated
+    if (updateData.balance !== undefined && updateData.availableBalance === undefined) {
+      updateData.availableBalance = updateData.balance;
+    }
+
+    const updatedAccount = await prisma.account.update({
+      where: { id: accountId },
+      data: updateData
+    });
+
+    return res.json({
+      success: true,
+      account: updatedAccount
+    });
+  } catch (error) {
+    console.error('Update account error:', error);
+    return res.status(500).json({ error: error.message || 'Failed to update account' });
+  }
+});
+
+// Delete a user's account
+router.delete('/users/:userId/accounts/:accountId', verifyAuth, verifyAdmin, async (req, res) => {
+  const { userId, accountId } = req.params;
+
+  try {
+    const account = await prisma.account.findUnique({ where: { id: accountId } });
+    if (!account || account.userId !== userId) {
+      return res.status(404).json({ error: 'Account not found for this user' });
+    }
+
+    const remainingAccounts = await prisma.account.findMany({
+      where: {
+        userId,
+        id: { not: accountId }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    await prisma.account.delete({ where: { id: accountId } });
+
+    if (account.isPrimary && remainingAccounts.length > 0) {
+      await prisma.account.update({
+        where: { id: remainingAccounts[0].id },
+        data: { isPrimary: true }
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Account deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete account error:', error);
+    return res.status(500).json({ error: error.message || 'Failed to delete account' });
+  }
+});
+
 // Create admin deposit (direct credit)
 // POST /api/v1/mybanker/deposits
 router.post('/deposits', verifyAuth, verifyAdmin, async (req, res) => {

@@ -19,6 +19,8 @@ export const GodModeUserModal = ({ isOpen, onClose, userId, onSuccess }) => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   const [selectedAccount, setSelectedAccount] = useState(null);
+  const [accountEditState, setAccountEditState] = useState(null);
+  const [accountSaving, setAccountSaving] = useState(false);
   const [moneyAction, setMoneyAction] = useState({ type: 'CREDIT', amount: '', description: '' });
   const [expandedSections, setExpandedSections] = useState({
     personal: true,
@@ -91,6 +93,85 @@ export const GodModeUserModal = ({ isOpen, onClose, userId, onSuccess }) => {
       setMessage({ type: 'error', text: error.message || 'Failed to update user' });
     }
     setSaving(false);
+  };
+
+  useEffect(() => {
+    if (selectedAccount) {
+      setAccountEditState({
+        id: selectedAccount.id,
+        accountNumber: selectedAccount.accountNumber || '',
+        balance: selectedAccount.balance ?? '',
+        availableBalance: selectedAccount.availableBalance ?? '',
+        pendingBalance: selectedAccount.pendingBalance ?? 0,
+        accountType: selectedAccount.accountType || 'CHECKING',
+        isPrimary: Boolean(selectedAccount.isPrimary),
+        isActive: Boolean(selectedAccount.isActive)
+      });
+    } else {
+      setAccountEditState(null);
+    }
+  }, [selectedAccount]);
+
+  const handleAccountFieldChange = (field, value) => {
+    setAccountEditState(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleUpdateAccount = async () => {
+    if (!userId || !accountEditState?.id) {
+      setMessage({ type: 'error', text: 'No account selected' });
+      return;
+    }
+
+    setAccountSaving(true);
+    try {
+      const payload = {
+        accountNumber: accountEditState.accountNumber?.trim(),
+        accountType: accountEditState.accountType,
+        balance: accountEditState.balance,
+        availableBalance: accountEditState.availableBalance,
+        pendingBalance: accountEditState.pendingBalance,
+        isPrimary: accountEditState.isPrimary,
+        isActive: accountEditState.isActive
+      };
+
+      await apiClient.put(`/mybanker/users/${userId}/accounts/${accountEditState.id}`, payload);
+      setMessage({ type: 'success', text: 'Account updated successfully!' });
+      await fetchAllUserData();
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error('Account update failed:', error);
+      setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to update account' });
+    } finally {
+      setAccountSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!userId || !accountEditState?.id) {
+      setMessage({ type: 'error', text: 'No account selected' });
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this account? This action cannot be undone.')) {
+      return;
+    }
+
+    setAccountSaving(true);
+    try {
+      await apiClient.delete(`/mybanker/users/${userId}/accounts/${accountEditState.id}`);
+      setMessage({ type: 'success', text: 'Account deleted successfully' });
+      setSelectedAccount(null);
+      await fetchAllUserData();
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error('Delete account failed:', error);
+      setMessage({ type: 'error', text: error.response?.data?.error || 'Failed to delete account' });
+    } finally {
+      setAccountSaving(false);
+    }
   };
 
   const handleCreditDebit = async () => {
@@ -378,42 +459,139 @@ export const GodModeUserModal = ({ isOpen, onClose, userId, onSuccess }) => {
                 ))}
                 
                 {/* Credit/Debit Section */}
-                {selectedAccount && (
-                  <div className="bg-slate-900 rounded-lg p-4 border border-purple-500/30">
-                    <h5 className="text-white font-semibold mb-3 flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-green-400" />
-                      Credit/Debit: {selectedAccount.accountType} ({selectedAccount.accountNumber})
-                    </h5>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                      <select
-                        value={moneyAction.type}
-                        onChange={(e) => setMoneyAction(prev => ({ ...prev, type: e.target.value }))}
-                        className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
-                      >
-                        <option value="CREDIT">Credit (+)</option>
-                        <option value="DEBIT">Debit (-)</option>
-                      </select>
-                      <input
-                        type="number"
-                        placeholder="Amount"
-                        value={moneyAction.amount}
-                        onChange={(e) => setMoneyAction(prev => ({ ...prev, amount: e.target.value }))}
-                        className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Description (optional)"
-                        value={moneyAction.description}
-                        onChange={(e) => setMoneyAction(prev => ({ ...prev, description: e.target.value }))}
-                        className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
-                      />
-                      <button
-                        onClick={handleCreditDebit}
-                        disabled={saving || !moneyAction.amount}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg font-semibold transition"
-                      >
-                        {saving ? 'Processing...' : 'Apply'}
-                      </button>
+                {selectedAccount && accountEditState && (
+                  <div className="space-y-3">
+                    <div className="bg-slate-900 rounded-lg p-4 border border-purple-500/30">
+                      <h5 className="text-white font-semibold mb-3 flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-green-400" />
+                        Credit/Debit: {selectedAccount.accountType} ({selectedAccount.accountNumber})
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <select
+                          value={moneyAction.type}
+                          onChange={(e) => setMoneyAction(prev => ({ ...prev, type: e.target.value }))}
+                          className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                        >
+                          <option value="CREDIT">Credit (+)</option>
+                          <option value="DEBIT">Debit (-)</option>
+                        </select>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          value={moneyAction.amount}
+                          onChange={(e) => setMoneyAction(prev => ({ ...prev, amount: e.target.value }))}
+                          className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Description (optional)"
+                          value={moneyAction.description}
+                          onChange={(e) => setMoneyAction(prev => ({ ...prev, description: e.target.value }))}
+                          className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                        />
+                        <button
+                          onClick={handleCreditDebit}
+                          disabled={saving || !moneyAction.amount}
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg font-semibold transition"
+                        >
+                          {saving ? 'Processing...' : 'Apply'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-900 rounded-lg p-4 border border-amber-500/30">
+                      <h5 className="text-white font-semibold mb-3 flex items-center gap-2">
+                        <Edit className="w-4 h-4 text-amber-300" />
+                        Account Admin Controls
+                      </h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs text-slate-400 block mb-1">Account Number</label>
+                          <input
+                            type="text"
+                            value={accountEditState.accountNumber}
+                            onChange={(e) => handleAccountFieldChange('accountNumber', e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white font-mono"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-400 block mb-1">Account Type</label>
+                          <select
+                            value={accountEditState.accountType}
+                            onChange={(e) => handleAccountFieldChange('accountType', e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                          >
+                            {['CHECKING', 'SAVINGS', 'BUSINESS', 'CRYPTO_WALLET'].map(type => (
+                              <option key={type} value={type}>{type.replace('_', ' ')}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-400 block mb-1">Balance</label>
+                          <input
+                            type="number"
+                            value={accountEditState.balance}
+                            onChange={(e) => handleAccountFieldChange('balance', e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-400 block mb-1">Available Balance</label>
+                          <input
+                            type="number"
+                            value={accountEditState.availableBalance}
+                            onChange={(e) => handleAccountFieldChange('availableBalance', e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-slate-400 block mb-1">Pending Balance</label>
+                          <input
+                            type="number"
+                            value={accountEditState.pendingBalance}
+                            onChange={(e) => handleAccountFieldChange('pendingBalance', e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                          />
+                        </div>
+                        <div className="flex items-center gap-4 mt-4">
+                          <label className="flex items-center gap-2 text-slate-200 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={accountEditState.isPrimary}
+                              onChange={(e) => handleAccountFieldChange('isPrimary', e.target.checked)}
+                              className="text-purple-500"
+                            />
+                            Primary Account
+                          </label>
+                          <label className="flex items-center gap-2 text-slate-200 text-sm">
+                            <input
+                              type="checkbox"
+                              checked={accountEditState.isActive}
+                              onChange={(e) => handleAccountFieldChange('isActive', e.target.checked)}
+                              className="text-purple-500"
+                            />
+                            Active
+                          </label>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-3 mt-4">
+                        <button
+                          onClick={handleUpdateAccount}
+                          disabled={accountSaving}
+                          className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-600 text-white rounded-lg font-semibold transition flex items-center gap-2"
+                        >
+                          <Save className="w-4 h-4" />
+                          {accountSaving ? 'Saving...' : 'Update Account'}
+                        </button>
+                        <button
+                          onClick={handleDeleteAccount}
+                          disabled={accountSaving}
+                          className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-600 text-white rounded-lg font-semibold transition flex items-center gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete Account
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

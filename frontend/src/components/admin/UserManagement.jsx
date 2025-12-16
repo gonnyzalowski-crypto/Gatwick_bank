@@ -321,6 +321,16 @@ export const UserManagement = () => {
                         >
                           <ExternalLink className="w-4 h-4 text-cyan-400" />
                         </button>
+                        <button
+                          onClick={() => {
+                            setSelectedUser(user.id);
+                            setShowViewModal(true);
+                          }}
+                          className="p-2 hover:bg-purple-600/30 bg-purple-500/10 rounded-lg transition-colors border border-purple-500/30"
+                          title="Open account controls"
+                        >
+                          <Eye className="w-4 h-4 text-purple-300" />
+                        </button>
                         <button 
                           onClick={() => {
                             setSelectedUserForEdit(user.id);
