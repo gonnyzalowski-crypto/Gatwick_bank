@@ -728,7 +728,18 @@ router.put('/users/:userId', verifyAuth, verifyAdmin, upload.single('profilePhot
 
     // Handle profile photo upload
     if (req.file) {
-      updateData.profilePhoto = `/uploads/profiles/${req.file.filename}`;
+      try {
+        const fileBuffer = await fs.promises.readFile(req.file.path);
+        const mimeType = req.file.mimetype || 'image/jpeg';
+        const base64Data = fileBuffer.toString('base64');
+        updateData.profilePhoto = `data:${mimeType};base64,${base64Data}`;
+
+        // Remove the physical file since we store the base64 representation
+        await fs.promises.unlink(req.file.path).catch(() => {});
+      } catch (fileError) {
+        console.error('Profile photo conversion error:', fileError);
+        return res.status(500).json({ error: 'Failed to process profile photo' });
+      }
     }
 
     // Handle password update
