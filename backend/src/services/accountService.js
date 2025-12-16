@@ -1,5 +1,31 @@
 import prisma from '../config/prisma.js';
+import redis from '../config/redis.js';
+import { formatCurrency as formatUSD } from '../utils/formatCurrency.js';
+import { getCachedData, setCachedData } from '../utils/cache.js';
+import { performanceLog } from '../utils/performanceOptimization.js';
+import { logAuditEvent } from './auditService.js';
 import { generateCryptoWalletAddress, detectCryptoType } from '../utils/walletGenerator.js';
+
+const cachePrefix = 'accountService:';
+const accountSelectFields = {
+  id: true,
+  accountType: true,
+  balance: true,
+  availableBalance: true,
+  pendingBalance: true,
+  isPrimary: true,
+  isActive: true
+};
+
+const normalizeMoneyValue = (value) => {
+  if (value === null || value === undefined) return 0;
+  if (typeof value === 'object' && typeof value.toString === 'function') {
+    const parsed = Number(value.toString());
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
 
 // Generate 10-digit account number starting with 7
 export const generateAccountNumber = (accountType) => {
@@ -234,17 +260,14 @@ export const getAccountSummary = async (userId) => {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
-  const [accounts, cards, recentTransactions, monthlyTransactions, loans] = await Promise.all([
-    prisma.account.findMany({
-      where: { userId },
-      select: {
-        id: true,
-        accountType: true,
-        balance: true,
-        availableBalance: true,
-        pendingBalance: true,
-      },
-    }),
+  let accounts = await prisma.account.findMany({
+    where: { userId },
+    select: accountSelectFields,
+  });
+
+  accounts = await syncAvailableBalancesForUser(userId, accounts);
+
+  const [cards, recentTransactions, monthlyTransactions, loans] = await Promise.all([
     prisma.card.findMany({
       where: {
         account: { userId },
