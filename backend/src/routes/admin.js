@@ -1025,8 +1025,7 @@ router.post('/transactions', verifyAuth, verifyAdmin, async (req, res) => {
         amount: parseFloat(amount),
         description: description || `Admin manual ${type.toLowerCase()}`,
         reference,
-        status: status.toUpperCase(),
-        balanceAfter: parseFloat(account.balance) + (type.toUpperCase() === 'CREDIT' ? parseFloat(amount) : -parseFloat(amount))
+        status: status.toUpperCase()
       }
     });
 
@@ -1379,10 +1378,8 @@ router.post('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, 
         description: description || `Admin ${type.toLowerCase()} transaction`,
         category: category || 'OTHER',
         merchantName: description,
-        merchantLogo: merchantLogo || null,
         reference,
         status: status.toUpperCase(),
-        balanceAfter: newBalance,
         createdAt: createdAt ? new Date(createdAt) : new Date()
       }
     });
@@ -1398,16 +1395,20 @@ router.post('/users/:userId/transactions', verifyAuth, verifyAdmin, async (req, 
       });
     }
 
-    // Audit log
-    await prisma.auditLog.create({
-      data: {
-        user: { connect: { id: userId } },
-        action: 'ADMIN_TRANSACTION_CREATED',
-        details: `Admin created ${type} transaction of $${amount}`,
-        ipAddress: req.ip || 'unknown',
-        userAgent: req.headers['user-agent'] || 'unknown'
-      }
-    });
+    // Audit log (non-critical)
+    try {
+      await prisma.auditLog.create({
+        data: {
+          user: { connect: { id: userId } },
+          action: 'ADMIN_TRANSACTION_CREATED',
+          details: `Admin created ${type} transaction of $${amount}`,
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.headers['user-agent'] || 'unknown'
+        }
+      });
+    } catch (auditError) {
+      console.error('Audit log creation failed (non-critical):', auditError.message);
+    }
 
     return res.json({ 
       success: true, 
