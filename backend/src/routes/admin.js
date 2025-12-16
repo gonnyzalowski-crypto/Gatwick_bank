@@ -31,6 +31,69 @@ const verifyAdmin = async (req, res, next) => {
   }
 };
 
+const normalizeMoneyValue = (value, fallback = 0) => {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'object' && typeof value.toString === 'function') {
+    const parsed = Number(value.toString());
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const getDefaultSpendingAccount = async (userId) => {
+  const checkingAccount = await prisma.account.findFirst({
+    where: { userId, accountType: 'CHECKING', isActive: true },
+    orderBy: { createdAt: 'asc' }
+  });
+  if (checkingAccount) {
+    return checkingAccount;
+  }
+
+  const primaryAccount = await prisma.account.findFirst({
+    where: { userId, isPrimary: true, isActive: true },
+    orderBy: { createdAt: 'asc' }
+  });
+  if (primaryAccount) {
+    return primaryAccount;
+  }
+
+  return prisma.account.findFirst({
+    where: { userId, isActive: true },
+    orderBy: { createdAt: 'asc' }
+  });
+};
+
+const promoteDefaultSpendingAccount = async (userId) => {
+  const accounts = await prisma.account.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'asc' }
+  });
+
+  if (!accounts.length) return null;
+
+  const activeAccounts = accounts.filter(acc => acc.isActive);
+  const candidate =
+    activeAccounts.find(acc => acc.accountType === 'CHECKING') ||
+    activeAccounts.find(acc => acc.isPrimary) ||
+    activeAccounts[0] ||
+    accounts[0];
+
+  if (!candidate) return null;
+
+  await prisma.account.updateMany({
+    where: { userId, id: { not: candidate.id } },
+    data: { isPrimary: false }
+  });
+
+  await prisma.account.update({
+    where: { id: candidate.id },
+    data: { isPrimary: true }
+  });
+
+  return candidate;
+};
+
 // Get admin dashboard stats
 // GET /api/v1/mybanker/stats
 router.get('/stats', verifyAuth, verifyAdmin, async (req, res) => {
@@ -601,64 +664,60 @@ router.post('/users/:userId/credit-debit', verifyAuth, verifyAdmin, async (req, 
       return res.status(400).json({ error: 'Invalid transaction type' });
     }
 
-    if (!amount || amount <= 0) {
+    const amountValue = normalizeMoneyValue(amount);
+    if (amountValue <= 0) {
       return res.status(400).json({ error: 'Invalid amount' });
     }
 
-    if (!accountId) {
-      return res.status(400).json({ error: 'Account ID is required' });
+    let account;
+    if (accountId) {
+      account = await prisma.account.findFirst({
+        where: { id: accountId, userId }
+      });
+    } else {
+      account = await getDefaultSpendingAccount(userId);
     }
-
-    // Get the specified account
-    const account = await prisma.account.findFirst({
-      where: {
-        id: accountId,
-        userId
-      }
-    });
 
     if (!account) {
       return res.status(404).json({ error: 'User account not found' });
     }
 
-    // Check if debit would result in negative balance
-    if (type === 'DEBIT' && account.balance < amount) {
+    const currentBalance = normalizeMoneyValue(account.balance);
+    const currentAvailable = normalizeMoneyValue(account.availableBalance, currentBalance);
+
+    if (type === 'DEBIT' && currentAvailable < amountValue) {
       return res.status(400).json({ error: 'Insufficient balance' });
     }
 
-    // Create transaction
     const transaction = await prisma.transaction.create({
       data: {
         userId,
         accountId: account.id,
-        amount: parseFloat(amount),
+        amount: amountValue,
         type,
         description: description || `Admin ${type.toLowerCase()} adjustment`,
         status: 'COMPLETED'
       }
     });
 
-    // Update account balance
-    const newBalance = type === 'CREDIT' 
-      ? parseFloat(account.balance) + parseFloat(amount)
-      : parseFloat(account.balance) - parseFloat(amount);
+    const newBalance = type === 'CREDIT' ? currentBalance + amountValue : currentBalance - amountValue;
+    const newAvailable = type === 'CREDIT' ? currentAvailable + amountValue : currentAvailable - amountValue;
 
     await prisma.account.update({
       where: { id: account.id },
-      data: { balance: newBalance }
+      data: { balance: newBalance, availableBalance: newAvailable }
     });
 
-    // Log the action
     await prisma.auditLog.create({
       data: {
         userId: req.user.id,
         action: `ADMIN_${type}`,
-        description: `Admin ${type.toLowerCase()}ed $${amount} ${type === 'CREDIT' ? 'to' : 'from'} user account`,
+        description: `Admin ${type.toLowerCase()}ed $${amountValue} ${type === 'CREDIT' ? 'to' : 'from'} user account`,
         severity: 'HIGH',
         ipAddress: req.ip,
         metadata: {
           targetUserId: userId,
-          amount,
+          amount: amountValue,
           transactionId: transaction.id,
           description
         }
@@ -666,9 +725,10 @@ router.post('/users/:userId/credit-debit', verifyAuth, verifyAdmin, async (req, 
     });
 
     return res.json({
-      message: `Successfully ${type.toLowerCase()}ed $${amount}`,
+      message: `Successfully ${type.toLowerCase()}ed $${amountValue}`,
       transaction,
-      newBalance
+      newBalance,
+      availableBalance: newAvailable
     });
   } catch (error) {
     console.error('Credit/Debit error:', error);
@@ -2958,6 +3018,8 @@ router.put('/users/:userId/accounts/:accountId', verifyAuth, verifyAdmin, async 
       data: updateData
     });
 
+    await promoteDefaultSpendingAccount(userId);
+
     return res.json({
       success: true,
       account: updatedAccount
@@ -2989,10 +3051,7 @@ router.delete('/users/:userId/accounts/:accountId', verifyAuth, verifyAdmin, asy
     await prisma.account.delete({ where: { id: accountId } });
 
     if (account.isPrimary && remainingAccounts.length > 0) {
-      await prisma.account.update({
-        where: { id: remainingAccounts[0].id },
-        data: { isPrimary: true }
-      });
+      await promoteDefaultSpendingAccount(userId);
     }
 
     return res.json({
