@@ -172,7 +172,7 @@ const UserProfileModal = ({ isOpen, onClose, user }) => {
               <div className="flex items-start justify-between py-2 border-b border-neutral-100">
                 <span className="text-sm text-neutral-600">Account Type</span>
                 <span className="text-sm font-medium text-neutral-900">
-                  {userData?.isBusinessAccount ? 'Business Account' : 'Personal Account'}
+                  {userData?.accountType === 'BUSINESS' || userData?.isBusinessAccount ? 'Corporate Account' : 'Personal Account'}
                 </span>
               </div>
               <div className="flex items-start justify-between py-2">

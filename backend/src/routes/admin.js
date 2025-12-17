@@ -4020,4 +4020,89 @@ router.post('/users/:userId/impersonate', verifyAuth, verifyAdmin, async (req, r
   }
 });
 
+// Seed Food Supply Transactions from CSV data
+// POST /api/v1/mybanker/seed-food-supply-transactions
+router.post('/seed-food-supply-transactions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { transactions } = req.body;
+    
+    if (!transactions || !Array.isArray(transactions)) {
+      return res.status(400).json({ error: 'Transactions array is required' });
+    }
+
+    const results = {
+      created: 0,
+      skipped: 0,
+      errors: []
+    };
+
+    for (const tx of transactions) {
+      const { userEmail, requestNumber, amount, description, category, merchantName, createdAt } = tx;
+      
+      // Find user and their primary account
+      const user = await prisma.user.findUnique({
+        where: { email: userEmail },
+        include: {
+          accounts: {
+            where: { isActive: true },
+            orderBy: { isPrimary: 'desc' }
+          }
+        }
+      });
+
+      if (!user || user.accounts.length === 0) {
+        results.errors.push(`No account found for ${userEmail}`);
+        results.skipped++;
+        continue;
+      }
+
+      const account = user.accounts[0];
+      const reference = `TXN-${requestNumber}`;
+
+      // Check if transaction already exists
+      const existingTx = await prisma.transaction.findUnique({
+        where: { reference }
+      });
+
+      if (existingTx) {
+        results.skipped++;
+        continue;
+      }
+
+      // Create the transaction
+      try {
+        await prisma.transaction.create({
+          data: {
+            userId: user.id,
+            accountId: account.id,
+            reference,
+            amount: parseFloat(amount),
+            type: 'DEBIT',
+            description,
+            category: category || 'SUPPLIES',
+            merchantName: merchantName || 'Food Supply Services',
+            merchantCategory: 'FOOD_SUPPLIES',
+            status: 'COMPLETED',
+            createdAt: new Date(createdAt),
+            updatedAt: new Date(createdAt)
+          }
+        });
+        results.created++;
+      } catch (error) {
+        results.errors.push(`Error creating ${reference}: ${error.message}`);
+        results.skipped++;
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `Seeded ${results.created} transactions, skipped ${results.skipped}`,
+      results
+    });
+  } catch (error) {
+    console.error('Seed food supply transactions error:', error);
+    return res.status(500).json({ error: 'Failed to seed transactions' });
+  }
+});
+
 export default router;
