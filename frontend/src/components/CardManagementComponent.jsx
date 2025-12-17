@@ -127,14 +127,14 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
           className="absolute inset-0 w-full h-full object-cover"
         />
         
-        {/* Card number - single line, positioned at 50% from top */}
+        {/* Card number - single line, positioned at 48% from top */}
         <div 
           className="absolute text-white whitespace-nowrap"
           style={{ 
-            top: '50%', 
+            top: '48%', 
             left: '6%',
-            fontSize: '20px',
-            letterSpacing: '0.15em',
+            fontSize: '17px',
+            letterSpacing: '0.12em',
             fontWeight: '400',
             fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
           }}
@@ -142,26 +142,26 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
           {formatCardNumber(card.cardNumber)}
         </div>
         
-        {/* VALID THRU label + Expiry date - positioned at 66% from top */}
+        {/* VALID THRU label + Expiry date - positioned at 64% from top */}
         <div 
           className="absolute flex items-center text-white"
-          style={{ top: '66%', left: '55%' }}
+          style={{ top: '64%', left: '52%' }}
         >
           <span 
             style={{ 
-              fontSize: '7px', 
+              fontSize: '6px', 
               lineHeight: '1.1',
-              letterSpacing: '0.03em',
+              letterSpacing: '0.02em',
               opacity: 0.9,
-              marginRight: '4px'
+              marginRight: '3px'
             }}
           >
             VALID<br/>THRU
           </span>
           <span 
             style={{ 
-              fontSize: '16px',
-              letterSpacing: '0.08em',
+              fontSize: '14px',
+              letterSpacing: '0.06em',
               fontWeight: '400',
               fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
             }}
@@ -170,14 +170,14 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
           </span>
         </div>
         
-        {/* Cardholder name - positioned at 84% from top */}
+        {/* Cardholder name - positioned at 82% from top */}
         <div 
           className="absolute text-white uppercase whitespace-nowrap"
           style={{ 
-            top: '84%', 
+            top: '82%', 
             left: '6%',
-            fontSize: '14px',
-            letterSpacing: '0.18em',
+            fontSize: '12px',
+            letterSpacing: '0.14em',
             fontWeight: '400',
             fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
           }}
