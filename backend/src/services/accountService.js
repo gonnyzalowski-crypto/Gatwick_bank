@@ -1,8 +1,4 @@
 import prisma from '../config/prisma.js';
-import redis from '../config/redis.js';
-import { getCachedData, setCachedData } from '../utils/cache.js';
-import { performanceLog } from '../utils/performanceOptimization.js';
-import { logAuditEvent } from './auditService.js';
 import { generateCryptoWalletAddress, detectCryptoType } from '../utils/walletGenerator.js';
 
 const cachePrefix = 'accountService:';
