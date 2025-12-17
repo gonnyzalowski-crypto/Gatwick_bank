@@ -464,14 +464,14 @@ export const CardsPage = () => {
                           className="absolute inset-0 w-full h-full object-cover"
                         />
                         
-                        {/* Card number - single line, positioned at 48% from top */}
+                        {/* Card number - single line, positioned at 50% from top */}
                         <div 
                           className="absolute text-white whitespace-nowrap"
                           style={{ 
-                            top: '48%', 
+                            top: '50%', 
                             left: '6%',
-                            fontSize: '17px',
-                            letterSpacing: '0.12em',
+                            fontSize: '18px',
+                            letterSpacing: '0.18em',
                             fontWeight: '400',
                             fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
                           }}
@@ -479,26 +479,26 @@ export const CardsPage = () => {
                           {formatCardNumber(card.cardNumber, card.cardType)}
                         </div>
                         
-                        {/* VALID THRU label + Expiry date - positioned at 64% from top */}
+                        {/* VALID THRU label + Expiry date - positioned at 66% from top */}
                         <div 
                           className="absolute flex items-center text-white"
-                          style={{ top: '64%', left: '52%' }}
+                          style={{ top: '66%', left: '54%' }}
                         >
                           <span 
                             style={{ 
-                              fontSize: '6px', 
+                              fontSize: '7px', 
                               lineHeight: '1.1',
-                              letterSpacing: '0.02em',
+                              letterSpacing: '0.03em',
                               opacity: 0.9,
-                              marginRight: '3px'
+                              marginRight: '4px'
                             }}
                           >
                             VALID<br/>THRU
                           </span>
                           <span 
                             style={{ 
-                              fontSize: '14px',
-                              letterSpacing: '0.06em',
+                              fontSize: '15px',
+                              letterSpacing: '0.08em',
                               fontWeight: '400',
                               fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
                             }}
@@ -507,14 +507,14 @@ export const CardsPage = () => {
                           </span>
                         </div>
                         
-                        {/* Cardholder name - positioned at 82% from top */}
+                        {/* Cardholder name - positioned at 84% from top */}
                         <div 
                           className="absolute text-white uppercase whitespace-nowrap"
                           style={{ 
-                            top: '82%', 
+                            top: '84%', 
                             left: '6%',
-                            fontSize: '12px',
-                            letterSpacing: '0.14em',
+                            fontSize: '13px',
+                            letterSpacing: '0.18em',
                             fontWeight: '400',
                             fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
                           }}
