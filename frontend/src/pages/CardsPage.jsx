@@ -479,32 +479,19 @@ export const CardsPage = () => {
                           {formatCardNumber(card.cardNumber, card.cardType)}
                         </div>
                         
-                        {/* VALID THRU label + Expiry date - positioned at 66% from top */}
+                        {/* Expiry date - positioned next to template's VALID THRU */}
                         <div 
-                          className="absolute flex items-center text-white"
-                          style={{ top: '66%', left: '54%' }}
+                          className="absolute text-white"
+                          style={{ 
+                            top: '66%', 
+                            left: '68%',
+                            fontSize: '15px',
+                            letterSpacing: '0.08em',
+                            fontWeight: '400',
+                            fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
+                          }}
                         >
-                          <span 
-                            style={{ 
-                              fontSize: '7px', 
-                              lineHeight: '1.1',
-                              letterSpacing: '0.03em',
-                              opacity: 0.9,
-                              marginRight: '4px'
-                            }}
-                          >
-                            VALID<br/>THRU
-                          </span>
-                          <span 
-                            style={{ 
-                              fontSize: '15px',
-                              letterSpacing: '0.08em',
-                              fontWeight: '400',
-                              fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
-                            }}
-                          >
-                            {card.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '12/30'}
-                          </span>
+                          {card.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '12/30'}
                         </div>
                         
                         {/* Cardholder name - positioned at 84% from top */}
@@ -574,12 +561,6 @@ export const CardsPage = () => {
                       <div>
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-sm font-semibold text-neutral-900">Recent Transactions</h3>
-                          <button 
-                            onClick={() => setSelectedCardId(card.id)}
-                            className="text-xs text-primary-600 hover:text-primary-700 font-medium"
-                          >
-                            See All →
-                          </button>
                         </div>
                         
                         {/* Transaction List */}

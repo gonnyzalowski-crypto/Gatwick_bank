@@ -197,10 +197,6 @@ export const AccountsPage = () => {
                       <span>Currency</span>
                       <span className="text-slate-900 font-medium">{account.currency}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>Created</span>
-                      <span className="text-slate-900 font-medium">{formatDate(account.createdAt)}</span>
-                    </div>
                   </div>
 
                   <div className="mt-4 pt-3 border-t border-slate-100">

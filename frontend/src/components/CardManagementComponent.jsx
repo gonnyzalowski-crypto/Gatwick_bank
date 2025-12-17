@@ -142,32 +142,19 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
           {formatCardNumber(card.cardNumber)}
         </div>
         
-        {/* VALID THRU label + Expiry date - positioned at 66% from top */}
+        {/* Expiry date - positioned next to template's VALID THRU */}
         <div 
-          className="absolute flex items-center text-white"
-          style={{ top: '66%', left: '54%' }}
+          className="absolute text-white"
+          style={{ 
+            top: '66%', 
+            left: '68%',
+            fontSize: '15px',
+            letterSpacing: '0.08em',
+            fontWeight: '400',
+            fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
+          }}
         >
-          <span 
-            style={{ 
-              fontSize: '7px', 
-              lineHeight: '1.1',
-              letterSpacing: '0.03em',
-              opacity: 0.9,
-              marginRight: '4px'
-            }}
-          >
-            VALID<br/>THRU
-          </span>
-          <span 
-            style={{ 
-              fontSize: '15px',
-              letterSpacing: '0.08em',
-              fontWeight: '400',
-              fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
-            }}
-          >
-            {formatDate(card.expiry)}
-          </span>
+          {formatDate(card.expiry)}
         </div>
         
         {/* Cardholder name - positioned at 84% from top */}
