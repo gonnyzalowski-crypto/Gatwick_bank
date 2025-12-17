@@ -470,8 +470,8 @@ export const CardsPage = () => {
                           style={{ 
                             top: '50%', 
                             left: '6%',
-                            fontSize: '18px',
-                            letterSpacing: '0.18em',
+                            fontSize: '16px',
+                            letterSpacing: '0.14em',
                             fontWeight: '400',
                             fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
                           }}
