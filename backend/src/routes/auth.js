@@ -127,14 +127,18 @@ router.post('/login', authLimiter, checkAccountLockout, async (req, res) => {
   const { email, password } = validation.data;
 
   try {
+    console.log(`🔐 Login attempt for: ${email}`);
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
+      console.log(`❌ User not found: ${email}`);
       recordFailedAttempt(email);
       return res.status(401).json({ error: 'Invalid email or password' });
     }
+    console.log(`✅ User found: ${user.email}, ID: ${user.id}`);
 
     const bcrypt = (await import('bcryptjs')).default;
     const ok = await bcrypt.compare(password, user.password);
+    console.log(`🔑 Password comparison result: ${ok}`);
     if (!ok) {
       const attemptResult = recordFailedAttempt(email);
       return res.status(401).json({ 
