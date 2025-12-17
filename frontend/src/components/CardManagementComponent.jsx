@@ -111,7 +111,7 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
 
   return (
     <div className="space-y-4">
-      {/* Realistic Credit Card Display - Using Template Image */}
+      {/* Realistic Card Display - Using Template Image */}
       <div 
         className="relative rounded-2xl overflow-hidden shadow-2xl"
         style={{ 
@@ -120,12 +120,46 @@ export const CardManagementComponent = ({ card, onUpdate, onDelete }) => {
           fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
         }}
       >
-        {/* Template background image */}
+        {/* Template background image with color filter for debit cards */}
         <img 
           src="/card-template.png" 
           alt="Card Template" 
           className="absolute inset-0 w-full h-full object-cover"
+          style={card.cardType !== 'CREDIT' ? { filter: 'hue-rotate(200deg) saturate(1.2)' } : {}}
         />
+        
+        {/* Card type label - cover template's "Credit card" text for debit cards */}
+        {card.cardType !== 'CREDIT' && (
+          <>
+            {/* Background to cover the original "Credit card" text */}
+            <div 
+              className="absolute"
+              style={{ 
+                top: '8%', 
+                right: '4%',
+                width: '80px',
+                height: '20px',
+                background: 'linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%)',
+                borderRadius: '4px'
+              }}
+            />
+            {/* Debit card text */}
+            <div 
+              className="absolute text-white"
+              style={{ 
+                top: '8%', 
+                right: '5%',
+                fontSize: '12px',
+                letterSpacing: '0.05em',
+                fontWeight: '400',
+                fontFamily: "'OCR B Std', 'OCR-B', 'Courier New', monospace",
+                fontStyle: 'italic'
+              }}
+            >
+              Debit card
+            </div>
+          </>
+        )}
         
         {/* Card number - single line, positioned at 50% from top */}
         <div 
