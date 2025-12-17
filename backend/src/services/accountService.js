@@ -1,6 +1,5 @@
 import prisma from '../config/prisma.js';
 import redis from '../config/redis.js';
-import { formatCurrency as formatUSD } from '../utils/formatCurrency.js';
 import { getCachedData, setCachedData } from '../utils/cache.js';
 import { performanceLog } from '../utils/performanceOptimization.js';
 import { logAuditEvent } from './auditService.js';
