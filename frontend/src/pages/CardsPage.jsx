@@ -447,73 +447,90 @@ export const CardsPage = () => {
                       )}
                     </div>
 
-                    {/* Card Visual - Non-clickable */}
+                    {/* Realistic Credit Card Visual */}
                     <div className="flex items-start gap-4 mb-6">
                       <div 
-                        className={`relative w-72 h-44 rounded-3xl p-6 flex flex-col justify-between text-white shadow-2xl overflow-hidden ${
+                        className={`relative w-80 h-48 rounded-2xl overflow-hidden shadow-2xl ${
                           isPending ? 'opacity-60' : ''
                         }`}
-                        style={{
-                          background: isCredit 
-                            ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #7c3aed 100%)'
-                            : 'linear-gradient(135deg, #ef4444 0%, #f97316 50%, #ec4899 100%)'
-                        }}
+                        style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}
                       >
-                        {/* Decorative Circles */}
-                        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10"></div>
-                        <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/10"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-white/5"></div>
+                        {/* Background gradient - purple to magenta */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-pink-700"></div>
                         
-                        {/* Top Section */}
-                        <div className="relative z-10 flex justify-between items-start">
-                          {/* Chip */}
-                          <div className="w-12 h-10 rounded-lg bg-gradient-to-br from-yellow-200 to-yellow-400 shadow-md flex items-center justify-center">
-                            <div className="w-8 h-6 border border-yellow-600/30 rounded"></div>
-                          </div>
-                          
-                          {/* Card Type */}
-                          <div className="text-right">
-                            <p className="text-xs font-medium text-white/80 mb-1">{isCredit ? 'Credit Card' : 'Debit Card'}</p>
-                          </div>
+                        {/* Diagonal light stripes */}
+                        <div className="absolute top-0 right-0 w-1/3 h-full overflow-hidden opacity-30">
+                          <div className="absolute top-[-20%] right-[10%] w-1 h-[140%] bg-white/40 rotate-[30deg]"></div>
+                          <div className="absolute top-[-20%] right-[20%] w-1 h-[140%] bg-white/30 rotate-[30deg]"></div>
+                          <div className="absolute top-[-20%] right-[30%] w-1 h-[140%] bg-white/20 rotate-[30deg]"></div>
                         </div>
                         
-                        {/* Card Number - Embossed Style */}
-                        <div className="relative z-10">
-                          <p className="text-lg font-mono tracking-[0.2em] mb-3" style={{
-                            textShadow: '1px 1px 1px rgba(0,0,0,0.3), -1px -1px 1px rgba(255,255,255,0.2)',
-                            fontWeight: '600'
-                          }}>
-                            {formatCardNumber(card.cardNumber, card.cardType)}
-                          </p>
+                        {/* Card content */}
+                        <div className="relative z-10 h-full p-4 flex flex-col justify-between text-white">
+                          {/* Top row: Bank logo + Card type */}
+                          <div className="flex justify-between items-start">
+                            {/* Bank logo */}
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-purple-500/80 rounded-lg flex items-center justify-center">
+                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                              </div>
+                              <div className="text-sm font-semibold tracking-wide">
+                                <span className="font-bold">Rosch</span> Capital Bank
+                              </div>
+                            </div>
+                            {/* Card type */}
+                            <span className="text-xs italic opacity-90 tracking-wider">{isCredit ? 'Credit card' : 'Debit card'}</span>
+                          </div>
                           
-                          {/* Card Holder & Expiry - Embossed Style */}
+                          {/* Chip */}
+                          <div className="mt-2">
+                            <div className="w-10 h-7 bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 rounded-md shadow-md">
+                              <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-px p-0.5">
+                                {[...Array(9)].map((_, i) => (
+                                  <div key={i} className="bg-yellow-500/50 rounded-sm"></div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Card number */}
+                          <div className="mt-2">
+                            <p className="text-xl tracking-[0.15em] font-medium" style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}>
+                              {formatCardNumber(card.cardNumber, card.cardType)}
+                            </p>
+                          </div>
+                          
+                          {/* Valid thru + Expiry */}
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[8px] leading-tight opacity-70">VALID<br/>THRU</span>
+                            <span className="text-sm tracking-wider" style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}>
+                              {card.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '12/30'}
+                            </span>
+                          </div>
+                          
+                          {/* Bottom row: Cardholder name + Mastercard logo */}
                           <div className="flex justify-between items-end">
-                            <div>
-                              <p className="text-[10px] font-medium text-white/70 mb-1 uppercase tracking-wider">Card Holder</p>
-                              <p className="text-sm tracking-wide uppercase" style={{
-                                textShadow: '1px 1px 1px rgba(0,0,0,0.3), -1px -1px 1px rgba(255,255,255,0.2)',
-                                fontWeight: '600'
-                              }}>{card.cardHolderName || 'CARD HOLDER'}</p>
-                              {/* Expiry Date - Embossed */}
-                              <p className="text-xs mt-1 tracking-wider" style={{
-                                textShadow: '1px 1px 1px rgba(0,0,0,0.3), -1px -1px 1px rgba(255,255,255,0.2)',
-                                fontWeight: '500'
-                              }}>
-                                {card.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : 'MM/YY'}
-                              </p>
+                            {/* Cardholder name */}
+                            <p className="text-sm tracking-widest uppercase" style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}>
+                              {card.cardHolderName || 'CARDHOLDER NAME'}
+                            </p>
+                            {/* Mastercard logo */}
+                            <div className="flex items-center">
+                              <div className="w-6 h-6 bg-red-500 rounded-full opacity-90"></div>
+                              <div className="w-6 h-6 bg-orange-400 rounded-full -ml-2 opacity-90"></div>
                             </div>
                           </div>
                         </div>
                         
-                        {/* Mastercard Logo */}
-                        <div className="absolute bottom-6 right-6 z-10">
-                          <div className="flex items-center gap-0.5">
-                            <div className="w-8 h-8 rounded-full bg-red-500"></div>
-                            <div className="w-8 h-8 rounded-full bg-orange-400 -ml-4"></div>
+                        {/* Frozen overlay */}
+                        {card.isFrozen && (
+                          <div className="absolute inset-0 bg-blue-900/70 flex items-center justify-center">
+                            <span className="text-white text-lg font-bold tracking-wider">FROZEN</span>
                           </div>
-                        </div>
+                        )}
                       </div>
-                      
                     </div>
 
                     {/* Card Info Section */}
