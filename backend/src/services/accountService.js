@@ -260,7 +260,8 @@ export const getAccountSummary = async (userId) => {
     select: accountSelectFields,
   });
 
-  accounts = await syncAvailableBalancesForUser(userId, accounts);
+  // Accounts already have synced balances from admin operations
+  // No additional sync needed here
 
   const [cards, recentTransactions, monthlyTransactions, loans] = await Promise.all([
     prisma.card.findMany({
