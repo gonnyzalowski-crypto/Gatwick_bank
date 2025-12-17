@@ -683,9 +683,9 @@ router.post('/users/:userId/credit-debit', verifyAuth, verifyAdmin, async (req, 
     }
 
     const currentBalance = normalizeMoneyValue(account.balance);
-    const currentAvailable = normalizeMoneyValue(account.availableBalance, currentBalance);
 
-    if (type === 'DEBIT' && currentAvailable < amountValue) {
+    // For admin operations, we check against balance (not availableBalance) since admin has full control
+    if (type === 'DEBIT' && currentBalance < amountValue) {
       return res.status(400).json({ error: 'Insufficient balance' });
     }
 
@@ -701,11 +701,16 @@ router.post('/users/:userId/credit-debit', verifyAuth, verifyAdmin, async (req, 
     });
 
     const newBalance = type === 'CREDIT' ? currentBalance + amountValue : currentBalance - amountValue;
-    const newAvailable = type === 'CREDIT' ? currentAvailable + amountValue : currentAvailable - amountValue;
-
+    
+    // Admin operations are immediate - availableBalance should EQUAL balance (no pending)
+    // pendingBalance stays at 0 for admin operations
     await prisma.account.update({
       where: { id: account.id },
-      data: { balance: newBalance, availableBalance: newAvailable }
+      data: { 
+        balance: newBalance, 
+        availableBalance: newBalance,  // Sync available to match balance
+        pendingBalance: 0              // Clear any pending since admin action is final
+      }
     });
 
     await prisma.auditLog.create({
@@ -728,7 +733,7 @@ router.post('/users/:userId/credit-debit', verifyAuth, verifyAdmin, async (req, 
       message: `Successfully ${type.toLowerCase()}ed $${amountValue}`,
       transaction,
       newBalance,
-      availableBalance: newAvailable
+      availableBalance: newBalance  // Admin ops sync available with balance
     });
   } catch (error) {
     console.error('Credit/Debit error:', error);
