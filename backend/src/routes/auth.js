@@ -518,16 +518,61 @@ router.get('/random-security-question', verifyAuth, async (req, res) => {
   }
 });
 
-// Update login preference
+// Update login preference (requires verification)
 // PUT /api/v1/auth/login-preference
 router.put('/login-preference', verifyAuth, async (req, res) => {
   try {
-    const { preference } = req.body;
+    const { preference, backupCode, questionId, answer } = req.body;
     const userId = req.user.userId;
 
     // Validate preference
     if (!['question', 'code'].includes(preference)) {
       return res.status(400).json({ error: 'Invalid preference. Must be "question" or "code"' });
+    }
+
+    // Get current user preference
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { loginPreference: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // If preference is the same, no change needed
+    if (user.loginPreference === preference) {
+      return res.status(200).json({ 
+        message: 'Login preference is already set to this value',
+        preference 
+      });
+    }
+
+    // Require verification based on current preference
+    if (user.loginPreference === 'question') {
+      // Currently using security questions - require backup code to change
+      if (!backupCode) {
+        return res.status(400).json({ error: 'Backup code is required to change from security question' });
+      }
+      
+      const backupResult = await verifyBackupCode(userId, backupCode);
+      if (!backupResult.valid) {
+        return res.status(401).json({ 
+          error: backupResult.error || 'Invalid or already used backup code',
+          alreadyUsed: backupResult.alreadyUsed || false
+        });
+      }
+    } else {
+      // Currently using backup code/auth token - require security question answer to change
+      if (!questionId || !answer) {
+        return res.status(400).json({ error: 'Security question answer is required to change from auth token' });
+      }
+      
+      const cleanAnswer = answer.toLowerCase().trim();
+      const verified = await verifySecurityAnswer(userId, questionId, cleanAnswer);
+      if (!verified) {
+        return res.status(401).json({ error: 'Incorrect security question answer' });
+      }
     }
 
     // Update user preference
@@ -538,7 +583,8 @@ router.put('/login-preference', verifyAuth, async (req, res) => {
 
     // Log the action
     await logAction(userId, 'LOGIN_PREFERENCE_CHANGED', req.ip, req.get('user-agent'), {
-      newPreference: preference
+      newPreference: preference,
+      previousPreference: user.loginPreference
     });
 
     return res.status(200).json({ 

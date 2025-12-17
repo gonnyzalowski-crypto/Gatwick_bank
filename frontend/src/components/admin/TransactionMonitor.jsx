@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, ArrowDownLeft, Search, Filter, Download, Eye, Edit, Trash2, Plus, X, Save } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ArrowUpRight, ArrowDownLeft, Search, Filter, Download, Eye, Edit, Trash2, Plus, X, Save, ChevronLeft, ChevronRight } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
+
+const PAGE_SIZE = 30;
 
 export const TransactionMonitor = () => {
   const [transactions, setTransactions] = useState([]);
@@ -8,10 +10,11 @@ export const TransactionMonitor = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [dateRange, setDateRange] = useState('7days');
+  const [dateRange, setDateRange] = useState('all');
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     fetchTransactions();
@@ -32,14 +35,28 @@ export const TransactionMonitor = () => {
     setIsLoading(false);
   };
 
-  const filteredTransactions = transactions.filter(tx => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      tx.reference?.toLowerCase().includes(searchLower) ||
-      tx.description?.toLowerCase().includes(searchLower) ||
-      tx.user?.email?.toLowerCase().includes(searchLower)
-    );
-  });
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(tx => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        tx.reference?.toLowerCase().includes(searchLower) ||
+        tx.description?.toLowerCase().includes(searchLower) ||
+        tx.user?.email?.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [transactions, searchTerm]);
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredTransactions.length / PAGE_SIZE));
+  const paginatedTransactions = useMemo(() => {
+    const start = currentPage * PAGE_SIZE;
+    return filteredTransactions.slice(start, start + PAGE_SIZE);
+  }, [filteredTransactions, currentPage]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchTerm, filterType, filterStatus, dateRange]);
 
   const getTypeIcon = (type) => {
     return type === 'CREDIT' || type === 'DEPOSIT' ? (
@@ -207,14 +224,14 @@ export const TransactionMonitor = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
-              {filteredTransactions.length === 0 ? (
+              {paginatedTransactions.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-6 py-12 text-center text-slate-400">
                     No transactions found
                   </td>
                 </tr>
               ) : (
-                filteredTransactions.map((tx) => (
+                paginatedTransactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="text-white font-mono text-sm">{tx.reference}</div>
@@ -269,6 +286,32 @@ export const TransactionMonitor = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="p-4 border-t border-slate-700 flex items-center justify-between">
+          <p className="text-sm text-slate-400">
+            Showing {currentPage * PAGE_SIZE + 1} - {Math.min((currentPage + 1) * PAGE_SIZE, filteredTransactions.length)} of {filteredTransactions.length} transactions
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+              className="p-2 rounded-lg border border-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-700 text-slate-300"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="px-3 py-1 text-sm font-medium text-slate-300">
+              Page {currentPage + 1} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage >= totalPages - 1}
+              className="p-2 rounded-lg border border-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-700 text-slate-300"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 

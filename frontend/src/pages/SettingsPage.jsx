@@ -27,6 +27,12 @@ export const SettingsPage = () => {
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [autoDebitSettings, setAutoDebitSettings] = useState(null);
   const [autoDebitLoading, setAutoDebitLoading] = useState(false);
+  
+  // Verification modal state for changing login preference
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [pendingPreference, setPendingPreference] = useState(null);
+  const [verificationAnswer, setVerificationAnswer] = useState('');
+  const [verificationBackupCode, setVerificationBackupCode] = useState('');
 
   useEffect(() => {
     fetchRandomQuestion();
@@ -82,16 +88,55 @@ export const SettingsPage = () => {
   };
 
   const handlePreferenceChange = async (newPreference) => {
+    // Don't allow changing to the same preference
+    if (newPreference === loginPreference) return;
+    
+    // Show verification modal instead of changing directly
+    setPendingPreference(newPreference);
+    setVerificationAnswer('');
+    setVerificationBackupCode('');
+    setShowVerificationModal(true);
+  };
+
+  const handleVerifiedPreferenceChange = async () => {
     setPreferenceLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      await apiClient.put('/auth/login-preference', { preference: newPreference });
-      setLoginPreference(newPreference);
-      setSuccess(`Login verification method updated to ${newPreference === 'question' ? 'Security Question' : 'Auth Token'}`)
+      // Determine what verification is needed based on current preference
+      const verificationData = {
+        preference: pendingPreference
+      };
+
+      // If currently using security questions, require backup code to change away
+      if (loginPreference === 'question') {
+        if (!verificationBackupCode.trim()) {
+          setError('Please enter a backup code to verify your identity');
+          setPreferenceLoading(false);
+          return;
+        }
+        verificationData.backupCode = verificationBackupCode.trim();
+      } else {
+        // If currently using backup code/auth token, require security question answer to change
+        if (!verificationAnswer.trim()) {
+          setError('Please answer the security question to verify your identity');
+          setPreferenceLoading(false);
+          return;
+        }
+        verificationData.questionId = securityQuestion?.id;
+        verificationData.answer = verificationAnswer.trim();
+      }
+
+      await apiClient.put('/auth/login-preference', verificationData);
+      setLoginPreference(pendingPreference);
+      setSuccess(`Login verification method updated to ${pendingPreference === 'question' ? 'Security Question' : 'Auth Token'}`);
+      setShowVerificationModal(false);
+      setPendingPreference(null);
+      setVerificationAnswer('');
+      setVerificationBackupCode('');
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update preference');
+      setError(err.response?.data?.error || 'Verification failed. Please check your answer and try again.');
     }
 
     setPreferenceLoading(false);
@@ -744,6 +789,87 @@ export const SettingsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Verification Modal for Changing Login Preference */}
+      {showVerificationModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900">Verify Your Identity</h3>
+                <p className="text-sm text-neutral-500">
+                  {loginPreference === 'question' 
+                    ? 'Enter a backup code to change your login method'
+                    : 'Answer your security question to change your login method'
+                  }
+                </p>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+
+            {loginPreference === 'question' ? (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Backup Code
+                </label>
+                <input
+                  type="text"
+                  value={verificationBackupCode}
+                  onChange={(e) => setVerificationBackupCode(e.target.value)}
+                  placeholder="Enter your 6-digit backup code"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  maxLength={6}
+                />
+                <p className="mt-2 text-xs text-neutral-500">
+                  Use one of your backup codes to verify this change
+                </p>
+              </div>
+            ) : (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  {securityQuestion?.question || 'Security Question'}
+                </label>
+                <input
+                  type="text"
+                  value={verificationAnswer}
+                  onChange={(e) => setVerificationAnswer(e.target.value)}
+                  placeholder="Enter your answer"
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowVerificationModal(false);
+                  setPendingPreference(null);
+                  setError('');
+                }}
+                className="flex-1 px-4 py-3 border border-neutral-300 text-neutral-700 rounded-xl hover:bg-neutral-50 transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleVerifiedPreferenceChange}
+                disabled={preferenceLoading}
+                className="flex-1 px-4 py-3 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition font-medium disabled:opacity-50"
+              >
+                {preferenceLoading ? 'Verifying...' : 'Confirm Change'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </UserDashboardLayout>
   );
 };
