@@ -21,7 +21,7 @@ transactionsRouter.use(verifyAuth);
 transactionsRouter.get('/', async (req, res) => {
   try {
     const accountId = req.query.accountId || null;
-    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 10000);
     const offset = parseInt(req.query.offset) || 0;
 
     const result = await getUserTransactions(req.user.userId, accountId, limit, offset);

@@ -4,7 +4,7 @@ import apiClient from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { Search, Filter, Download, ArrowUpRight, ArrowDownLeft, Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 15;
 
 const CATEGORIES = [
   { value: '', label: 'All Categories' },

@@ -741,6 +741,177 @@ router.post('/users/:userId/credit-debit', verifyAuth, verifyAdmin, async (req, 
   }
 });
 
+// Admin Transfer - Move money between any accounts (same user or different users)
+// POST /api/v1/mybanker/admin-transfer
+router.post('/admin-transfer', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { fromAccountId, toAccountId, amount, description } = req.body;
+
+    if (!fromAccountId || !toAccountId) {
+      return res.status(400).json({ error: 'Source and destination accounts are required' });
+    }
+
+    if (fromAccountId === toAccountId) {
+      return res.status(400).json({ error: 'Source and destination accounts must be different' });
+    }
+
+    const amountValue = normalizeMoneyValue(amount);
+    if (amountValue <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
+    }
+
+    // Get source account
+    const fromAccount = await prisma.account.findUnique({
+      where: { id: fromAccountId },
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } }
+    });
+
+    if (!fromAccount) {
+      return res.status(404).json({ error: 'Source account not found' });
+    }
+
+    // Get destination account
+    const toAccount = await prisma.account.findUnique({
+      where: { id: toAccountId },
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } }
+    });
+
+    if (!toAccount) {
+      return res.status(404).json({ error: 'Destination account not found' });
+    }
+
+    const fromBalance = normalizeMoneyValue(fromAccount.balance);
+
+    if (fromBalance < amountValue) {
+      return res.status(400).json({ error: 'Insufficient balance in source account' });
+    }
+
+    // Perform the transfer in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Debit from source account
+      const debitTransaction = await tx.transaction.create({
+        data: {
+          userId: fromAccount.userId,
+          accountId: fromAccountId,
+          amount: amountValue,
+          type: 'DEBIT',
+          description: description || `Admin transfer to ${toAccount.user.firstName} ${toAccount.user.lastName} (${toAccount.accountNumber})`,
+          status: 'COMPLETED'
+        }
+      });
+
+      const newFromBalance = fromBalance - amountValue;
+      await tx.account.update({
+        where: { id: fromAccountId },
+        data: { 
+          balance: newFromBalance, 
+          availableBalance: newFromBalance,
+          pendingBalance: 0
+        }
+      });
+
+      // Credit to destination account
+      const toBalance = normalizeMoneyValue(toAccount.balance);
+      const creditTransaction = await tx.transaction.create({
+        data: {
+          userId: toAccount.userId,
+          accountId: toAccountId,
+          amount: amountValue,
+          type: 'CREDIT',
+          description: description || `Admin transfer from ${fromAccount.user.firstName} ${fromAccount.user.lastName} (${fromAccount.accountNumber})`,
+          status: 'COMPLETED'
+        }
+      });
+
+      const newToBalance = toBalance + amountValue;
+      await tx.account.update({
+        where: { id: toAccountId },
+        data: { 
+          balance: newToBalance, 
+          availableBalance: newToBalance,
+          pendingBalance: 0
+        }
+      });
+
+      return { debitTransaction, creditTransaction, newFromBalance, newToBalance };
+    });
+
+    // Log the admin action
+    await prisma.auditLog.create({
+      data: {
+        userId: req.user.userId,
+        action: 'ADMIN_TRANSFER',
+        description: `Admin transferred $${amountValue} from ${fromAccount.user.email} to ${toAccount.user.email}`,
+        severity: 'HIGH',
+        ipAddress: req.ip,
+        metadata: {
+          fromAccountId,
+          toAccountId,
+          fromUserId: fromAccount.userId,
+          toUserId: toAccount.userId,
+          amount: amountValue,
+          description
+        }
+      }
+    });
+
+    return res.json({
+      success: true,
+      message: `Successfully transferred $${amountValue}`,
+      fromAccount: {
+        id: fromAccountId,
+        accountNumber: fromAccount.accountNumber,
+        newBalance: result.newFromBalance,
+        user: `${fromAccount.user.firstName} ${fromAccount.user.lastName}`
+      },
+      toAccount: {
+        id: toAccountId,
+        accountNumber: toAccount.accountNumber,
+        newBalance: result.newToBalance,
+        user: `${toAccount.user.firstName} ${toAccount.user.lastName}`
+      }
+    });
+  } catch (error) {
+    console.error('Admin transfer error:', error);
+    return res.status(500).json({ error: 'Failed to process transfer' });
+  }
+});
+
+// Get all accounts for admin transfer dropdown
+// GET /api/v1/mybanker/all-accounts
+router.get('/all-accounts', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const accounts = await prisma.account.findMany({
+      where: { isActive: true },
+      include: {
+        user: {
+          select: { id: true, firstName: true, lastName: true, email: true }
+        }
+      },
+      orderBy: [
+        { user: { lastName: 'asc' } },
+        { accountNumber: 'asc' }
+      ]
+    });
+
+    return res.json({
+      success: true,
+      accounts: accounts.map(acc => ({
+        id: acc.id,
+        accountNumber: acc.accountNumber,
+        accountType: acc.accountType,
+        balance: normalizeMoneyValue(acc.balance),
+        userId: acc.userId,
+        userName: `${acc.user.firstName} ${acc.user.lastName}`,
+        userEmail: acc.user.email
+      }))
+    });
+  } catch (error) {
+    console.error('Get all accounts error:', error);
+    return res.status(500).json({ error: 'Failed to fetch accounts' });
+  }
+});
+
 // Update user (Admin only)
 // PUT /api/v1/mybanker/users/:userId
 router.put('/users/:userId', verifyAuth, verifyAdmin, upload.single('profilePhoto'), async (req, res) => {

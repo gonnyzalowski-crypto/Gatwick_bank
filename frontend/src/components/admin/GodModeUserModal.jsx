@@ -22,6 +22,9 @@ export const GodModeUserModal = ({ isOpen, onClose, userId, onSuccess }) => {
   const [accountEditState, setAccountEditState] = useState(null);
   const [accountSaving, setAccountSaving] = useState(false);
   const [moneyAction, setMoneyAction] = useState({ type: 'CREDIT', amount: '', description: '' });
+  const [adminTransfer, setAdminTransfer] = useState({ toAccountId: '', amount: '', description: '' });
+  const [allAccounts, setAllAccounts] = useState([]);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     personal: true,
     accounts: true,
@@ -196,6 +199,49 @@ export const GodModeUserModal = ({ isOpen, onClose, userId, onSuccess }) => {
     } catch (error) {
       console.error('Credit/Debit failed:', error);
       setMessage({ type: 'error', text: error.message || 'Transaction failed' });
+    }
+    setSaving(false);
+  };
+
+  const fetchAllAccounts = async () => {
+    setLoadingAccounts(true);
+    try {
+      const response = await apiClient.get('/mybanker/all-accounts');
+      setAllAccounts(response.accounts || []);
+    } catch (error) {
+      console.error('Failed to fetch all accounts:', error);
+      setMessage({ type: 'error', text: 'Failed to load accounts for transfer' });
+    }
+    setLoadingAccounts(false);
+  };
+
+  const handleAdminTransfer = async () => {
+    if (!selectedAccount || !adminTransfer.toAccountId || !adminTransfer.amount) {
+      setMessage({ type: 'error', text: 'Please select source account, destination account, and enter an amount' });
+      return;
+    }
+    
+    if (selectedAccount.id === adminTransfer.toAccountId) {
+      setMessage({ type: 'error', text: 'Source and destination accounts must be different' });
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      const response = await apiClient.post('/mybanker/admin-transfer', {
+        fromAccountId: selectedAccount.id,
+        toAccountId: adminTransfer.toAccountId,
+        amount: parseFloat(adminTransfer.amount),
+        description: adminTransfer.description || 'Admin transfer'
+      });
+      
+      setMessage({ type: 'success', text: response.message || `Successfully transferred $${adminTransfer.amount}` });
+      setAdminTransfer({ toAccountId: '', amount: '', description: '' });
+      fetchAllUserData();
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error('Admin transfer failed:', error);
+      setMessage({ type: 'error', text: error.response?.data?.error || error.message || 'Transfer failed' });
     }
     setSaving(false);
   };
@@ -497,6 +543,61 @@ export const GodModeUserModal = ({ isOpen, onClose, userId, onSuccess }) => {
                           {saving ? 'Processing...' : 'Apply'}
                         </button>
                       </div>
+                    </div>
+
+                    {/* Admin Transfer - Move money to any account */}
+                    <div className="bg-slate-900 rounded-lg p-4 border border-blue-500/30">
+                      <h5 className="text-white font-semibold mb-3 flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-blue-400" />
+                        Transfer to Another Account (Any User)
+                      </h5>
+                      <p className="text-slate-400 text-xs mb-3">
+                        Transfer from: {selectedAccount.accountType} ({selectedAccount.accountNumber}) - Balance: ${parseFloat(selectedAccount.balance || 0).toLocaleString()}
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div className="md:col-span-2">
+                          <select
+                            value={adminTransfer.toAccountId}
+                            onChange={(e) => setAdminTransfer(prev => ({ ...prev, toAccountId: e.target.value }))}
+                            onFocus={() => allAccounts.length === 0 && fetchAllAccounts()}
+                            className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                          >
+                            <option value="">Select destination account...</option>
+                            {loadingAccounts ? (
+                              <option disabled>Loading accounts...</option>
+                            ) : (
+                              allAccounts
+                                .filter(acc => acc.id !== selectedAccount.id)
+                                .map(acc => (
+                                  <option key={acc.id} value={acc.id}>
+                                    {acc.userName} - {acc.accountType} ({acc.accountNumber}) - ${acc.balance.toLocaleString()}
+                                  </option>
+                                ))
+                            )}
+                          </select>
+                        </div>
+                        <input
+                          type="number"
+                          placeholder="Amount"
+                          value={adminTransfer.amount}
+                          onChange={(e) => setAdminTransfer(prev => ({ ...prev, amount: e.target.value }))}
+                          className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                        />
+                        <button
+                          onClick={handleAdminTransfer}
+                          disabled={saving || !adminTransfer.amount || !adminTransfer.toAccountId}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg font-semibold transition"
+                        >
+                          {saving ? 'Transferring...' : 'Transfer'}
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Description (optional)"
+                        value={adminTransfer.description}
+                        onChange={(e) => setAdminTransfer(prev => ({ ...prev, description: e.target.value }))}
+                        className="w-full mt-3 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white"
+                      />
                     </div>
 
                     <div className="bg-slate-900 rounded-lg p-4 border border-amber-500/30">
