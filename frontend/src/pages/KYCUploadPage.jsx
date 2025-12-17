@@ -386,8 +386,8 @@ export const KYCUploadPage = () => {
           </div>
         )}
 
-        {/* Uploaded Documents */}
-        {Object.keys(uploadedDocs).length > 0 && (
+        {/* Uploaded Documents - Only show for non-verified accounts */}
+        {Object.keys(uploadedDocs).length > 0 && kycStatus?.status !== 'VERIFIED' && (
           <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-slate-900 mb-4">
               Uploaded documents ({kycStatus?.totalDocuments})
