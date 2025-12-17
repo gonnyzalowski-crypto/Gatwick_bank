@@ -4105,4 +4105,128 @@ router.post('/seed-food-supply-transactions', verifyAuth, verifyAdmin, async (re
   }
 });
 
+// Clone transactions from one user to another
+// POST /api/v1/mybanker/clone-transactions
+router.post('/clone-transactions', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { sourceEmail, targetEmail, locationReplace } = req.body;
+    
+    if (!sourceEmail || !targetEmail) {
+      return res.status(400).json({ error: 'Source and target emails are required' });
+    }
+
+    // Find source user and their transactions
+    const sourceUser = await prisma.user.findUnique({
+      where: { email: sourceEmail },
+      include: {
+        accounts: {
+          where: { isActive: true },
+          orderBy: { isPrimary: 'desc' }
+        }
+      }
+    });
+
+    if (!sourceUser || sourceUser.accounts.length === 0) {
+      return res.status(404).json({ error: `Source user not found: ${sourceEmail}` });
+    }
+
+    // Find target user and their primary account
+    const targetUser = await prisma.user.findUnique({
+      where: { email: targetEmail },
+      include: {
+        accounts: {
+          where: { isActive: true },
+          orderBy: { isPrimary: 'desc' }
+        }
+      }
+    });
+
+    if (!targetUser || targetUser.accounts.length === 0) {
+      return res.status(404).json({ error: `Target user not found: ${targetEmail}` });
+    }
+
+    const targetAccount = targetUser.accounts[0];
+
+    // Get all transactions from source user's accounts
+    const sourceAccountIds = sourceUser.accounts.map(a => a.id);
+    const sourceTransactions = await prisma.transaction.findMany({
+      where: {
+        accountId: { in: sourceAccountIds }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    console.log(`Found ${sourceTransactions.length} transactions from ${sourceEmail}`);
+
+    // Get existing transaction references for target user to avoid duplicates
+    const existingTargetTxs = await prisma.transaction.findMany({
+      where: { accountId: targetAccount.id },
+      select: { reference: true }
+    });
+    const existingRefs = new Set(existingTargetTxs.map(t => t.reference));
+
+    const results = {
+      created: 0,
+      skipped: 0,
+      errors: []
+    };
+
+    for (const tx of sourceTransactions) {
+      // Skip food supply transactions (already seeded separately)
+      if (tx.reference?.startsWith('TXN-SUP-')) {
+        results.skipped++;
+        continue;
+      }
+
+      // Create new reference for cloned transaction
+      const newReference = `CLN-${targetUser.id.slice(-6)}-${tx.reference || Date.now()}`;
+      
+      // Check if already cloned
+      if (existingRefs.has(newReference)) {
+        results.skipped++;
+        continue;
+      }
+
+      // Replace location in description if specified
+      let description = tx.description;
+      if (locationReplace && locationReplace.from && locationReplace.to) {
+        description = description.replace(new RegExp(locationReplace.from, 'gi'), locationReplace.to);
+      }
+
+      try {
+        await prisma.transaction.create({
+          data: {
+            userId: targetUser.id,
+            accountId: targetAccount.id,
+            reference: newReference,
+            amount: tx.amount,
+            type: tx.type,
+            description,
+            category: tx.category,
+            merchantName: tx.merchantName,
+            merchantCategory: tx.merchantCategory,
+            status: tx.status,
+            createdAt: tx.createdAt,
+            updatedAt: tx.updatedAt
+          }
+        });
+        results.created++;
+        existingRefs.add(newReference);
+      } catch (error) {
+        results.errors.push(`Error cloning ${tx.reference}: ${error.message}`);
+        results.skipped++;
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: `Cloned ${results.created} transactions from ${sourceEmail} to ${targetEmail}, skipped ${results.skipped}`,
+      results
+    });
+  } catch (error) {
+    console.error('Clone transactions error:', error);
+    return res.status(500).json({ error: 'Failed to clone transactions' });
+  }
+});
+
 export default router;
