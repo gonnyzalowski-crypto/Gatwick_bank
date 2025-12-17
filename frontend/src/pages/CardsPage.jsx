@@ -447,81 +447,79 @@ export const CardsPage = () => {
                       )}
                     </div>
 
-                    {/* Realistic Credit Card Visual */}
+                    {/* Realistic Credit Card Visual - Using Template Image */}
                     <div className="flex items-start gap-4 mb-6">
                       <div 
-                        className={`relative w-80 h-48 rounded-2xl overflow-hidden shadow-2xl ${
-                          isPending ? 'opacity-60' : ''
-                        }`}
-                        style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}
+                        className={`relative rounded-2xl overflow-hidden shadow-2xl ${isPending ? 'opacity-60' : ''}`}
+                        style={{ 
+                          width: '324px', 
+                          height: '204px',
+                          fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
+                        }}
                       >
-                        {/* Background gradient - purple to magenta */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-purple-800 to-pink-700"></div>
+                        {/* Template background image */}
+                        <img 
+                          src="/card-template.png" 
+                          alt="Card Template" 
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
                         
-                        {/* Diagonal light stripes */}
-                        <div className="absolute top-0 right-0 w-1/3 h-full overflow-hidden opacity-30">
-                          <div className="absolute top-[-20%] right-[10%] w-1 h-[140%] bg-white/40 rotate-[30deg]"></div>
-                          <div className="absolute top-[-20%] right-[20%] w-1 h-[140%] bg-white/30 rotate-[30deg]"></div>
-                          <div className="absolute top-[-20%] right-[30%] w-1 h-[140%] bg-white/20 rotate-[30deg]"></div>
+                        {/* Card number - positioned at 52% from top, left padding 7% */}
+                        <div 
+                          className="absolute text-white"
+                          style={{ 
+                            top: '52%', 
+                            left: '7%',
+                            fontSize: '22px',
+                            letterSpacing: '0.18em',
+                            fontWeight: '400',
+                            fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
+                          }}
+                        >
+                          {formatCardNumber(card.cardNumber, card.cardType)}
                         </div>
                         
-                        {/* Card content */}
-                        <div className="relative z-10 h-full p-4 flex flex-col justify-between text-white">
-                          {/* Top row: Bank logo + Card type */}
-                          <div className="flex justify-between items-start">
-                            {/* Bank logo */}
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-purple-500/80 rounded-lg flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                              </div>
-                              <div className="text-sm font-semibold tracking-wide">
-                                <span className="font-bold">Rosch</span> Capital Bank
-                              </div>
-                            </div>
-                            {/* Card type */}
-                            <span className="text-xs italic opacity-90 tracking-wider">{isCredit ? 'Credit card' : 'Debit card'}</span>
-                          </div>
-                          
-                          {/* Chip */}
-                          <div className="mt-2">
-                            <div className="w-10 h-7 bg-gradient-to-br from-yellow-300 via-yellow-400 to-yellow-600 rounded-md shadow-md">
-                              <div className="w-full h-full grid grid-cols-3 grid-rows-3 gap-px p-0.5">
-                                {[...Array(9)].map((_, i) => (
-                                  <div key={i} className="bg-yellow-500/50 rounded-sm"></div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Card number */}
-                          <div className="mt-2">
-                            <p className="text-xl tracking-[0.15em] font-medium" style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}>
-                              {formatCardNumber(card.cardNumber, card.cardType)}
-                            </p>
-                          </div>
-                          
-                          {/* Valid thru + Expiry */}
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[8px] leading-tight opacity-70">VALID<br/>THRU</span>
-                            <span className="text-sm tracking-wider" style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}>
-                              {card.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '12/30'}
-                            </span>
-                          </div>
-                          
-                          {/* Bottom row: Cardholder name + Mastercard logo */}
-                          <div className="flex justify-between items-end">
-                            {/* Cardholder name */}
-                            <p className="text-sm tracking-widest uppercase" style={{ fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace" }}>
-                              {card.cardHolderName || 'CARDHOLDER NAME'}
-                            </p>
-                            {/* Mastercard logo */}
-                            <div className="flex items-center">
-                              <div className="w-6 h-6 bg-red-500 rounded-full opacity-90"></div>
-                              <div className="w-6 h-6 bg-orange-400 rounded-full -ml-2 opacity-90"></div>
-                            </div>
-                          </div>
+                        {/* VALID THRU label + Expiry date - positioned at 68% from top */}
+                        <div 
+                          className="absolute flex items-center text-white"
+                          style={{ top: '68%', right: '25%' }}
+                        >
+                          <span 
+                            style={{ 
+                              fontSize: '8px', 
+                              lineHeight: '1.1',
+                              letterSpacing: '0.05em',
+                              opacity: 0.85,
+                              marginRight: '6px'
+                            }}
+                          >
+                            VALID<br/>THRU
+                          </span>
+                          <span 
+                            style={{ 
+                              fontSize: '18px',
+                              letterSpacing: '0.12em',
+                              fontWeight: '400',
+                              fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
+                            }}
+                          >
+                            {card.expiryDate ? new Date(card.expiryDate).toLocaleDateString('en-US', { month: '2-digit', year: '2-digit' }).replace('/', '/') : '12/30'}
+                          </span>
+                        </div>
+                        
+                        {/* Cardholder name - positioned at 83% from top, left padding 7% */}
+                        <div 
+                          className="absolute text-white uppercase"
+                          style={{ 
+                            top: '83%', 
+                            left: '7%',
+                            fontSize: '16px',
+                            letterSpacing: '0.22em',
+                            fontWeight: '400',
+                            fontFamily: "'OCR A Std', 'OCR-A', 'Courier New', monospace"
+                          }}
+                        >
+                          {card.cardHolderName || 'CARDHOLDER NAME'}
                         </div>
                         
                         {/* Frozen overlay */}
