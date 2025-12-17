@@ -65,24 +65,6 @@ app.get('/healthz', (req, res) => {
   });
 });
 
-// Debug endpoint to check database connectivity and user count
-app.get('/debug/db', async (req, res) => {
-  try {
-    const userCount = await prisma.user.count();
-    const users = await prisma.user.findMany({
-      select: { id: true, email: true, firstName: true, lastName: true, isAdmin: true },
-      take: 10
-    });
-    res.json({ 
-      status: 'ok', 
-      userCount,
-      users: users.map(u => ({ email: u.email, name: `${u.firstName} ${u.lastName}`, isAdmin: u.isAdmin }))
-    });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: error.message });
-  }
-});
-
 // Serve uploaded files (MUST be before SPA fallback)
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
