@@ -46,11 +46,14 @@ const CryptoAccountPage = ({ accountId, onBack }) => {
   const fetchCryptoValue = async () => {
     try {
       setLoadingRate(true);
-      const response = await apiClient.get(`/currencies/rate/USD/${cryptoType}`);
+      // Get rate: how many USD per 1 BTC
+      const response = await apiClient.get(`/currencies/rate/${cryptoType}/USD`);
       if (response.success) {
+        // rate = USD per 1 BTC (e.g., 83333)
         setExchangeRate(response.rate);
-        const crypto = account.balance * response.rate;
-        setCryptoValue(crypto);
+        // account.balance is in USD, convert to BTC by dividing
+        const cryptoAmount = account.balance / response.rate;
+        setCryptoValue(cryptoAmount);
       }
     } catch (err) {
       console.error('Failed to fetch crypto value:', err);
@@ -143,16 +146,16 @@ const CryptoAccountPage = ({ accountId, onBack }) => {
               <p className="text-xs text-purple-100 mb-1">Available</p>
               <p className="text-xl font-semibold">
                 {/* For crypto wallets: Available = Total Balance - Pending */}
-                {showCrypto && cryptoValue !== null
-                  ? `${formatCrypto((account.balance - (account.pendingBalance || 0)) * exchangeRate)} ${cryptoType}`
+                {showCrypto && cryptoValue !== null && exchangeRate
+                  ? `${formatCrypto((account.balance - (account.pendingBalance || 0)) / exchangeRate)} ${cryptoType}`
                   : formatCurrency(account.balance - (account.pendingBalance || 0))}
               </p>
             </div>
             <div className="bg-white/10 rounded-lg p-4">
               <p className="text-xs text-purple-100 mb-1">Pending</p>
               <p className="text-xl font-semibold">
-                {showCrypto && cryptoValue !== null
-                  ? `${formatCrypto((account.pendingBalance || 0) * exchangeRate)} ${cryptoType}`
+                {showCrypto && cryptoValue !== null && exchangeRate
+                  ? `${formatCrypto((account.pendingBalance || 0) / exchangeRate)} ${cryptoType}`
                   : formatCurrency(account.pendingBalance || 0)}
               </p>
             </div>
@@ -193,7 +196,7 @@ const CryptoAccountPage = ({ accountId, onBack }) => {
             </div>
             <div className="flex justify-between items-center py-3 border-b border-neutral-100">
               <span className="text-neutral-600 text-sm">Currency</span>
-              <span className="text-neutral-900 font-medium">{account.currency}</span>
+              <span className="text-neutral-900 font-medium">USD</span>
             </div>
             <div className="flex justify-between items-center py-3">
               <span className="text-neutral-600 text-sm">Status</span>
