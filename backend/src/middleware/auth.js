@@ -1,8 +1,8 @@
 import { verifyToken } from '../utils/jwt.js';
 import prisma from '../config/prisma.js';
 
-// Development mode - skip Redis entirely
-const DEV_MODE = true;
+// Development mode - skip Redis entirely (MUST be false in production)
+const DEV_MODE = process.env.NODE_ENV !== 'production';
 
 /**
  * Middleware to verify JWT token from Authorization header or cookies

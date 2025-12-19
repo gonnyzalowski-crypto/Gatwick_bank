@@ -319,16 +319,21 @@ router.post('/login/verify', async (req, res) => {
     const accessToken = generateToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
-    // Store refresh token
-    const redis = (await import('../config/redis.js')).default;
-    await redis.setex(`refresh:${user.id}`, 86400, refreshToken);
+    // Store refresh token (non-blocking - don't fail login if Redis is unavailable)
+    try {
+      const redis = (await import('../config/redis.js')).default;
+      await redis.setex(`refresh:${user.id}`, 30 * 24 * 60 * 60, refreshToken); // 30 days TTL
+    } catch (redisError) {
+      console.warn('⚠️ Redis unavailable for refresh token storage:', redisError.message);
+      // Continue without Redis - JWT access token will still work
+    }
 
-    // Set cookie
+    // Set cookie - use 'none' for cross-origin Railway deployment, 'lax' for same-origin
     res.cookie('token', accessToken, {
       httpOnly: true,
       secure: config.nodeEnv === 'production',
-      sameSite: 'strict',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // Increased from 7 days to 30 days
+      sameSite: config.nodeEnv === 'production' ? 'none' : 'lax',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
     // Log successful login
