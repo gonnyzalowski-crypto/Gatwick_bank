@@ -327,9 +327,9 @@ export const LoginPage = () => {
                       </button>
                     </div>
                     <div className="mt-2 text-right">
-                      <a href="#" className="text-sm font-semibold text-purple-700 hover:text-purple-800">
+                      <Link to="/forgot-password" className="text-sm font-semibold text-purple-700 hover:text-purple-800">
                         Forgot password?
-                      </a>
+                      </Link>
                     </div>
                   </div>
 

@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import BankerLoginPage from './pages/BankerLoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DecLoginPage from './pages/DecLoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import DashboardPage from './pages/DashboardPage';
 import AccountsPage from './pages/AccountsPage';
 import CardsPage from './pages/CardsPage';
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/banker-login" element={<BankerLoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dec-login" element={<DecLoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* Protected Routes */}
           <Route

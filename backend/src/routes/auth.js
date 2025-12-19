@@ -845,4 +845,205 @@ router.put('/auto-debit-settings', verifyAuth, async (req, res) => {
   }
 });
 
+// ============= FORGOT PASSWORD FLOW =============
+
+// Step 1: Verify email exists
+// POST /api/v1/auth/forgot-password/verify-email
+router.post('/forgot-password/verify-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    // Normalize email for case-insensitive search
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user exists
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive'
+        }
+      },
+      select: { id: true, email: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'No account found with this email address' });
+    }
+
+    // Log the attempt
+    await logAction(user.id, 'FORGOT_PASSWORD_EMAIL_VERIFIED', req.ip, req.get('user-agent'));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Email verified. Please enter your Auth Token.'
+    });
+  } catch (error) {
+    console.error('Forgot password verify email error:', error);
+    return res.status(500).json({ error: 'Failed to verify email' });
+  }
+});
+
+// Step 2: Verify backup code (without marking as used yet)
+// POST /api/v1/auth/forgot-password/verify-code
+router.post('/forgot-password/verify-code', async (req, res) => {
+  try {
+    const { email, backupCode } = req.body;
+
+    if (!email || !backupCode) {
+      return res.status(400).json({ error: 'Email and backup code are required' });
+    }
+
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Find user
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify the backup code exists and is not used
+    const code = await prisma.backupCode.findFirst({
+      where: {
+        userId: user.id,
+        code: backupCode.trim(),
+        used: false
+      }
+    });
+
+    if (!code) {
+      // Check if code exists but is already used
+      const usedCode = await prisma.backupCode.findFirst({
+        where: {
+          userId: user.id,
+          code: backupCode.trim(),
+          used: true
+        }
+      });
+
+      if (usedCode) {
+        return res.status(401).json({ 
+          error: 'This Auth Token has already been used. Please use a different one.',
+          alreadyUsed: true
+        });
+      }
+
+      return res.status(401).json({ error: 'Invalid Auth Token' });
+    }
+
+    // Log the verification (don't mark as used yet - that happens on password reset)
+    await logAction(user.id, 'FORGOT_PASSWORD_CODE_VERIFIED', req.ip, req.get('user-agent'));
+
+    return res.status(200).json({
+      success: true,
+      message: 'Auth Token verified. You can now reset your password.'
+    });
+  } catch (error) {
+    console.error('Forgot password verify code error:', error);
+    return res.status(500).json({ error: 'Failed to verify Auth Token' });
+  }
+});
+
+// Step 3: Reset password (marks backup code as used)
+// POST /api/v1/auth/forgot-password/reset
+router.post('/forgot-password/reset', async (req, res) => {
+  try {
+    const { email, backupCode, newPassword } = req.body;
+
+    if (!email || !backupCode || !newPassword) {
+      return res.status(400).json({ error: 'Email, backup code, and new password are required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
+    // Normalize email
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Find user
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive'
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify and mark backup code as used in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // Find the backup code
+      const code = await tx.backupCode.findFirst({
+        where: {
+          userId: user.id,
+          code: backupCode.trim(),
+          used: false
+        }
+      });
+
+      if (!code) {
+        throw new Error('Invalid or already used Auth Token');
+      }
+
+      // Mark backup code as used
+      await tx.backupCode.update({
+        where: { id: code.id },
+        data: { 
+          used: true,
+          usedAt: new Date()
+        }
+      });
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // Update user password
+      await tx.user.update({
+        where: { id: user.id },
+        data: { password: hashedPassword }
+      });
+
+      return { success: true };
+    });
+
+    // Log the password reset
+    await logAction(user.id, 'PASSWORD_RESET_VIA_FORGOT', req.ip, req.get('user-agent'));
+
+    // Create notification
+    await createNotification(
+      user.id,
+      'security',
+      'Password Reset',
+      'Your password has been reset successfully. If you did not make this change, please contact support immediately.',
+      { timestamp: new Date() }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password reset successfully. You can now log in with your new password.'
+    });
+  } catch (error) {
+    console.error('Forgot password reset error:', error);
+    return res.status(500).json({ error: error.message || 'Failed to reset password' });
+  }
+});
+
 export default router;
