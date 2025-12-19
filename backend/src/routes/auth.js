@@ -127,8 +127,19 @@ router.post('/login', authLimiter, checkAccountLockout, async (req, res) => {
   const { email, password } = validation.data;
 
   try {
-    console.log(`🔐 Login attempt for: ${email}`);
-    const user = await prisma.user.findUnique({ where: { email } });
+    // Normalize email to lowercase for case-insensitive lookup
+    const normalizedEmail = email.toLowerCase().trim();
+    console.log(`🔐 Login attempt for: ${normalizedEmail}`);
+    
+    // Use case-insensitive search
+    const user = await prisma.user.findFirst({ 
+      where: { 
+        email: { 
+          equals: normalizedEmail,
+          mode: 'insensitive' 
+        } 
+      } 
+    });
     if (!user) {
       console.log(`❌ User not found: ${email}`);
       recordFailedAttempt(email);
