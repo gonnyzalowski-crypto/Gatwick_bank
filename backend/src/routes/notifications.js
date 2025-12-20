@@ -71,7 +71,7 @@ router.put('/mark-all-read', verifyAuth, async (req, res) => {
   }
 });
 
-// Get admin notifications (KYC approvals, card approvals, support tickets, etc.)
+// Get admin notifications (KYC approvals, card approvals, support tickets, deposits, withdrawals, PND accounts, etc.)
 // GET /api/v1/notifications/admin
 router.get('/admin', verifyAuth, async (req, res) => {
   try {
@@ -98,6 +98,55 @@ router.get('/admin', verifyAuth, async (req, res) => {
       where: { status: { in: ['OPEN', 'IN_PROGRESS'] } }
     });
 
+    // Get pending deposits
+    const pendingDeposits = await prisma.deposit.count({
+      where: { status: 'PENDING' }
+    });
+
+    // Get pending withdrawals
+    let pendingWithdrawals = 0;
+    try {
+      pendingWithdrawals = await prisma.withdrawal.count({
+        where: { status: 'PENDING' }
+      });
+    } catch (e) {
+      // Withdrawal model may not exist
+    }
+
+    // Get PND (Post-No-Debit) restricted accounts
+    const pndAccounts = await prisma.user.count({
+      where: { accountStatus: 'PND' }
+    });
+
+    // Get suspended accounts
+    const suspendedAccounts = await prisma.user.count({
+      where: { accountStatus: 'SUSPENDED' }
+    });
+
+    // Get new users (registered in last 24 hours)
+    const newUsers = await prisma.user.count({
+      where: {
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
+        }
+      }
+    });
+
+    // Get recent failed login attempts (last 24 hours)
+    let failedLogins = 0;
+    try {
+      failedLogins = await prisma.auditLog.count({
+        where: {
+          action: 'FAILED_LOGIN',
+          createdAt: {
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
+          }
+        }
+      });
+    } catch (e) {
+      // AuditLog may not exist
+    }
+
     // Create notification objects
     const notifications = [];
     
@@ -107,6 +156,9 @@ router.get('/admin', verifyAuth, async (req, res) => {
         type: 'kyc_approval',
         title: 'Pending KYC Approvals',
         message: `${pendingKYC} KYC submission${pendingKYC > 1 ? 's' : ''} awaiting review`,
+        count: pendingKYC,
+        priority: 'high',
+        link: '/mybanker?section=kyc',
         createdAt: new Date(),
         isRead: false
       });
@@ -118,6 +170,9 @@ router.get('/admin', verifyAuth, async (req, res) => {
         type: 'card_approval',
         title: 'Pending Card Approvals',
         message: `${pendingCards} credit card application${pendingCards > 1 ? 's' : ''} awaiting approval`,
+        count: pendingCards,
+        priority: 'high',
+        link: '/mybanker?section=cards',
         createdAt: new Date(),
         isRead: false
       });
@@ -129,6 +184,37 @@ router.get('/admin', verifyAuth, async (req, res) => {
         type: 'transaction',
         title: 'Pending Transfer Approvals',
         message: `${pendingTransfers} transfer${pendingTransfers > 1 ? 's' : ''} awaiting approval`,
+        count: pendingTransfers,
+        priority: 'high',
+        link: '/mybanker?section=transfers',
+        createdAt: new Date(),
+        isRead: false
+      });
+    }
+
+    if (pendingDeposits > 0) {
+      notifications.push({
+        id: 'deposit-pending',
+        type: 'deposit',
+        title: 'Pending Deposit Approvals',
+        message: `${pendingDeposits} deposit${pendingDeposits > 1 ? 's' : ''} awaiting approval`,
+        count: pendingDeposits,
+        priority: 'high',
+        link: '/mybanker?section=deposits',
+        createdAt: new Date(),
+        isRead: false
+      });
+    }
+
+    if (pendingWithdrawals > 0) {
+      notifications.push({
+        id: 'withdrawal-pending',
+        type: 'withdrawal',
+        title: 'Pending Withdrawal Requests',
+        message: `${pendingWithdrawals} withdrawal${pendingWithdrawals > 1 ? 's' : ''} awaiting processing`,
+        count: pendingWithdrawals,
+        priority: 'high',
+        link: '/mybanker?section=withdrawals',
         createdAt: new Date(),
         isRead: false
       });
@@ -140,17 +226,93 @@ router.get('/admin', verifyAuth, async (req, res) => {
         type: 'support',
         title: 'Open Support Tickets',
         message: `${openTickets} support ticket${openTickets > 1 ? 's' : ''} need attention`,
+        count: openTickets,
+        priority: 'medium',
+        link: '/mybanker?section=support',
         createdAt: new Date(),
         isRead: false
       });
     }
+
+    if (pndAccounts > 0) {
+      notifications.push({
+        id: 'pnd-accounts',
+        type: 'account_restriction',
+        title: 'PND Restricted Accounts',
+        message: `${pndAccounts} account${pndAccounts > 1 ? 's' : ''} under PND restriction`,
+        count: pndAccounts,
+        priority: 'medium',
+        link: '/mybanker?section=users&filter=PND',
+        createdAt: new Date(),
+        isRead: false
+      });
+    }
+
+    if (suspendedAccounts > 0) {
+      notifications.push({
+        id: 'suspended-accounts',
+        type: 'account_restriction',
+        title: 'Suspended Accounts',
+        message: `${suspendedAccounts} account${suspendedAccounts > 1 ? 's' : ''} currently suspended`,
+        count: suspendedAccounts,
+        priority: 'low',
+        link: '/mybanker?section=users&filter=SUSPENDED',
+        createdAt: new Date(),
+        isRead: false
+      });
+    }
+
+    if (newUsers > 0) {
+      notifications.push({
+        id: 'new-users',
+        type: 'user',
+        title: 'New User Registrations',
+        message: `${newUsers} new user${newUsers > 1 ? 's' : ''} registered in the last 24 hours`,
+        count: newUsers,
+        priority: 'low',
+        link: '/mybanker?section=users',
+        createdAt: new Date(),
+        isRead: false
+      });
+    }
+
+    if (failedLogins > 5) {
+      notifications.push({
+        id: 'failed-logins',
+        type: 'security',
+        title: 'Failed Login Attempts',
+        message: `${failedLogins} failed login attempt${failedLogins > 1 ? 's' : ''} in the last 24 hours`,
+        count: failedLogins,
+        priority: failedLogins > 20 ? 'high' : 'medium',
+        link: '/mybanker?section=audit',
+        createdAt: new Date(),
+        isRead: false
+      });
+    }
+
+    // Sort by priority (high first)
+    const priorityOrder = { high: 0, medium: 1, low: 2 };
+    notifications.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
     await prisma.$disconnect();
 
     return res.json({
       success: true,
       notifications,
-      unreadCount: notifications.length
+      unreadCount: notifications.filter(n => n.priority === 'high').length,
+      totalCount: notifications.length,
+      summary: {
+        pendingKYC,
+        pendingCards,
+        pendingTransfers,
+        pendingDeposits,
+        pendingWithdrawals,
+        openTickets,
+        pndAccounts,
+        suspendedAccounts,
+        newUsers,
+        failedLogins
+      }
     });
   } catch (error) {
     console.error('Get admin notifications error:', error);
