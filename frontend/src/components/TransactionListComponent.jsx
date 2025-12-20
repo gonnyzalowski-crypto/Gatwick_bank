@@ -87,10 +87,11 @@ export const TransactionListComponent = ({ accountId, limit = 20 }) => {
       setDownloadingId(transactionId);
       
       // Get the auth token
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://gatwickbank-production.up.railway.app/api/v1';
       
       // Fetch the PDF as a blob
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/transactions/${transactionId}/receipt`, {
+      const response = await fetch(`${apiBaseUrl}/transactions/${transactionId}/receipt`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

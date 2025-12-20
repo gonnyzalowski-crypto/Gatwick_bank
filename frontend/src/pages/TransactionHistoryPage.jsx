@@ -258,9 +258,10 @@ const TransactionHistoryPage = () => {
   const handleDownloadReceipt = async (transactionId) => {
     try {
       setDownloadingId(transactionId);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://gatwickbank-production.up.railway.app/api/v1';
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/transactions/${transactionId}/receipt`, {
+      const response = await fetch(`${apiBaseUrl}/transactions/${transactionId}/receipt`, {
         method: 'GET',
         headers: { 'Authorization': `Bearer ${token}` }
       });
