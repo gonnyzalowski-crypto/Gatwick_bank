@@ -1,5 +1,10 @@
 import PDFDocument from 'pdfkit';
 import prisma from '../config/prisma.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Generate a clean, professional PDF receipt for a transaction
@@ -56,23 +61,14 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       const textMuted = '#6B7280';
 
       // ============ HEADER ============
-      // Logo icon (Building2 style - purple rounded square with building icon)
-      doc.roundedRect(leftMargin, 45, 44, 44, 8).fill(primaryColor);
-      
-      // Building icon representation (simplified)
-      doc.fillColor('#FFFFFF');
-      // Main building body
-      doc.rect(leftMargin + 12, 58, 20, 22).fill('#FFFFFF');
-      // Roof/top
-      doc.moveTo(leftMargin + 10, 58)
-         .lineTo(leftMargin + 22, 50)
-         .lineTo(leftMargin + 34, 58)
-         .fill('#FFFFFF');
-      // Windows (3 small squares)
-      doc.fillColor(primaryColor);
-      doc.rect(leftMargin + 15, 62, 4, 4).fill(primaryColor);
-      doc.rect(leftMargin + 25, 62, 4, 4).fill(primaryColor);
-      doc.rect(leftMargin + 20, 70, 4, 6).fill(primaryColor);
+      // Logo image from assets
+      const logoPath = path.join(__dirname, '../assets/logo.png');
+      try {
+        doc.image(logoPath, leftMargin, 45, { width: 44, height: 44 });
+      } catch (e) {
+        // Fallback: draw a simple purple square if logo not found
+        doc.roundedRect(leftMargin, 45, 44, 44, 8).fill(primaryColor);
+      }
 
       // Bank name
       doc.fillColor(textDark)
