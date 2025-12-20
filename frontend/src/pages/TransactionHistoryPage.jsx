@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import UserDashboardLayout from '../components/layout/UserDashboardLayout';
 import apiClient from '../lib/apiClient';
 import { useAuth } from '../hooks/useAuth';
-import { Search, Filter, Download, ArrowUpRight, ArrowDownLeft, Calendar, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Search, Filter, Download, ArrowUpRight, ArrowDownLeft, Calendar, ChevronLeft, ChevronRight, X, ChevronDown, ChevronUp, FileText, Loader2 } from 'lucide-react';
 
 const PAGE_SIZE = 15;
 
@@ -124,6 +124,10 @@ const TransactionHistoryPage = () => {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Receipt download state
+  const [expandedId, setExpandedId] = useState(null);
+  const [downloadingId, setDownloadingId] = useState(null);
 
   useEffect(() => {
     const fetchAllTransactions = async () => {
@@ -249,6 +253,48 @@ const TransactionHistoryPage = () => {
   };
 
   const hasActiveFilters = searchTerm || typeFilter || categoryFilter || dateRange.start || dateRange.end;
+
+  // Handle receipt download
+  const handleDownloadReceipt = async (transactionId) => {
+    try {
+      setDownloadingId(transactionId);
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/transactions/${transactionId}/receipt`, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) throw new Error('Failed to download receipt');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      
+      const contentDisposition = response.headers.get('Content-Disposition');
+      let filename = `RoschCapital_Receipt_${transactionId}.pdf`;
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename="(.+)"/);
+        if (match) filename = match[1];
+      }
+      
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error downloading receipt:', err);
+      alert('Failed to download receipt. Please try again.');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  const toggleExpand = (id) => {
+    setExpandedId(expandedId === id ? null : id);
+  };
 
   return (
     <UserDashboardLayout>
@@ -405,72 +451,143 @@ const TransactionHistoryPage = () => {
             ) : (
               paginatedRows.map((row) => {
                 const merchantLogo = getMerchantLogo(row.description);
+                const isExpanded = expandedId === row.id;
                 return (
-                <div key={row.id} className="p-4 hover:bg-slate-50 transition-colors cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    {/* Icon - Use merchant logo if available, otherwise category icon */}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden ${
-                      row.type === 'credit' ? 'bg-emerald-100' : 'bg-red-50'
-                    }`}>
-                      {merchantLogo ? (
-                        <img 
-                          src={merchantLogo} 
-                          alt="" 
-                          className="w-7 h-7 object-contain"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'block';
-                          }}
-                        />
-                      ) : null}
-                      <span className={`text-xl ${merchantLogo ? 'hidden' : ''}`}>
-                        {getCategoryIcon(row.category)}
-                      </span>
-                    </div>
-
-                    {/* Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-slate-900 truncate">{row.description}</p>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getCategoryColor(row.category)}`}>
-                          {row.category.replace('_', ' ')}
+                <div key={row.id} className="border-b border-slate-100 last:border-b-0">
+                  {/* Main Row - Clickable */}
+                  <div 
+                    className="p-4 hover:bg-slate-50 transition-colors cursor-pointer"
+                    onClick={() => toggleExpand(row.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Icon - Use merchant logo if available, otherwise category icon */}
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden ${
+                        row.type === 'credit' ? 'bg-emerald-100' : 'bg-red-50'
+                      }`}>
+                        {merchantLogo ? (
+                          <img 
+                            src={merchantLogo} 
+                            alt="" 
+                            className="w-7 h-7 object-contain"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'block';
+                            }}
+                          />
+                        ) : null}
+                        <span className={`text-xl ${merchantLogo ? 'hidden' : ''}`}>
+                          {getCategoryIcon(row.category)}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                        <span>{formatDate(row.date)}</span>
-                        <span>•</span>
-                        <span>{formatTime(row.date)}</span>
-                        {row.accountNumber && (
-                          <>
-                            <span>•</span>
-                            <span>****{row.accountNumber.slice(-4)}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
 
-                    {/* Amount & Status */}
-                    <div className="text-right">
-                      <p className={`text-lg font-semibold ${
-                        row.type === 'credit' ? 'text-emerald-600' : 'text-red-600'
-                      }`}>
-                        {row.type === 'credit' ? '+' : '-'}${formatAmount(row.amount)}
-                      </p>
-                      <div className="flex items-center justify-end gap-2">
-                        <p className="text-xs text-slate-400">{row.currency}</p>
-                        {row.status && row.status !== 'COMPLETED' && (
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                            row.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                            row.status === 'DECLINED' ? 'bg-red-100 text-red-700' :
-                            row.status === 'REVERSED' ? 'bg-gray-100 text-gray-700' :
-                            'bg-blue-100 text-blue-700'
-                          }`}>
-                            {row.status}
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-slate-900 truncate">{row.description}</p>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${getCategoryColor(row.category)}`}>
+                            {row.category.replace('_', ' ')}
                           </span>
-                        )}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                          <span>{formatDate(row.date)}</span>
+                          <span>•</span>
+                          <span>{formatTime(row.date)}</span>
+                          {row.accountNumber && (
+                            <>
+                              <span>•</span>
+                              <span>****{row.accountNumber.slice(-4)}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Amount & Status */}
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className={`text-lg font-semibold ${
+                            row.type === 'credit' ? 'text-emerald-600' : 'text-red-600'
+                          }`}>
+                            {row.type === 'credit' ? '+' : '-'}${formatAmount(row.amount)}
+                          </p>
+                          <div className="flex items-center justify-end gap-2">
+                            <p className="text-xs text-slate-400">{row.currency}</p>
+                            {row.status && row.status !== 'COMPLETED' && (
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                                row.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                                row.status === 'DECLINED' ? 'bg-red-100 text-red-700' :
+                                row.status === 'REVERSED' ? 'bg-gray-100 text-gray-700' :
+                                'bg-blue-100 text-blue-700'
+                              }`}>
+                                {row.status}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        {/* Expand Icon */}
+                        <div className="text-slate-400">
+                          {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="px-4 pb-4 bg-slate-50 border-t border-slate-100">
+                      <div className="pt-4 grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">Reference</p>
+                          <p className="text-sm font-mono text-slate-900">{row.reference || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">Type</p>
+                          <p className="text-sm text-slate-900 capitalize">{row.type}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">Category</p>
+                          <p className="text-sm text-slate-900">{row.category.replace('_', ' ')}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-slate-500 mb-1">Status</p>
+                          <p className="text-sm text-slate-900">{row.status}</p>
+                        </div>
+                        {row.merchantName && (
+                          <div className="col-span-2">
+                            <p className="text-xs text-slate-500 mb-1">Merchant</p>
+                            <p className="text-sm text-slate-900">{row.merchantName}</p>
+                          </div>
+                        )}
+                        <div className="col-span-2">
+                          <p className="text-xs text-slate-500 mb-1">Date & Time</p>
+                          <p className="text-sm text-slate-900">
+                            {new Date(row.date).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Download Receipt Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownloadReceipt(row.id);
+                        }}
+                        disabled={downloadingId === row.id}
+                        className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-xl transition-colors"
+                      >
+                        {downloadingId === row.id ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Generating Receipt...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-5 h-5" />
+                            <span>Download Receipt (PDF)</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               );})
             )}
