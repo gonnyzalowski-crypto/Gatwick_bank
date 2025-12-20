@@ -67,28 +67,16 @@ transactionsRouter.get('/category/:category', async (req, res) => {
 });
 
 /**
- * GET /api/v1/transactions/:id
- * Get a specific transaction by ID
- */
-transactionsRouter.get('/:id', async (req, res) => {
-  try {
-    const result = await getTransactionById(req.params.id, req.user.userId);
-    res.json(result);
-  } catch (error) {
-    console.error('Error in GET /transactions/:id:', error);
-    const statusCode = error.message.includes('not found') ? 404 : 500;
-    res.status(statusCode).json({ error: error.message });
-  }
-});
-
-/**
  * GET /api/v1/transactions/:id/receipt
  * Download PDF receipt for a transaction
+ * NOTE: This route MUST come before /:id to avoid being caught by the generic route
  */
 transactionsRouter.get('/:id/receipt', async (req, res) => {
   try {
     const transactionId = req.params.id;
     const userId = req.user.userId;
+
+    console.log(`Generating receipt for transaction: ${transactionId}, user: ${userId}`);
 
     // Generate PDF receipt
     const pdfBuffer = await generateTransactionReceipt(transactionId, userId);
@@ -97,10 +85,13 @@ transactionsRouter.get('/:id/receipt', async (req, res) => {
     const receiptData = await getReceiptData(transactionId, userId);
     const filename = `RoschCapital_Receipt_${receiptData.reference || transactionId}.pdf`;
 
+    console.log(`Receipt generated successfully, size: ${pdfBuffer.length} bytes`);
+
     // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Length', pdfBuffer.length);
+    res.setHeader('Cache-Control', 'no-cache');
 
     res.send(pdfBuffer);
   } catch (error) {
@@ -123,6 +114,22 @@ transactionsRouter.get('/:id/receipt/preview', async (req, res) => {
     res.json(receiptData);
   } catch (error) {
     console.error('Error getting receipt preview:', error);
+    const statusCode = error.message.includes('not found') ? 404 : 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/transactions/:id
+ * Get a specific transaction by ID
+ * NOTE: This route MUST come after more specific routes like /:id/receipt
+ */
+transactionsRouter.get('/:id', async (req, res) => {
+  try {
+    const result = await getTransactionById(req.params.id, req.user.userId);
+    res.json(result);
+  } catch (error) {
+    console.error('Error in GET /transactions/:id:', error);
     const statusCode = error.message.includes('not found') ? 404 : 500;
     res.status(statusCode).json({ error: error.message });
   }
