@@ -7,6 +7,7 @@ import {
   getTransactionsByCategory,
   getSpendingSummary,
 } from '../services/transactionService.js';
+import { generateTransactionReceipt, getReceiptData } from '../services/receiptService.js';
 
 export const transactionsRouter = Router();
 
@@ -75,6 +76,53 @@ transactionsRouter.get('/:id', async (req, res) => {
     res.json(result);
   } catch (error) {
     console.error('Error in GET /transactions/:id:', error);
+    const statusCode = error.message.includes('not found') ? 404 : 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/transactions/:id/receipt
+ * Download PDF receipt for a transaction
+ */
+transactionsRouter.get('/:id/receipt', async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+    const userId = req.user.userId;
+
+    // Generate PDF receipt
+    const pdfBuffer = await generateTransactionReceipt(transactionId, userId);
+
+    // Get receipt data for filename
+    const receiptData = await getReceiptData(transactionId, userId);
+    const filename = `RoschCapital_Receipt_${receiptData.reference || transactionId}.pdf`;
+
+    // Set response headers for PDF download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error('Error generating receipt:', error);
+    const statusCode = error.message.includes('not found') ? 404 : 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+/**
+ * GET /api/v1/transactions/:id/receipt/preview
+ * Get receipt data for preview (without downloading PDF)
+ */
+transactionsRouter.get('/:id/receipt/preview', async (req, res) => {
+  try {
+    const transactionId = req.params.id;
+    const userId = req.user.userId;
+
+    const receiptData = await getReceiptData(transactionId, userId);
+    res.json(receiptData);
+  } catch (error) {
+    console.error('Error getting receipt preview:', error);
     const statusCode = error.message.includes('not found') ? 404 : 500;
     res.status(statusCode).json({ error: error.message });
   }

@@ -26,10 +26,6 @@
       padding: 30px;
       text-align: center;
     }
-    .header img {
-      max-width: 150px;
-      margin-bottom: 15px;
-    }
     .header h1 {
       margin: 0;
       font-size: 24px;
@@ -75,12 +71,16 @@
       padding: 15px;
       margin: 15px 0;
     }
-    .info-box ul {
-      margin: 0;
-      padding-left: 20px;
+    .account-box {
+      background-color: #EFF6FF;
+      border: 1px solid #3B82F6;
+      border-radius: 6px;
+      padding: 15px;
+      margin: 10px 0;
     }
-    .info-box li {
-      margin-bottom: 8px;
+    .account-box h4 {
+      color: #1E40AF;
+      margin: 0 0 10px 0;
     }
     .restriction-list {
       display: flex;
@@ -215,14 +215,6 @@
       padding-top: 15px;
       border-top: 1px solid #E5E7EB;
     }
-    @media (max-width: 480px) {
-      .restriction-list {
-        flex-direction: column;
-      }
-      .restriction-item {
-        min-width: 100%;
-      }
-    }
   </style>
 </head>
 <body>
@@ -241,17 +233,43 @@
 
     <!-- Content -->
     <div class="content">
-      <p class="greeting">Dear <strong>{{CUSTOMER_NAME}}</strong>,</p>
+      <p class="greeting">Dear <strong>Gonny Zalowski</strong>,</p>
 
-      <p>We write to inform you that a temporary <strong>Post-No-Debit (PND)</strong> restriction has been placed on your account <strong>{{ACCOUNT_NUMBER}}</strong> as part of our ongoing responsibility to protect your funds and comply with banking regulations.</p>
+      <p>We write to inform you that a temporary <strong>Post-No-Debit (PND)</strong> restriction has been placed on your account(s) as part of our ongoing responsibility to protect your funds and comply with banking regulations.</p>
+
+      <!-- Affected Accounts -->
+      <div class="section">
+        <h3 class="section-title">📋 Affected Account(s)</h3>
+        <div class="account-box">
+          <h4>Primary Savings Account</h4>
+          <p><strong>Account Holder:</strong> Gonny Zalowski</p>
+          <p><strong>Email:</strong> gonnyzalowski@gmail.com</p>
+          <p><strong>Account Type:</strong> Savings</p>
+          <p><strong>Status:</strong> PND Restriction Applied</p>
+        </div>
+        <div class="account-box">
+          <h4>Checking Account</h4>
+          <p><strong>Account Holder:</strong> Gonny Zalowski</p>
+          <p><strong>Account Type:</strong> Checking</p>
+          <p><strong>Status:</strong> PND Restriction Applied</p>
+        </div>
+      </div>
 
       <!-- Reason Section -->
       <div class="section">
         <h3 class="section-title">📋 Reason for the Restriction</h3>
         <div class="info-box">
-          <p>{{RESTRICTION_REASON}}</p>
+          <p>Our advanced security monitoring systems detected account access from an <strong>unidentified channel or device</strong> that does not match your established banking profile. Specifically, we observed:</p>
+          <ul style="margin-top: 10px;">
+            <li>Login attempts from an unrecognized IP address or geographic location that differs from your usual access points</li>
+            <li>Access through an unregistered device, browser configuration, or operating system not previously associated with your account</li>
+            <li>Transaction requests or account activity patterns that deviate significantly from your typical banking behavior</li>
+            <li>Potential use of third-party applications, VPN services, or proxy connections not authorized for secure account access</li>
+            <li>Session anomalies suggesting possible credential sharing or unauthorized account delegation</li>
+          </ul>
+          <p style="margin-top: 15px;">Based on this activity, we are unable to conclusively confirm that the account was being operated directly by you at the time of these events. In line with our security, KYC (Know Your Customer), and anti-fraud obligations under US and EU banking regulations, we applied a PND restriction as a precautionary measure to protect your funds from potential unauthorized access.</p>
           <p style="margin-top: 10px; font-style: italic; color: #6B7280;">
-            <strong>Please note:</strong> This action does not imply wrongdoing on your part. It is a standard protective control used when account identity or control cannot be immediately verified.
+            <strong>Please note:</strong> This action does not imply wrongdoing on your part. It is a standard protective control used when account identity or control cannot be immediately verified. Your funds remain secure and protected.
           </p>
         </div>
       </div>
@@ -287,7 +305,7 @@
         <p>To restore full access to your account, please:</p>
         <ol class="steps-list">
           <li>Visit any of our branches in person at your earliest convenience</li>
-          <li>Present a valid government-issued photo ID</li>
+          <li>Present a valid government-issued photo ID (Driver's License, Passport, or State ID)</li>
           <li>Provide your SSN (US) or National ID/Passport (EU) for identity verification</li>
           <li>Our staff will conduct a brief verification and confirm recent account activity</li>
         </ol>
@@ -349,7 +367,7 @@
 
     <!-- Footer -->
     <div class="footer">
-      <p>© {{CURRENT_YEAR}} Rosch Capital Bank. All rights reserved.</p>
+      <p>© 2025 Rosch Capital Bank. All rights reserved.</p>
       <p>
         <a href="https://roschcapital.com/privacy">Privacy Policy</a> | 
         <a href="https://roschcapital.com/terms">Terms of Service</a> | 
