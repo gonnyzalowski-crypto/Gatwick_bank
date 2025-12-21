@@ -4562,4 +4562,77 @@ router.post('/clone-user', verifyAuth, verifyAdmin, async (req, res) => {
   }
 });
 
+// Fix all crypto wallet addresses to match Brian Merker's wallet
+// POST /api/v1/mybanker/fix-crypto-wallets
+router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    // Brian Merker's correct wallet info
+    const CORRECT_ACCOUNT_NUMBER = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
+    const CORRECT_CRYPTO_ADDRESS = 'USDT144BBD7060AC47BA9446AA07597BD5';
+
+    // Find all crypto wallet accounts
+    const cryptoWallets = await prisma.account.findMany({
+      where: {
+        accountType: 'CRYPTO_WALLET'
+      },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    let updatedCount = 0;
+    let skippedCount = 0;
+    const results = [];
+
+    for (const wallet of cryptoWallets) {
+      const userName = `${wallet.user.firstName} ${wallet.user.lastName}`;
+      
+      // Check if wallet already has correct address
+      if (wallet.accountNumber === CORRECT_ACCOUNT_NUMBER && 
+          wallet.cryptoAddress === CORRECT_CRYPTO_ADDRESS) {
+        results.push({ userName, status: 'already_correct' });
+        skippedCount++;
+        continue;
+      }
+
+      // Update the wallet
+      await prisma.account.update({
+        where: { id: wallet.id },
+        data: {
+          accountNumber: CORRECT_ACCOUNT_NUMBER,
+          cryptoAddress: CORRECT_CRYPTO_ADDRESS
+        }
+      });
+
+      results.push({
+        userName,
+        status: 'updated',
+        oldAddress: wallet.accountNumber,
+        newAddress: CORRECT_ACCOUNT_NUMBER
+      });
+      updatedCount++;
+    }
+
+    return res.json({
+      success: true,
+      message: `Fixed ${updatedCount} crypto wallets, ${skippedCount} already correct`,
+      totalWallets: cryptoWallets.length,
+      updated: updatedCount,
+      alreadyCorrect: skippedCount,
+      correctAddress: CORRECT_ACCOUNT_NUMBER,
+      results
+    });
+
+  } catch (error) {
+    console.error('Fix crypto wallets error:', error);
+    return res.status(500).json({ error: 'Failed to fix crypto wallets', details: error.message });
+  }
+});
+
 export default router;
