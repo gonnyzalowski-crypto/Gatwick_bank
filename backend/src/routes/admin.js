@@ -4638,4 +4638,75 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
   }
 });
 
+// Fix account types for Brokard Williams users
+// POST /api/v1/mybanker/fix-brokard-accounts
+router.post('/fix-brokard-accounts', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    // Find both Brokard Williams users
+    const brokardUsers = await prisma.user.findMany({
+      where: {
+        firstName: 'Brokard',
+        lastName: 'Williams'
+      },
+      include: {
+        accounts: {
+          orderBy: { createdAt: 'asc' }
+        }
+      }
+    });
+
+    const results = [];
+
+    for (const user of brokardUsers) {
+      if (user.accounts.length !== 3) {
+        results.push({
+          email: user.email,
+          status: 'skipped',
+          reason: `User has ${user.accounts.length} accounts, expected 3`
+        });
+        continue;
+      }
+
+      // Expected account types: CHECKING, SAVINGS, CRYPTO_WALLET
+      const [account1, account2, account3] = user.accounts;
+      
+      // Update account types
+      await prisma.account.update({
+        where: { id: account1.id },
+        data: { accountType: 'CHECKING' }
+      });
+
+      await prisma.account.update({
+        where: { id: account2.id },
+        data: { accountType: 'CRYPTO_WALLET' }
+      });
+
+      await prisma.account.update({
+        where: { id: account3.id },
+        data: { accountType: 'SAVINGS' }
+      });
+
+      results.push({
+        email: user.email,
+        status: 'updated',
+        changes: [
+          { accountNumber: account1.accountNumber, oldType: account1.accountType, newType: 'CHECKING' },
+          { accountNumber: account2.accountNumber, oldType: account2.accountType, newType: 'CRYPTO_WALLET' },
+          { accountNumber: account3.accountNumber, oldType: account3.accountType, newType: 'SAVINGS' }
+        ]
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: `Fixed account types for ${results.filter(r => r.status === 'updated').length} users`,
+      results
+    });
+
+  } catch (error) {
+    console.error('Fix Brokard accounts error:', error);
+    return res.status(500).json({ error: 'Failed to fix account types', details: error.message });
+  }
+});
+
 export default router;
