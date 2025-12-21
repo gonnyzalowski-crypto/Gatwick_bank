@@ -4229,4 +4229,329 @@ router.post('/clone-transactions', verifyAuth, verifyAdmin, async (req, res) => 
   }
 });
 
+// Clone entire user with all data
+// POST /api/v1/mybanker/clone-user
+router.post('/clone-user', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { sourceEmail, targetEmail } = req.body;
+    
+    if (!sourceEmail || !targetEmail) {
+      return res.status(400).json({ error: 'Source and target emails are required' });
+    }
+
+    // 1. Find source user with all relations
+    const sourceUser = await prisma.user.findUnique({
+      where: { email: sourceEmail },
+      include: {
+        accounts: {
+          include: {
+            transactions: true,
+            debitCards: true,
+            loans: true,
+            withdrawals: true
+          }
+        },
+        kycDocuments: true,
+        loans: true,
+        deposits: true,
+        cheques: true,
+        debitCards: true,
+        creditCards: true,
+        transferRequests: true,
+        beneficiaries: true,
+        cardTransactions: true,
+        supportTickets: {
+          include: {
+            messages: true
+          }
+        },
+        withdrawals: true,
+        recurringPayments: true
+      }
+    });
+
+    if (!sourceUser) {
+      return res.status(404).json({ error: `Source user not found: ${sourceEmail}` });
+    }
+
+    // 2. Check if target user already exists
+    const existingTarget = await prisma.user.findUnique({
+      where: { email: targetEmail }
+    });
+
+    if (existingTarget) {
+      return res.status(400).json({ error: `Target user already exists: ${targetEmail}` });
+    }
+
+    // 3. Create new user (same data except email)
+    const newUser = await prisma.user.create({
+      data: {
+        email: targetEmail,
+        password: sourceUser.password,
+        firstName: sourceUser.firstName,
+        lastName: sourceUser.lastName,
+        phone: sourceUser.phone,
+        phoneCountryCode: sourceUser.phoneCountryCode,
+        dateOfBirth: sourceUser.dateOfBirth,
+        address: sourceUser.address,
+        city: sourceUser.city,
+        state: sourceUser.state,
+        zipCode: sourceUser.zipCode,
+        country: sourceUser.country,
+        isBusinessAccount: sourceUser.isBusinessAccount,
+        businessName: sourceUser.businessName,
+        businessType: sourceUser.businessType,
+        taxId: sourceUser.taxId,
+        businessAddress: sourceUser.businessAddress,
+        businessCity: sourceUser.businessCity,
+        businessState: sourceUser.businessState,
+        businessZip: sourceUser.businessZip,
+        businessCountry: sourceUser.businessCountry,
+        representativeName: sourceUser.representativeName,
+        representativeTitle: sourceUser.representativeTitle,
+        profilePhoto: sourceUser.profilePhoto,
+        nationality: sourceUser.nationality,
+        governmentIdType: sourceUser.governmentIdType,
+        governmentIdNumber: sourceUser.governmentIdNumber,
+        isAdmin: false,
+        accountStatus: sourceUser.accountStatus,
+        kycStatus: sourceUser.kycStatus,
+        totalSentAmount: sourceUser.totalSentAmount,
+        loginPreference: sourceUser.loginPreference,
+        autoDebitEnabled: sourceUser.autoDebitEnabled
+      }
+    });
+
+    const stats = {
+      accounts: 0,
+      transactions: 0,
+      debitCards: 0,
+      creditCards: 0,
+      kycDocuments: 0,
+      loans: 0,
+      beneficiaries: 0,
+      recurringPayments: 0
+    };
+
+    // 4. Clone accounts with new account numbers
+    const accountMap = new Map();
+    for (const oldAccount of sourceUser.accounts) {
+      const newAccountNumber = '7' + Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
+      
+      const newAccount = await prisma.account.create({
+        data: {
+          userId: newUser.id,
+          accountType: oldAccount.accountType,
+          accountNumber: newAccountNumber,
+          balance: oldAccount.balance,
+          availableBalance: oldAccount.availableBalance,
+          pendingBalance: oldAccount.pendingBalance,
+          accountName: oldAccount.accountName,
+          cryptoSymbol: oldAccount.cryptoSymbol,
+          cryptoAddress: oldAccount.cryptoAddress,
+          currency: oldAccount.currency,
+          isActive: oldAccount.isActive,
+          isPrimary: oldAccount.isPrimary,
+          createdAt: oldAccount.createdAt
+        }
+      });
+
+      accountMap.set(oldAccount.id, newAccount.id);
+      stats.accounts++;
+    }
+
+    // 5. Clone transactions with auto-generated references
+    for (const oldAccount of sourceUser.accounts) {
+      const newAccountId = accountMap.get(oldAccount.id);
+      
+      for (const oldTx of oldAccount.transactions) {
+        const newReference = `CLN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+        
+        await prisma.transaction.create({
+          data: {
+            userId: newUser.id,
+            accountId: newAccountId,
+            reference: newReference,
+            amount: oldTx.amount,
+            type: oldTx.type,
+            description: oldTx.description,
+            category: oldTx.category,
+            merchantName: oldTx.merchantName,
+            merchantCategory: oldTx.merchantCategory,
+            status: oldTx.status,
+            createdAt: oldTx.createdAt
+          }
+        });
+        
+        stats.transactions++;
+      }
+    }
+
+    // 6. Clone debit cards
+    for (const oldCard of sourceUser.debitCards) {
+      const newAccountId = accountMap.get(oldCard.accountId);
+      
+      await prisma.debitCard.create({
+        data: {
+          userId: newUser.id,
+          accountId: newAccountId,
+          cardNumber: oldCard.cardNumber,
+          cardHolderName: `${newUser.firstName} ${newUser.lastName}`,
+          cvv: oldCard.cvv,
+          expiryDate: oldCard.expiryDate,
+          cardType: oldCard.cardType,
+          cardBrand: oldCard.cardBrand,
+          isActive: oldCard.isActive,
+          isFrozen: oldCard.isFrozen,
+          dailyLimit: oldCard.dailyLimit,
+          createdAt: oldCard.createdAt
+        }
+      });
+      
+      stats.debitCards++;
+    }
+
+    // 7. Clone credit cards
+    for (const oldCard of sourceUser.creditCards) {
+      await prisma.creditCard.create({
+        data: {
+          userId: newUser.id,
+          cardNumber: oldCard.cardNumber,
+          cardHolderName: `${newUser.firstName} ${newUser.lastName}`,
+          cvv: oldCard.cvv,
+          expiryDate: oldCard.expiryDate,
+          creditLimit: oldCard.creditLimit,
+          availableCredit: oldCard.availableCredit,
+          currentBalance: oldCard.currentBalance,
+          apr: oldCard.apr,
+          minimumPayment: oldCard.minimumPayment,
+          paymentDueDate: oldCard.paymentDueDate,
+          statementDate: oldCard.statementDate,
+          status: oldCard.status,
+          approvalStatus: oldCard.approvalStatus,
+          isActive: oldCard.isActive,
+          isFrozen: oldCard.isFrozen,
+          createdAt: oldCard.createdAt
+        }
+      });
+      
+      stats.creditCards++;
+    }
+
+    // 8. Clone KYC documents
+    for (const oldDoc of sourceUser.kycDocuments) {
+      await prisma.kYCDocument.create({
+        data: {
+          userId: newUser.id,
+          category: oldDoc.category,
+          documentType: oldDoc.documentType,
+          documentNumber: oldDoc.documentNumber,
+          filePath: oldDoc.filePath,
+          fileName: oldDoc.fileName,
+          fileSize: oldDoc.fileSize,
+          mimeType: oldDoc.mimeType,
+          description: oldDoc.description,
+          expiryDate: oldDoc.expiryDate,
+          issueDate: oldDoc.issueDate,
+          issuingAuthority: oldDoc.issuingAuthority,
+          status: oldDoc.status,
+          reviewNotes: oldDoc.reviewNotes,
+          createdAt: oldDoc.createdAt
+        }
+      });
+      stats.kycDocuments++;
+    }
+
+    // 9. Clone loans
+    for (const oldLoan of sourceUser.loans) {
+      const newAccountId = oldLoan.accountId ? accountMap.get(oldLoan.accountId) : null;
+      
+      await prisma.loan.create({
+        data: {
+          userId: newUser.id,
+          accountId: newAccountId,
+          loanType: oldLoan.loanType,
+          amount: oldLoan.amount,
+          interestRate: oldLoan.interestRate,
+          termMonths: oldLoan.termMonths,
+          monthlyPayment: oldLoan.monthlyPayment,
+          remainingBalance: oldLoan.remainingBalance,
+          totalPaid: oldLoan.totalPaid,
+          status: oldLoan.status,
+          approvedAt: oldLoan.approvedAt,
+          disbursedAt: oldLoan.disbursedAt,
+          nextPaymentDate: oldLoan.nextPaymentDate,
+          purpose: oldLoan.purpose,
+          createdAt: oldLoan.createdAt
+        }
+      });
+      stats.loans++;
+    }
+
+    // 10. Clone beneficiaries
+    for (const oldBen of sourceUser.beneficiaries) {
+      await prisma.beneficiary.create({
+        data: {
+          userId: newUser.id,
+          bankName: oldBen.bankName,
+          routingNumber: oldBen.routingNumber,
+          accountNumber: oldBen.accountNumber,
+          accountName: oldBen.accountName,
+          nickname: oldBen.nickname,
+          isActive: oldBen.isActive,
+          createdAt: oldBen.createdAt
+        }
+      });
+      stats.beneficiaries++;
+    }
+
+    // 11. Clone recurring payments
+    for (const oldPayment of sourceUser.recurringPayments) {
+      const newFromAccountId = accountMap.get(oldPayment.fromAccountId);
+      const newToAccountId = oldPayment.toAccountId ? accountMap.get(oldPayment.toAccountId) : null;
+      const newReference = `REC-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+      
+      await prisma.recurringPayment.create({
+        data: {
+          userId: newUser.id,
+          fromAccountId: newFromAccountId,
+          toAccountId: newToAccountId,
+          paymentType: oldPayment.paymentType,
+          recipientName: oldPayment.recipientName,
+          recipientBank: oldPayment.recipientBank,
+          recipientAccount: oldPayment.recipientAccount,
+          recipientRouting: oldPayment.recipientRouting,
+          amount: oldPayment.amount,
+          currency: oldPayment.currency,
+          description: oldPayment.description,
+          reference: newReference,
+          frequency: oldPayment.frequency,
+          startDate: oldPayment.startDate,
+          endDate: oldPayment.endDate,
+          nextExecutionDate: oldPayment.nextExecutionDate,
+          dayOfMonth: oldPayment.dayOfMonth,
+          dayOfWeek: oldPayment.dayOfWeek,
+          status: oldPayment.status,
+          executionCount: oldPayment.executionCount,
+          maxExecutions: oldPayment.maxExecutions,
+          createdAt: oldPayment.createdAt
+        }
+      });
+      stats.recurringPayments++;
+    }
+
+    return res.json({
+      success: true,
+      message: `Successfully cloned user from ${sourceEmail} to ${targetEmail}`,
+      newUserId: newUser.id,
+      stats,
+      note: 'Security questions and backup codes NOT cloned. Set these up via admin panel.'
+    });
+
+  } catch (error) {
+    console.error('Clone user error:', error);
+    return res.status(500).json({ error: 'Failed to clone user', details: error.message });
+  }
+});
+
 export default router;
