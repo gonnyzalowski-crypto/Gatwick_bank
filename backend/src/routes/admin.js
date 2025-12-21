@@ -4387,17 +4387,21 @@ router.post('/clone-user', verifyAuth, verifyAdmin, async (req, res) => {
       }
     }
 
-    // 6. Clone debit cards
+    // 6. Clone debit cards (generate new unique card numbers)
     for (const oldCard of sourceUser.debitCards) {
       const newAccountId = accountMap.get(oldCard.accountId);
+      
+      // Generate new unique card number (16 digits)
+      const newCardNumber = '4062' + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+      const newCvv = Math.floor(100 + Math.random() * 900).toString();
       
       await prisma.debitCard.create({
         data: {
           userId: newUser.id,
           accountId: newAccountId,
-          cardNumber: oldCard.cardNumber,
+          cardNumber: newCardNumber,
           cardHolderName: `${newUser.firstName} ${newUser.lastName}`,
-          cvv: oldCard.cvv,
+          cvv: newCvv,
           expiryDate: oldCard.expiryDate,
           cardType: oldCard.cardType,
           cardBrand: oldCard.cardBrand,
@@ -4411,14 +4415,18 @@ router.post('/clone-user', verifyAuth, verifyAdmin, async (req, res) => {
       stats.debitCards++;
     }
 
-    // 7. Clone credit cards
+    // 7. Clone credit cards (generate new unique card numbers)
     for (const oldCard of sourceUser.creditCards) {
+      // Generate new unique card number (16 digits)
+      const newCardNumber = '5175' + Math.floor(Math.random() * 1000000000000).toString().padStart(12, '0');
+      const newCvv = Math.floor(100 + Math.random() * 900).toString();
+      
       await prisma.creditCard.create({
         data: {
           userId: newUser.id,
-          cardNumber: oldCard.cardNumber,
+          cardNumber: newCardNumber,
           cardHolderName: `${newUser.firstName} ${newUser.lastName}`,
-          cvv: oldCard.cvv,
+          cvv: newCvv,
           expiryDate: oldCard.expiryDate,
           creditLimit: oldCard.creditLimit,
           availableCredit: oldCard.availableCredit,
