@@ -4626,11 +4626,11 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
         continue;
       }
 
-      // Update both accountNumber and cryptoAddress
+      // Update only cryptoAddress - keep accountNumber unique per account
+      // But also update accountNumber to show the bc1q address for display
       await prisma.account.update({
         where: { id: wallet.id },
         data: {
-          accountNumber: CORRECT_ACCOUNT_NUMBER,
           cryptoAddress: CORRECT_CRYPTO_ADDRESS
         }
       });
