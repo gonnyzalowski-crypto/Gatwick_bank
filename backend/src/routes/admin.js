@@ -4567,10 +4567,8 @@ router.post('/clone-user', verifyAuth, verifyAdmin, async (req, res) => {
 router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     // Brian Merker's correct wallet info
-    // accountNumber is the display number (bc1q...) - this is what user sees
-    // cryptoAddress is the internal address - keep this consistent too
-    const CORRECT_ACCOUNT_NUMBER = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
-    const CORRECT_CRYPTO_ADDRESS = 'USDT144BBD7060AC47BA9446AA07597BD5';
+    // The bc1q address is the correct one to use for all wallets
+    const CORRECT_CRYPTO_ADDRESS = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
 
     // Find Brian Merker's wallet first to confirm
     const brianUser = await prisma.user.findFirst({
@@ -4613,9 +4611,8 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
     for (const wallet of cryptoWallets) {
       const userName = `${wallet.user.firstName} ${wallet.user.lastName}`;
       
-      // Check if wallet already has correct addresses
-      if (wallet.accountNumber === CORRECT_ACCOUNT_NUMBER && 
-          wallet.cryptoAddress === CORRECT_CRYPTO_ADDRESS) {
+      // Check if wallet already has correct address
+      if (wallet.cryptoAddress === CORRECT_CRYPTO_ADDRESS) {
         results.push({ 
           userName, 
           status: 'already_correct',
@@ -4626,8 +4623,7 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
         continue;
       }
 
-      // Update only cryptoAddress - keep accountNumber unique per account
-      // But also update accountNumber to show the bc1q address for display
+      // Update cryptoAddress to the bc1q address
       await prisma.account.update({
         where: { id: wallet.id },
         data: {
@@ -4638,9 +4634,7 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
       results.push({
         userName,
         status: 'updated',
-        oldAccountNumber: wallet.accountNumber,
         oldCryptoAddress: wallet.cryptoAddress,
-        newAccountNumber: CORRECT_ACCOUNT_NUMBER,
         newCryptoAddress: CORRECT_CRYPTO_ADDRESS
       });
       updatedCount++;
@@ -4652,7 +4646,6 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
       totalWallets: cryptoWallets.length,
       updated: updatedCount,
       alreadyCorrect: skippedCount,
-      correctAccountNumber: CORRECT_ACCOUNT_NUMBER,
       correctCryptoAddress: CORRECT_CRYPTO_ADDRESS,
       results
     });
