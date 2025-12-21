@@ -4567,13 +4567,33 @@ router.post('/clone-user', verifyAuth, verifyAdmin, async (req, res) => {
 router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => {
   try {
     // Brian Merker's correct wallet info
+    // accountNumber is the display number (bc1q...) - this is what user sees
+    // cryptoAddress is the internal address - keep this consistent too
     const CORRECT_ACCOUNT_NUMBER = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
     const CORRECT_CRYPTO_ADDRESS = 'USDT144BBD7060AC47BA9446AA07597BD5';
 
-    // Find all crypto wallet accounts
+    // Find Brian Merker's wallet first to confirm
+    const brianUser = await prisma.user.findFirst({
+      where: {
+        firstName: 'Brian',
+        lastName: 'Merker'
+      },
+      include: {
+        accounts: {
+          where: {
+            accountType: 'CRYPTO_WALLET'
+          }
+        }
+      }
+    });
+
+    // Find all OTHER crypto wallet accounts (not Brian's)
     const cryptoWallets = await prisma.account.findMany({
       where: {
-        accountType: 'CRYPTO_WALLET'
+        accountType: 'CRYPTO_WALLET',
+        NOT: {
+          id: brianUser?.accounts[0]?.id
+        }
       },
       include: {
         user: {
@@ -4593,15 +4613,20 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
     for (const wallet of cryptoWallets) {
       const userName = `${wallet.user.firstName} ${wallet.user.lastName}`;
       
-      // Check if wallet already has correct address
+      // Check if wallet already has correct addresses
       if (wallet.accountNumber === CORRECT_ACCOUNT_NUMBER && 
           wallet.cryptoAddress === CORRECT_CRYPTO_ADDRESS) {
-        results.push({ userName, status: 'already_correct' });
+        results.push({ 
+          userName, 
+          status: 'already_correct',
+          accountNumber: wallet.accountNumber,
+          cryptoAddress: wallet.cryptoAddress
+        });
         skippedCount++;
         continue;
       }
 
-      // Update the wallet
+      // Update both accountNumber and cryptoAddress
       await prisma.account.update({
         where: { id: wallet.id },
         data: {
@@ -4613,8 +4638,10 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
       results.push({
         userName,
         status: 'updated',
-        oldAddress: wallet.accountNumber,
-        newAddress: CORRECT_ACCOUNT_NUMBER
+        oldAccountNumber: wallet.accountNumber,
+        oldCryptoAddress: wallet.cryptoAddress,
+        newAccountNumber: CORRECT_ACCOUNT_NUMBER,
+        newCryptoAddress: CORRECT_CRYPTO_ADDRESS
       });
       updatedCount++;
     }
@@ -4625,7 +4652,8 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
       totalWallets: cryptoWallets.length,
       updated: updatedCount,
       alreadyCorrect: skippedCount,
-      correctAddress: CORRECT_ACCOUNT_NUMBER,
+      correctAccountNumber: CORRECT_ACCOUNT_NUMBER,
+      correctCryptoAddress: CORRECT_CRYPTO_ADDRESS,
       results
     });
 
