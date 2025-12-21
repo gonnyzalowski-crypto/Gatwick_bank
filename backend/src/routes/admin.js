@@ -4570,28 +4570,10 @@ router.post('/fix-crypto-wallets', verifyAuth, verifyAdmin, async (req, res) => 
     // The bc1q address is the correct one to use for all wallets
     const CORRECT_CRYPTO_ADDRESS = 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7';
 
-    // Find Brian Merker's wallet first to confirm
-    const brianUser = await prisma.user.findFirst({
-      where: {
-        firstName: 'Brian',
-        lastName: 'Merker'
-      },
-      include: {
-        accounts: {
-          where: {
-            accountType: 'CRYPTO_WALLET'
-          }
-        }
-      }
-    });
-
-    // Find all OTHER crypto wallet accounts (not Brian's)
+    // Find ALL crypto wallet accounts (including Brian's)
     const cryptoWallets = await prisma.account.findMany({
       where: {
-        accountType: 'CRYPTO_WALLET',
-        NOT: {
-          id: brianUser?.accounts[0]?.id
-        }
+        accountType: 'CRYPTO_WALLET'
       },
       include: {
         user: {
