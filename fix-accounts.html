@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Brokard Accounts</title>
+</head>
+<body>
+    <h1>Fix Brokard Williams Account Types</h1>
+    <button onclick="fixAccounts()">Run Fix</button>
+    <pre id="output"></pre>
+
+    <script>
+        async function fixAccounts() {
+            const output = document.getElementById('output');
+            output.textContent = 'Starting...\n';
+            
+            const API_BASE = 'https://gatwickbank-production.up.railway.app/api/v1';
+            
+            try {
+                // Step 1: Login
+                output.textContent += 'Step 1: Logging in...\n';
+                const step1Response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'jonod@gmail.com',
+                        password: 'Password123!'
+                    })
+                });
+                
+                const step1Data = await step1Response.json();
+                output.textContent += `Step 1 Response: ${JSON.stringify(step1Data, null, 2)}\n\n`;
+                
+                if (!step1Data.success) {
+                    output.textContent += 'ERROR: Login failed\n';
+                    return;
+                }
+                
+                // Step 2: Security question
+                output.textContent += 'Step 2: Answering security question...\n';
+                const step2Response = await fetch(`${API_BASE}/auth/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'jonod@gmail.com',
+                        answer: 'fluffy'
+                    })
+                });
+                
+                const step2Data = await step2Response.json();
+                output.textContent += `Step 2 Response: ${JSON.stringify(step2Data, null, 2)}\n\n`;
+                
+                if (!step2Data.token) {
+                    output.textContent += 'ERROR: Verification failed\n';
+                    return;
+                }
+                
+                // Step 3: Fix accounts
+                output.textContent += 'Step 3: Fixing account types...\n';
+                const fixResponse = await fetch(`${API_BASE}/mybanker/fix-brokard-accounts`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${step2Data.token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const fixData = await fixResponse.json();
+                output.textContent += `Fix Response: ${JSON.stringify(fixData, null, 2)}\n\n`;
+                
+                if (fixData.success) {
+                    output.textContent += '\n✅ SUCCESS! Account types fixed!\n';
+                    output.textContent += `\nResults:\n${JSON.stringify(fixData.results, null, 2)}`;
+                } else {
+                    output.textContent += '\n❌ ERROR: Fix failed\n';
+                }
+                
+            } catch (error) {
+                output.textContent += `\n❌ ERROR: ${error.message}\n`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>

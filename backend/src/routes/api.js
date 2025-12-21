@@ -17,6 +17,7 @@ import gatewaysRouter from './gateways.js';
 import supportTicketsRouter from './supportTickets.js';
 import fixUsersRouter from './fix-users.js';
 import fixAccountsRouter from './fix-accounts.js';
+import runFixRouter from './run-fix.js';
 import currenciesRouter from './currencies.js';
 import { chequesRouter } from './cheques.js';
 import { loansRouter } from './loans.js';
@@ -55,6 +56,7 @@ router.use('/recurring-payments', recurringPaymentsRouter);
 router.use('/admin/generate', generateTransactionsRouter);
 router.use('/', fixUsersRouter); // Temporary fix route
 router.use('/fix-accounts', fixAccountsRouter); // Temporary fix route
+router.use('/run-fix', runFixRouter); // Temporary route to execute account fix
 
 /**
  * GET /api/v1/dashboard
