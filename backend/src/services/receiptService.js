@@ -122,8 +122,8 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       doc.fillColor('#FFFFFF').font('Helvetica-Bold').fontSize(9).text(statusText, pageWidth - 60 - statusWidth + 8, y + 14);
 
       // ============ AMOUNT SECTION ============
-      y = 175;
-      doc.rect(leftMargin, y, contentWidth, 70).fill('#F9FAFB').stroke('#E5E7EB');
+      y = 160;
+      doc.rect(leftMargin, y, contentWidth, 60).fill('#F9FAFB').stroke('#E5E7EB');
       
       const isCredit = ['CREDIT', 'DEPOSIT'].includes(transaction.type?.toUpperCase());
       const amountColor = isCredit ? '#059669' : '#DC2626';
@@ -131,14 +131,14 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       const absAmount = Math.abs(parseFloat(transaction.amount));
       const formattedAmount = absAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-      doc.fillColor(textMuted).font('Helvetica').fontSize(10).text('Amount', leftMargin + 20, y + 12, { lineBreak: false });
-      doc.fillColor(amountColor).font('Helvetica-Bold').fontSize(28).text(`${amountSign}$${formattedAmount}`, leftMargin + 20, y + 28, { lineBreak: false });
+      doc.fillColor(textMuted).font('Helvetica').fontSize(9).text('Amount', leftMargin + 20, y + 10, { lineBreak: false });
+      doc.fillColor(amountColor).font('Helvetica-Bold').fontSize(24).text(`${amountSign}$${formattedAmount}`, leftMargin + 20, y + 24, { lineBreak: false });
       
-      doc.fillColor(textMuted).font('Helvetica').fontSize(10).text('Transaction Type', leftMargin + 280, y + 25, { lineBreak: false });
-      doc.fillColor(textDark).font('Helvetica-Bold').fontSize(12).text(transaction.type?.toUpperCase() || 'N/A', leftMargin + 280, y + 40, { lineBreak: false });
+      doc.fillColor(textMuted).font('Helvetica').fontSize(9).text('Transaction Type', leftMargin + 280, y + 22, { lineBreak: false });
+      doc.fillColor(textDark).font('Helvetica-Bold').fontSize(11).text(transaction.type?.toUpperCase() || 'N/A', leftMargin + 280, y + 36, { lineBreak: false });
 
       // ============ TRANSACTION DETAILS ============
-      y = 265;
+      y = 235;
       doc.fillColor(primaryColor).font('Helvetica-Bold').fontSize(12).text('Transaction Details', leftMargin, y);
       doc.moveTo(leftMargin, y + 18).lineTo(pageWidth - 60, y + 18).strokeColor('#E5E7EB').lineWidth(0.5).stroke();
 
@@ -150,17 +150,17 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       ];
 
       details.forEach(([label, value]) => {
-        doc.fillColor(textMuted).font('Helvetica').fontSize(10).text(label, leftMargin, y, { lineBreak: false });
-        doc.fillColor(textDark).font('Helvetica').fontSize(10).text(value, leftMargin + 150, y, { width: contentWidth - 150, lineBreak: false });
-        y += 18;
+        doc.fillColor(textMuted).font('Helvetica').fontSize(9).text(label, leftMargin, y, { lineBreak: false });
+        doc.fillColor(textDark).font('Helvetica').fontSize(9).text(value, leftMargin + 150, y, { width: contentWidth - 150, lineBreak: false });
+        y += 16;
       });
 
       // ============ ACCOUNT INFORMATION ============
-      y += 10;
-      doc.fillColor(primaryColor).font('Helvetica-Bold').fontSize(12).text('Account Information', leftMargin, y);
-      doc.moveTo(leftMargin, y + 18).lineTo(pageWidth - 60, y + 18).strokeColor('#E5E7EB').lineWidth(0.5).stroke();
+      y += 8;
+      doc.fillColor(primaryColor).font('Helvetica-Bold').fontSize(11).text('Account Information', leftMargin, y);
+      doc.moveTo(leftMargin, y + 16).lineTo(pageWidth - 60, y + 16).strokeColor('#E5E7EB').lineWidth(0.5).stroke();
 
-      y += 25;
+      y += 22;
       const accountInfo = [
         ['Account Holder', `${transaction.account.user.firstName} ${transaction.account.user.lastName}`],
         ['Account Number', `****${transaction.account.accountNumber?.slice(-4) || 'XXXX'}`],
@@ -169,20 +169,20 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       ];
 
       accountInfo.forEach(([label, value]) => {
-        doc.fillColor(textMuted).font('Helvetica').fontSize(10).text(label, leftMargin, y, { lineBreak: false });
-        doc.fillColor(textDark).font('Helvetica').fontSize(10).text(value, leftMargin + 150, y, { width: contentWidth - 150, lineBreak: false });
-        y += 18;
+        doc.fillColor(textMuted).font('Helvetica').fontSize(9).text(label, leftMargin, y, { lineBreak: false });
+        doc.fillColor(textDark).font('Helvetica').fontSize(9).text(value, leftMargin + 150, y, { width: contentWidth - 150, lineBreak: false });
+        y += 16;
       });
 
       // ============ VERIFICATION BOX ============
-      y += 12;
-      doc.rect(leftMargin, y, contentWidth, 55).fill('#F0FDF4').stroke('#86EFAC');
+      y += 10;
+      doc.rect(leftMargin, y, contentWidth, 50).fill('#F0FDF4').stroke('#86EFAC');
       
-      doc.fillColor('#166534').font('Helvetica-Bold').fontSize(10).text('Verification', leftMargin + 15, y + 10, { continued: false });
-      doc.fillColor('#15803D').font('Helvetica').fontSize(9)
-         .text('This receipt was generated electronically by Rosch Capital Bank.', leftMargin + 15, y + 24, { continued: false })
-         .text(`Document ID: RCB-${transaction.id.slice(-8).toUpperCase()}`, leftMargin + 15, y + 36, { continued: false })
-         .text(`Generated: ${new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`, leftMargin + 15, y + 48, { continued: false });
+      doc.fillColor('#166534').font('Helvetica-Bold').fontSize(9).text('Verification', leftMargin + 15, y + 8, { continued: false });
+      doc.fillColor('#15803D').font('Helvetica').fontSize(8)
+         .text('This receipt was generated electronically by Rosch Capital Bank.', leftMargin + 15, y + 20, { continued: false })
+         .text(`Document ID: RCB-${transaction.id.slice(-8).toUpperCase()}`, leftMargin + 15, y + 31, { continued: false })
+         .text(`Generated: ${new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`, leftMargin + 15, y + 42, { continued: false });
 
       // ============ FOOTER ============
       const footerY = doc.page.height - 80;
