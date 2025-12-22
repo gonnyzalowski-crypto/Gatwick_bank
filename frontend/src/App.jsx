@@ -22,6 +22,7 @@ import KYCUploadPage from './pages/KYCUploadPage';
 import TransactionHistoryPage from './pages/TransactionHistoryPage';
 import SupportPage from './pages/SupportTicketsPage';
 import LoansPage from './pages/LoansPage';
+import FixedDepositsPage from './pages/FixedDepositsPage';
 import ExternalTransfersPage from './pages/ExternalTransfersPage';
 import RecurringPaymentsPage from './pages/RecurringPaymentsPage';
 import StatementPage from './pages/StatementPage';
@@ -61,6 +62,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <LoansPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/fixed-deposits"
+            element={
+              <ProtectedRoute>
+                <FixedDepositsPage />
               </ProtectedRoute>
             }
           />

@@ -333,6 +333,7 @@ export const AdminDashboard = () => {
                   {activeSection === 'deposit' && 'Deposit Management'}
                   {activeSection === 'withdrawal' && 'Withdrawal Management'}
                   {activeSection === 'cheque' && 'Cheque Management'}
+                  {activeSection === 'fixed-deposits' && 'Fixed Deposits Management'}
                   {activeSection === 'cards' && 'Cards Management'}
                   {activeSection === 'loans' && 'Loans Management'}
                   {activeSection === 'external-transfers' && 'External Transfers'}
@@ -523,7 +524,7 @@ export const AdminDashboard = () => {
           {activeSection === 'tool-settings' && <AdminSettings />}
 
           {/* Other sections show placeholder */}
-          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'withdrawal', 'cheque', 'cards', 'loans', 'external-transfers', 'recurring-payments', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets'].includes(activeSection) && (
+          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'withdrawal', 'cheque', 'fixed-deposits', 'cards', 'loans', 'external-transfers', 'recurring-payments', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets'].includes(activeSection) && (
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4">

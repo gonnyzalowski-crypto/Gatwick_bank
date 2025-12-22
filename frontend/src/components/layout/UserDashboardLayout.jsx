@@ -214,6 +214,11 @@ const UserDashboardLayout = ({ children }) => {
                   <Landmark className="h-5 w-5" />
                   <span>Loans</span>
                 </NavLink>
+
+                <NavLink to="/fixed-deposits" className={navItemClasses} onClick={closeSidebar}>
+                  <PiggyBank className="h-5 w-5" />
+                  <span>Fixed Deposits</span>
+                </NavLink>
               </div>
             </div>
 
