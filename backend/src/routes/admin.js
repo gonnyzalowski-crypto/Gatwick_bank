@@ -4709,4 +4709,175 @@ router.post('/fix-brokard-accounts', verifyAuth, verifyAdmin, async (req, res) =
   }
 });
 
+// ============================================
+// FIXED DEPOSITS MANAGEMENT
+// ============================================
+
+/**
+ * GET /api/v1/mybanker/fixed-deposits
+ * Get all fixed deposits (admin view)
+ */
+router.get('/fixed-deposits', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { status, userId, search } = req.query;
+    
+    const where = {};
+    if (status) where.status = status;
+    if (userId) where.userId = userId;
+    if (search) {
+      where.OR = [
+        { depositNumber: { contains: search, mode: 'insensitive' } },
+        { user: { email: { contains: search, mode: 'insensitive' } } },
+        { user: { firstName: { contains: search, mode: 'insensitive' } } },
+        { user: { lastName: { contains: search, mode: 'insensitive' } } }
+      ];
+    }
+
+    const deposits = await prisma.fixedDeposit.findMany({
+      where,
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        },
+        account: {
+          select: {
+            accountNumber: true,
+            accountType: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedDeposits = deposits.map(deposit => ({
+      ...deposit,
+      principalAmount: normalizeMoneyValue(deposit.principalAmount),
+      interestRate: normalizeMoneyValue(deposit.interestRate),
+      maturityAmount: normalizeMoneyValue(deposit.maturityAmount),
+      withdrawnAmount: normalizeMoneyValue(deposit.withdrawnAmount)
+    }));
+
+    return res.json({
+      success: true,
+      data: formattedDeposits
+    });
+
+  } catch (error) {
+    console.error('Get fixed deposits error:', error);
+    return res.status(500).json({ error: 'Failed to fetch fixed deposits' });
+  }
+});
+
+/**
+ * POST /api/v1/mybanker/fixed-deposits/:depositId/withdraw
+ * Admin withdraw a fixed deposit
+ */
+router.post('/fixed-deposits/:depositId/withdraw', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const { depositId } = req.params;
+    const adminId = req.user.userId;
+
+    const deposit = await prisma.fixedDeposit.findUnique({
+      where: { id: depositId },
+      include: { account: true }
+    });
+
+    if (!deposit) {
+      return res.status(404).json({ error: 'Fixed deposit not found' });
+    }
+
+    if (deposit.status !== 'ACTIVE') {
+      return res.status(400).json({ error: 'Fixed deposit is not active' });
+    }
+
+    const now = new Date();
+    const isMatured = now >= deposit.maturityDate;
+    const withdrawalAmount = isMatured 
+      ? normalizeMoneyValue(deposit.maturityAmount) 
+      : normalizeMoneyValue(deposit.principalAmount);
+
+    await prisma.$transaction(async (tx) => {
+      await tx.fixedDeposit.update({
+        where: { id: depositId },
+        data: {
+          status: 'WITHDRAWN',
+          withdrawnAmount: withdrawalAmount,
+          withdrawnAt: now,
+          processedBy: adminId
+        }
+      });
+
+      await tx.account.update({
+        where: { id: deposit.accountId },
+        data: {
+          balance: { increment: withdrawalAmount },
+          availableBalance: { increment: withdrawalAmount }
+        }
+      });
+
+      await tx.transaction.create({
+        data: {
+          accountId: deposit.accountId,
+          amount: withdrawalAmount,
+          type: 'CREDIT',
+          description: `Fixed Deposit Withdrawal (Admin) - ${deposit.depositNumber}`,
+          category: 'INVESTMENT',
+          merchantName: 'Rosch Capital Bank',
+          merchantCategory: 'Fixed Deposit',
+          status: 'COMPLETED',
+          reference: `ADM-WD-${deposit.depositNumber}`
+        }
+      });
+    });
+
+    return res.json({
+      success: true,
+      message: isMatured 
+        ? 'Fixed deposit matured and withdrawn successfully' 
+        : 'Fixed deposit withdrawn early (principal only)',
+      data: { withdrawalAmount, isMatured }
+    });
+
+  } catch (error) {
+    console.error('Admin withdraw fixed deposit error:', error);
+    return res.status(500).json({ error: 'Failed to withdraw fixed deposit' });
+  }
+});
+
+/**
+ * GET /api/v1/mybanker/fixed-deposits/stats
+ * Get overall fixed deposit statistics
+ */
+router.get('/fixed-deposits/stats', verifyAuth, verifyAdmin, async (req, res) => {
+  try {
+    const deposits = await prisma.fixedDeposit.findMany();
+
+    const stats = {
+      totalDeposits: deposits.length,
+      activeDeposits: deposits.filter(d => d.status === 'ACTIVE').length,
+      maturedDeposits: deposits.filter(d => d.status === 'MATURED').length,
+      withdrawnDeposits: deposits.filter(d => d.status === 'WITHDRAWN').length,
+      totalInvested: deposits
+        .filter(d => d.status === 'ACTIVE')
+        .reduce((sum, d) => sum + normalizeMoneyValue(d.principalAmount), 0),
+      expectedReturns: deposits
+        .filter(d => d.status === 'ACTIVE')
+        .reduce((sum, d) => sum + (normalizeMoneyValue(d.maturityAmount) - normalizeMoneyValue(d.principalAmount)), 0)
+    };
+
+    return res.json({
+      success: true,
+      data: stats
+    });
+
+  } catch (error) {
+    console.error('Get fixed deposit stats error:', error);
+    return res.status(500).json({ error: 'Failed to fetch statistics' });
+  }
+});
+
 export default router;

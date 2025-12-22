@@ -53,6 +53,7 @@ router.use('/loans', loansRouter);
 router.use('/beneficiaries', beneficiariesRouter);
 router.use('/backup', backupRouter);
 router.use('/recurring-payments', recurringPaymentsRouter);
+router.use('/fixed-deposits', fixedDepositsRouter);
 router.use('/admin/generate', generateTransactionsRouter);
 router.use('/', fixUsersRouter); // Temporary fix route
 router.use('/fix-accounts', fixAccountsRouter); // Temporary fix route
