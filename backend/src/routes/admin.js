@@ -4843,7 +4843,7 @@ router.post('/fixed-deposits/:depositId/withdraw', verifyAuth, verifyAdmin, asyn
           title: 'Fixed Deposit Withdrawal Approved',
           message: `Your withdrawal request for fixed deposit ${deposit.depositNumber} has been approved. ${isMatured ? 'Maturity amount' : 'Principal amount'} of $${withdrawalAmount.toLocaleString()} has been credited to your account.`,
           type: 'WITHDRAWAL_APPROVED',
-          isRead: false
+          read: false
         }
       });
     });

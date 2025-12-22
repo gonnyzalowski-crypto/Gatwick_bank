@@ -214,7 +214,7 @@ router.post('/:depositId/withdraw-request', verifyAuth, async (req, res) => {
           title: 'Fixed Deposit Withdrawal Request',
           message: `${updatedDeposit.user.firstName} ${updatedDeposit.user.lastName} has requested withdrawal of fixed deposit ${deposit.depositNumber} ($${deposit.principalAmount})`,
           type: 'WITHDRAWAL_REQUEST',
-          isRead: false
+          read: false
         }
       });
     }
@@ -226,7 +226,7 @@ router.post('/:depositId/withdraw-request', verifyAuth, async (req, res) => {
         title: 'Withdrawal Request Submitted',
         message: `Your withdrawal request for fixed deposit ${deposit.depositNumber} has been submitted. Processing takes a minimum of 3 weeks.`,
         type: 'WITHDRAWAL_REQUEST',
-        isRead: false
+        read: false
       }
     });
 
