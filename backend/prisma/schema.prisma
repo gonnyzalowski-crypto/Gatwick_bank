@@ -768,3 +768,31 @@ model RecurringPaymentExecution {
   @@index([status])
   @@map("recurring_payment_executions")
 }
+
+model FixedDeposit {
+  id              String   @id @default(cuid())
+  userId          String
+  accountId       String
+  depositNumber   String   @unique
+  principalAmount Decimal  @db.Decimal(15, 2)
+  interestRate    Decimal  @default(12.00) @db.Decimal(5, 2)
+  termMonths      Int
+  maturityAmount  Decimal  @db.Decimal(15, 2)
+  maturityDate    DateTime
+  status          String   @default("ACTIVE")
+  autoRenew       Boolean  @default(false)
+  withdrawnAmount Decimal? @db.Decimal(15, 2)
+  withdrawnAt     DateTime?
+  processedBy     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account         Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  processor       User?    @relation("ProcessedFixedDeposits", fields: [processedBy], references: [id])
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([status])
+  @@map("fixed_deposits")
+}
