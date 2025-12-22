@@ -25,6 +25,7 @@ import { beneficiariesRouter } from './beneficiaries.js';
 import backupRouter from './backup.js';
 import generateTransactionsRouter from './generateTransactions.js';
 import recurringPaymentsRouter from './recurringPayments.js';
+import fixedDepositsRouter from './fixedDeposits.js';
 import { verifyAuth } from '../middleware/auth.js';
 import { getAccountSummary } from '../services/accountService.js';
 
