@@ -122,10 +122,29 @@ router.post('/brokard', async (req, res) => {
     // Fix: Move crypto address from SAVINGS to CRYPTO_WALLET, change SAVINGS to USD
 
     // Find user by email
-    const user1 = await prisma.user.findUnique({
+    // Try to find user with different email variations
+    let user1 = await prisma.user.findUnique({
       where: { email: 'brokardw@gmail.com' },
       include: { accounts: true }
     });
+    
+    if (!user1) {
+      user1 = await prisma.user.findUnique({
+        where: { email: 'Brokardw@gmail.com' },
+        include: { accounts: true }
+      });
+    }
+    
+    // Also try to find by account number if email doesn't work
+    if (!user1) {
+      const account = await prisma.account.findFirst({
+        where: { accountNumber: '93644920391' },
+        include: { user: { include: { accounts: true } } }
+      });
+      if (account) {
+        user1 = account.user;
+      }
+    }
 
     if (user1) {
       console.log('Found Brokardw@gmail.com');
