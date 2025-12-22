@@ -207,6 +207,7 @@ export const AdminDashboard = () => {
           >
             <SubMenuItem label="Cards" onClick={() => setActiveSection('cards')} />
             <SubMenuItem label="Loans" onClick={() => setActiveSection('loans')} />
+            <SubMenuItem label="Fixed Deposits" onClick={() => setActiveSection('fixed-deposits')} />
             <SubMenuItem label="External Transfers" onClick={() => setActiveSection('external-transfers')} />
             <SubMenuItem label="Recurring Payments" onClick={() => setActiveSection('recurring-payments')} />
             <SubMenuItem label="Currencies" onClick={() => setActiveSection('currencies')} />
@@ -505,6 +506,9 @@ export const AdminDashboard = () => {
           {/* Loans Management */}
           {activeSection === 'loans' && <LoansManagement />}
 
+          {/* Fixed Deposits Management */}
+          {activeSection === 'fixed-deposits' && <FixedDepositsManagement />}
+
           {/* External Transfers Management */}
           {activeSection === 'external-transfers' && <ExternalTransfersManagement />}
 
@@ -525,7 +529,7 @@ export const AdminDashboard = () => {
           {activeSection === 'tool-settings' && <AdminSettings />}
 
           {/* Other sections show placeholder */}
-          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'withdrawal', 'cheque', 'cards', 'loans', 'external-transfers', 'recurring-payments', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets'].includes(activeSection) && (
+          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'withdrawal', 'cheque', 'cards', 'loans', 'fixed-deposits', 'external-transfers', 'recurring-payments', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets'].includes(activeSection) && (
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
