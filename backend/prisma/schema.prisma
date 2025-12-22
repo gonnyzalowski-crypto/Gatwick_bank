@@ -79,6 +79,8 @@ model User {
   supportTickets    SupportTicket[]
   withdrawals       Withdrawal[]
   recurringPayments RecurringPayment[]
+  fixedDeposits     FixedDeposit[]
+  processedFixedDeposits FixedDeposit[] @relation("ProcessedFixedDeposits")
   
   @@map("users")
 }
