@@ -113,6 +113,7 @@ model Account {
   loans       Loan[]
   recurringPaymentsFrom RecurringPayment[] @relation("RecurringFromAccount")
   recurringPaymentsTo   RecurringPayment[] @relation("RecurringToAccount")
+  fixedDeposits FixedDeposit[]
   
   @@map("accounts")
 }
