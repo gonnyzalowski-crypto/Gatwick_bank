@@ -684,4 +684,124 @@ router.delete('/fixed-deposit/:id', async (req, res) => {
   }
 });
 
+// POST /api/v1/fix-accounts/reset-test-deposits - Reset test fixed deposits
+router.post('/reset-test-deposits', async (req, res) => {
+  try {
+    const results = [];
+    
+    // Find users
+    const benard = await prisma.user.findUnique({
+      where: { email: 'benardwilliams822@gmail.com' },
+      include: { accounts: true }
+    });
+    
+    const brian = await prisma.user.findUnique({
+      where: { email: 'brianmerker3@gmail.com' },
+      include: { accounts: true }
+    });
+    
+    if (!benard || !brian) {
+      return res.status(404).json({ error: 'Users not found' });
+    }
+    
+    // Delete existing fixed deposits for these users
+    const deletedBenard = await prisma.fixedDeposit.deleteMany({
+      where: { userId: benard.id }
+    });
+    
+    const deletedBrian = await prisma.fixedDeposit.deleteMany({
+      where: { userId: brian.id }
+    });
+    
+    results.push({
+      action: 'Deleted existing deposits',
+      benard: deletedBenard.count,
+      brian: deletedBrian.count
+    });
+    
+    // Calculate dates - 89 days ago
+    const createdDate = new Date();
+    createdDate.setDate(createdDate.getDate() - 89);
+    
+    // Maturity date - 12 months from creation
+    const maturityDate = new Date(createdDate);
+    maturityDate.setMonth(maturityDate.getMonth() + 12);
+    
+    const principalAmount = 1000000;
+    const interestRate = 12.5;
+    const maturityAmount = principalAmount + (principalAmount * interestRate / 100);
+    
+    // Create new deposits for Benard Williams
+    const benardAccount = benard.accounts.find(acc => acc.accountType === 'CHECKING');
+    if (benardAccount) {
+      const benardDeposit = await prisma.fixedDeposit.create({
+        data: {
+          userId: benard.id,
+          accountId: benardAccount.id,
+          depositNumber: `FD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          principalAmount,
+          interestRate,
+          termMonths: 12,
+          maturityAmount,
+          maturityDate,
+          status: 'ACTIVE',
+          autoRenew: false,
+          createdAt: createdDate,
+          updatedAt: createdDate
+        }
+      });
+      
+      results.push({
+        user: 'benardwilliams822@gmail.com',
+        depositNumber: benardDeposit.depositNumber,
+        principal: principalAmount,
+        createdAt: createdDate.toISOString(),
+        maturityDate: maturityDate.toISOString()
+      });
+    }
+    
+    // Create new deposits for Brian Merker
+    const brianAccount = brian.accounts.find(acc => acc.accountType === 'CHECKING');
+    if (brianAccount) {
+      const brianDeposit = await prisma.fixedDeposit.create({
+        data: {
+          userId: brian.id,
+          accountId: brianAccount.id,
+          depositNumber: `FD-${Date.now() + 1}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+          principalAmount,
+          interestRate,
+          termMonths: 12,
+          maturityAmount,
+          maturityDate,
+          status: 'ACTIVE',
+          autoRenew: false,
+          createdAt: createdDate,
+          updatedAt: createdDate
+        }
+      });
+      
+      results.push({
+        user: 'brianmerker3@gmail.com',
+        depositNumber: brianDeposit.depositNumber,
+        principal: principalAmount,
+        createdAt: createdDate.toISOString(),
+        maturityDate: maturityDate.toISOString()
+      });
+    }
+    
+    return res.json({
+      success: true,
+      message: 'Test deposits reset successfully',
+      results
+    });
+    
+  } catch (error) {
+    console.error('❌ Error resetting test deposits:', error);
+    return res.status(500).json({ 
+      error: 'Failed to reset test deposits',
+      details: error.message 
+    });
+  }
+});
+
 export default router;
