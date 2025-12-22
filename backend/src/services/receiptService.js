@@ -185,13 +185,13 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
          .text(`Generated: ${new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`, leftMargin + 15, y + 42, { continued: false });
 
       // ============ FOOTER ============
-      const footerY = doc.page.height - 80;
-      doc.moveTo(leftMargin, footerY).lineTo(pageWidth - 60, footerY).strokeColor('#E5E7EB').lineWidth(0.5).stroke();
+      y += 65;
+      doc.moveTo(leftMargin, y).lineTo(pageWidth - 60, y).strokeColor('#E5E7EB').lineWidth(0.5).stroke();
 
-      doc.fillColor(textMuted).font('Helvetica').fontSize(8)
-         .text('Rosch Capital Bank  •  support@roschcapital.com  •  +1 (800) 55-ROSCH', leftMargin, footerY + 15, { width: contentWidth, align: 'center', continued: false })
-         .text('This is an official transaction receipt. FDIC Insured.', leftMargin, footerY + 28, { width: contentWidth, align: 'center', continued: false })
-         .text('© 2025 Rosch Capital Bank. All rights reserved.', leftMargin, footerY + 41, { width: contentWidth, align: 'center', continued: false });
+      doc.fillColor(textMuted).font('Helvetica').fontSize(7)
+         .text('Rosch Capital Bank  •  support@roschcapital.com  •  +1 (800) 55-ROSCH', leftMargin, y + 10, { width: contentWidth, align: 'center', continued: false })
+         .text('This is an official transaction receipt. FDIC Insured.', leftMargin, y + 20, { width: contentWidth, align: 'center', continued: false })
+         .text('© 2025 Rosch Capital Bank. All rights reserved.', leftMargin, y + 30, { width: contentWidth, align: 'center', continued: false });
 
       // Finalize the document - ensure only one page
       doc.end();
