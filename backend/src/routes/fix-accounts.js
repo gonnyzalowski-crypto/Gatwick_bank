@@ -241,19 +241,20 @@ router.post('/brokard', async (req, res) => {
         results.push({ user: 'brokardwilliams@gmail.com', account: '7068638722', action: 'Changed to CRYPTO_WALLET with BTC address' });
       }
 
-      // 7101225458: Keep as CRYPTO_WALLET, ensure no USDT
+      // 7101225458: Change to CHECKING (was incorrectly CRYPTO_WALLET)
       if (account7101) {
         await prisma.account.update({
           where: { id: account7101.id },
           data: {
+            accountType: 'CHECKING',
             isPrimary: false,
             cryptoAddress: null,
             cryptoSymbol: null,
             currency: 'USD',
-            accountName: 'Crypto Wallet'
+            accountName: null
           }
         });
-        results.push({ user: 'brokardwilliams@gmail.com', account: '7101225458', action: 'Kept as CRYPTO_WALLET, removed any USDT' });
+        results.push({ user: 'brokardwilliams@gmail.com', account: '7101225458', action: 'Changed to CHECKING' });
       }
     } else {
       results.push({ user: 'brokardwilliams@gmail.com', error: 'User not found' });
