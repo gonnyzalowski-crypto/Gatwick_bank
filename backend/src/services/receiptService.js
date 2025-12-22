@@ -140,7 +140,7 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       const details = [
         ['Description', transaction.description || 'N/A'],
         ['Category', transaction.category || 'General'],
-        ['Merchant/Recipient', transaction.merchantName || 'N/A']
+        ['Merchant/Recipient', transaction.merchantName || transaction.description || 'Internal Transfer']
       ];
 
       details.forEach(([label, value]) => {
@@ -158,7 +158,7 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       const accountInfo = [
         ['Account Holder', `${transaction.account.user.firstName} ${transaction.account.user.lastName}`],
         ['Account Number', `****${transaction.account.accountNumber?.slice(-4) || 'XXXX'}`],
-        ['Account Type', transaction.account.type || 'N/A'],
+        ['Account Type', transaction.account.accountType || 'N/A'],
         ['Email', transaction.account.user.email || 'N/A']
       ];
 
@@ -236,7 +236,7 @@ export const getReceiptData = async (transactionId, userId) => {
     createdAt: transaction.createdAt,
     account: {
       number: `****${transaction.account.accountNumber?.slice(-4) || 'XXXX'}`,
-      type: transaction.account.type,
+      type: transaction.account.accountType,
       holder: `${transaction.account.user.firstName} ${transaction.account.user.lastName}`
     }
   };
