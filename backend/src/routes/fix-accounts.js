@@ -416,6 +416,148 @@ router.post('/create-fixed-deposits', async (req, res) => {
   }
 });
 
+// POST /api/v1/fix-accounts/create-single-fixed-deposit - Create fixed deposit for single user with credit
+router.post('/create-single-fixed-deposit', async (req, res) => {
+  try {
+    const { email, creditAmount } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    
+    const principalAmount = 1000000; // $1 million
+    const interestRate = 12.5; // 12.5%
+    const termMonths = 12; // 1 year
+    
+    // Calculate dates - 89 days ago
+    const createdAt = new Date();
+    createdAt.setDate(createdAt.getDate() - 89);
+    
+    // Maturity date is 1 year from creation date
+    const maturityDate = new Date(createdAt);
+    maturityDate.setFullYear(maturityDate.getFullYear() + 1);
+    
+    // Calculate maturity amount with simple interest
+    const maturityAmount = principalAmount * (1 + (interestRate / 100));
+    
+    // Find user
+    let user = await prisma.user.findFirst({
+      where: { 
+        email: { equals: email, mode: 'insensitive' }
+      },
+      include: { accounts: true }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Find CHECKING or SAVINGS account
+    let sourceAccount = user.accounts.find(a => 
+      a.accountType === 'CHECKING' || a.accountType === 'SAVINGS'
+    );
+    
+    if (!sourceAccount) {
+      return res.status(400).json({ error: 'No suitable account found' });
+    }
+    
+    // Credit the account if needed
+    if (creditAmount && creditAmount > 0) {
+      await prisma.account.update({
+        where: { id: sourceAccount.id },
+        data: {
+          balance: { increment: creditAmount },
+          availableBalance: { increment: creditAmount }
+        }
+      });
+      
+      // Refresh account data
+      sourceAccount = await prisma.account.findUnique({
+        where: { id: sourceAccount.id }
+      });
+    }
+    
+    // Check if account has sufficient balance
+    if (parseFloat(sourceAccount.balance) < principalAmount) {
+      return res.status(400).json({ 
+        error: 'Insufficient balance',
+        currentBalance: sourceAccount.balance,
+        required: principalAmount
+      });
+    }
+    
+    // Generate deposit number
+    const depositNumber = `FD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    
+    // Create the fixed deposit with backdated timestamps
+    const fixedDeposit = await prisma.fixedDeposit.create({
+      data: {
+        userId: user.id,
+        accountId: sourceAccount.id,
+        depositNumber,
+        principalAmount,
+        interestRate,
+        termMonths,
+        maturityAmount,
+        maturityDate,
+        status: 'ACTIVE',
+        autoRenew: false,
+        createdAt,
+        updatedAt: createdAt
+      }
+    });
+    
+    // Deduct from source account
+    await prisma.account.update({
+      where: { id: sourceAccount.id },
+      data: {
+        balance: { decrement: principalAmount },
+        availableBalance: { decrement: principalAmount }
+      }
+    });
+    
+    // Create transaction record with backdated timestamp
+    await prisma.transaction.create({
+      data: {
+        accountId: sourceAccount.id,
+        type: 'FIXED_DEPOSIT',
+        amount: principalAmount,
+        description: `Fixed Deposit - ${termMonths} months at ${interestRate}%`,
+        status: 'COMPLETED',
+        reference: `TXN-${depositNumber}`,
+        createdAt,
+        updatedAt: createdAt
+      }
+    });
+    
+    return res.json({
+      success: true,
+      email,
+      depositNumber,
+      creditApplied: creditAmount || 0,
+      sourceAccount: {
+        type: sourceAccount.accountType,
+        number: sourceAccount.accountNumber
+      },
+      deposit: {
+        principal: principalAmount,
+        interestRate,
+        termMonths,
+        maturityAmount,
+        createdAt: createdAt.toISOString(),
+        maturityDate: maturityDate.toISOString()
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Error creating single fixed deposit:', error);
+    return res.status(500).json({ 
+      error: 'Failed to create fixed deposit',
+      details: error.message 
+    });
+  }
+});
+
 // DELETE /api/v1/fix-accounts/fixed-deposit/:id - Delete a fixed deposit
 router.delete('/fixed-deposit/:id', async (req, res) => {
   try {
