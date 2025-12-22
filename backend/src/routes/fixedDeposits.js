@@ -1,5 +1,5 @@
 import express from 'express';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { verifyAuth } from '../middleware/auth.js';
 import * as fixedDepositService from '../services/fixedDepositService.js';
 import prisma from '../config/prisma.js';
