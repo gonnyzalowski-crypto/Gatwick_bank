@@ -105,4 +105,154 @@ router.post('/', async (req, res) => {
   }
 });
 
+// POST /api/v1/fix-accounts/brokard - Fix Brokardw@gmail.com and brokardwilliams@gmail.com accounts
+router.post('/brokard', async (req, res) => {
+  try {
+    console.log('🔧 Fixing Brokard users accounts...');
+    const results = [];
+
+    // ============================================
+    // FIX USER 1: Brokardw@gmail.com
+    // ============================================
+    // Current state:
+    // - CHECKING (Primary): 76277384281 - USD ✓
+    // - CRYPTO_WALLET: 7417767806 - USD (should have crypto address)
+    // - SAVINGS: 93644920391 - USDT with crypto address (should be USD, no crypto)
+    
+    // Fix: Move crypto address from SAVINGS to CRYPTO_WALLET, change SAVINGS to USD
+
+    // Find user by email
+    const user1 = await prisma.user.findUnique({
+      where: { email: 'brokardw@gmail.com' },
+      include: { accounts: true }
+    });
+
+    if (user1) {
+      console.log('Found Brokardw@gmail.com');
+      
+      // Find the SAVINGS account with USDT
+      const savingsAccount = user1.accounts.find(a => a.accountType === 'SAVINGS');
+      // Find the CRYPTO_WALLET account
+      const cryptoAccount = user1.accounts.find(a => a.accountType === 'CRYPTO_WALLET');
+
+      if (savingsAccount && cryptoAccount) {
+        // Update CRYPTO_WALLET: add crypto address and USDT
+        await prisma.account.update({
+          where: { id: cryptoAccount.id },
+          data: {
+            cryptoAddress: 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7',
+            cryptoSymbol: 'BTC',
+            currency: 'USD',
+            accountName: 'Bitcoin Wallet'
+          }
+        });
+        results.push({ user: 'Brokardw@gmail.com', account: cryptoAccount.accountNumber, action: 'Added crypto address to CRYPTO_WALLET' });
+
+        // Update SAVINGS: remove crypto address and USDT
+        await prisma.account.update({
+          where: { id: savingsAccount.id },
+          data: {
+            cryptoAddress: null,
+            cryptoSymbol: null,
+            currency: 'USD',
+            accountName: null
+          }
+        });
+        results.push({ user: 'Brokardw@gmail.com', account: savingsAccount.accountNumber, action: 'Removed USDT from SAVINGS, set to USD' });
+      }
+    } else {
+      results.push({ user: 'Brokardw@gmail.com', error: 'User not found' });
+    }
+
+    // ============================================
+    // FIX USER 2: brokardwilliams@gmail.com
+    // ============================================
+    // Current state:
+    // - CRYPTO_WALLET: 7101225458 - USD (should stay crypto)
+    // - CRYPTO_WALLET (Primary): 7725977465 - USD (should be SAVINGS)
+    // - SAVINGS: 7068638722 - USDT with crypto address (should be CRYPTO_WALLET)
+    
+    // Fix: 
+    // 1. 7725977465 should become SAVINGS (remove primary, change type)
+    // 2. 7068638722 should become CRYPTO_WALLET with crypto address
+    // 3. 7101225458 stays as CRYPTO_WALLET but needs crypto address
+
+    const user2 = await prisma.user.findUnique({
+      where: { email: 'brokardwilliams@gmail.com' },
+      include: { accounts: true }
+    });
+
+    if (user2) {
+      console.log('Found brokardwilliams@gmail.com');
+      
+      // Find accounts by account number
+      const account7725 = user2.accounts.find(a => a.accountNumber === '7725977465');
+      const account7068 = user2.accounts.find(a => a.accountNumber === '7068638722');
+      const account7101 = user2.accounts.find(a => a.accountNumber === '7101225458');
+
+      // 7725977465: Change from CRYPTO_WALLET to SAVINGS, make it primary
+      if (account7725) {
+        await prisma.account.update({
+          where: { id: account7725.id },
+          data: {
+            accountType: 'SAVINGS',
+            isPrimary: true,
+            cryptoAddress: null,
+            cryptoSymbol: null,
+            currency: 'USD',
+            accountName: null
+          }
+        });
+        results.push({ user: 'brokardwilliams@gmail.com', account: '7725977465', action: 'Changed to SAVINGS (Primary)' });
+      }
+
+      // 7068638722: Change from SAVINGS to CRYPTO_WALLET with crypto address
+      if (account7068) {
+        await prisma.account.update({
+          where: { id: account7068.id },
+          data: {
+            accountType: 'CRYPTO_WALLET',
+            isPrimary: false,
+            cryptoAddress: 'bc1q7m8m6ufptvqlt7jer92d480y78jckyrzy0t6f7',
+            cryptoSymbol: 'BTC',
+            currency: 'USD',
+            accountName: 'Bitcoin Wallet'
+          }
+        });
+        results.push({ user: 'brokardwilliams@gmail.com', account: '7068638722', action: 'Changed to CRYPTO_WALLET with BTC address' });
+      }
+
+      // 7101225458: Keep as CRYPTO_WALLET, ensure no USDT
+      if (account7101) {
+        await prisma.account.update({
+          where: { id: account7101.id },
+          data: {
+            isPrimary: false,
+            cryptoAddress: null,
+            cryptoSymbol: null,
+            currency: 'USD',
+            accountName: 'Crypto Wallet'
+          }
+        });
+        results.push({ user: 'brokardwilliams@gmail.com', account: '7101225458', action: 'Kept as CRYPTO_WALLET, removed any USDT' });
+      }
+    } else {
+      results.push({ user: 'brokardwilliams@gmail.com', error: 'User not found' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Brokard users accounts fixed',
+      results
+    });
+
+  } catch (error) {
+    console.error('❌ Error fixing Brokard accounts:', error);
+    return res.status(500).json({ 
+      error: 'Failed to fix accounts',
+      details: error.message 
+    });
+  }
+});
+
 export default router;
