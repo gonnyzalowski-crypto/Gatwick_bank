@@ -27,6 +27,7 @@ import LoansManagement from '../components/admin/LoansManagement';
 import ExternalTransfersManagement from '../components/admin/ExternalTransfersManagement';
 import RecurringPaymentsManagement from '../components/admin/RecurringPaymentsManagement';
 import WithdrawalManagement from '../components/admin/WithdrawalManagement';
+import FixedDepositsManagement from '../components/admin/FixedDepositsManagement';
 import { SupportTicketsPage as AdminSupportTickets } from './admin/SupportTicketsPage';
 import CurrencyManagement from './admin/CurrencyManagement';
 import NotificationBell from '../components/NotificationBell';
@@ -524,7 +525,7 @@ export const AdminDashboard = () => {
           {activeSection === 'tool-settings' && <AdminSettings />}
 
           {/* Other sections show placeholder */}
-          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'withdrawal', 'cheque', 'fixed-deposits', 'cards', 'loans', 'external-transfers', 'recurring-payments', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets'].includes(activeSection) && (
+          {!['overview', 'all-users', 'manage-users', 'add-user', 'kyc-review', 'transactions', 'audit-logs', 'backup-codes', 'deposit', 'withdrawal', 'cheque', 'cards', 'loans', 'external-transfers', 'recurring-payments', 'transfer-approvals', 'info', 'tool-settings', 'payment-gateways', 'currencies', 'support-tickets'].includes(activeSection) && (
             <div className="bg-slate-800 border border-slate-700 rounded-lg p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-4">

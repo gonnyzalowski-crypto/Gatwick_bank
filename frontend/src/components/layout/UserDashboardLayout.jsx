@@ -23,6 +23,7 @@ import {
   Building2,
   Repeat,
   Landmark,
+  PiggyBank,
 } from 'lucide-react';
 import { Logo } from '../ui/Logo';
 import NotificationBell from '../NotificationBell';
@@ -213,11 +214,6 @@ const UserDashboardLayout = ({ children }) => {
                 <NavLink to="/loans" className={navItemClasses} onClick={closeSidebar}>
                   <Landmark className="h-5 w-5" />
                   <span>Loans</span>
-                </NavLink>
-
-                <NavLink to="/fixed-deposits" className={navItemClasses} onClick={closeSidebar}>
-                  <PiggyBank className="h-5 w-5" />
-                  <span>Fixed Deposits</span>
                 </NavLink>
               </div>
             </div>
