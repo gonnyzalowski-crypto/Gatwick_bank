@@ -372,10 +372,9 @@ router.post('/create-fixed-deposits', async (req, res) => {
           accountId: sourceAccount.id,
           type: 'FIXED_DEPOSIT',
           amount: principalAmount,
-          currency: 'USD',
           description: `Fixed Deposit - ${termMonths} months at ${interestRate}%`,
           status: 'COMPLETED',
-          reference: depositNumber,
+          reference: `TXN-${depositNumber}`,
           createdAt,
           updatedAt: createdAt
         }
