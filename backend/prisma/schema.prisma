@@ -79,7 +79,6 @@ model User {
   supportTickets    SupportTicket[]
   withdrawals       Withdrawal[]
   recurringPayments RecurringPayment[]
-  fixedDeposits     FixedDeposit[]
   
   @@map("users")
 }
