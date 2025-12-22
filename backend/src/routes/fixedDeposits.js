@@ -1,6 +1,8 @@
 import express from 'express';
+import bcrypt from 'bcrypt';
 import { verifyAuth } from '../middleware/auth.js';
 import * as fixedDepositService from '../services/fixedDepositService.js';
+import prisma from '../config/prisma.js';
 
 const router = express.Router();
 
@@ -128,30 +130,137 @@ router.get('/:depositId', verifyAuth, async (req, res) => {
 });
 
 /**
- * POST /api/v1/fixed-deposits/:depositId/withdraw
- * Withdraw a fixed deposit
+ * POST /api/v1/fixed-deposits/:depositId/withdraw-request
+ * Request withdrawal of a fixed deposit (requires backup code, creates pending request)
  */
-router.post('/:depositId/withdraw', verifyAuth, async (req, res) => {
+router.post('/:depositId/withdraw-request', verifyAuth, async (req, res) => {
   try {
     const userId = req.user.userId;
     const { depositId } = req.params;
+    const { backupCode, reason } = req.body;
 
-    const result = await fixedDepositService.withdrawFixedDeposit(depositId, userId);
+    if (!backupCode) {
+      return res.status(400).json({ error: 'Backup code is required for withdrawal request' });
+    }
+
+    // Verify backup code
+    const backupCodes = await prisma.backupCode.findMany({
+      where: { userId, isUsed: false }
+    });
+
+    let validCode = false;
+    let matchedCodeId = null;
+
+    for (const code of backupCodes) {
+      const isMatch = await bcrypt.compare(backupCode, code.code);
+      if (isMatch) {
+        validCode = true;
+        matchedCodeId = code.id;
+        break;
+      }
+    }
+
+    if (!validCode) {
+      return res.status(401).json({ error: 'Invalid or already used backup code' });
+    }
+
+    // Get the fixed deposit
+    const deposit = await prisma.fixedDeposit.findFirst({
+      where: { id: depositId, userId }
+    });
+
+    if (!deposit) {
+      return res.status(404).json({ error: 'Fixed deposit not found' });
+    }
+
+    if (deposit.status !== 'ACTIVE') {
+      return res.status(400).json({ error: 'This fixed deposit is not active' });
+    }
+
+    if (deposit.withdrawalStatus === 'PENDING') {
+      return res.status(400).json({ error: 'A withdrawal request is already pending for this deposit' });
+    }
+
+    // Mark backup code as used
+    await prisma.backupCode.update({
+      where: { id: matchedCodeId },
+      data: { isUsed: true, usedAt: new Date() }
+    });
+
+    // Create withdrawal request (pending status)
+    const updatedDeposit = await prisma.fixedDeposit.update({
+      where: { id: depositId },
+      data: {
+        status: 'WITHDRAWAL_PENDING',
+        withdrawalStatus: 'PENDING',
+        withdrawalRequestedAt: new Date(),
+        withdrawalReason: reason || 'User requested withdrawal'
+      },
+      include: {
+        user: { select: { firstName: true, lastName: true, email: true } },
+        account: { select: { accountNumber: true, accountType: true } }
+      }
+    });
+
+    // Create notification for admin
+    const admins = await prisma.user.findMany({
+      where: { isAdmin: true }
+    });
+
+    for (const admin of admins) {
+      await prisma.notification.create({
+        data: {
+          userId: admin.id,
+          title: 'Fixed Deposit Withdrawal Request',
+          message: `${updatedDeposit.user.firstName} ${updatedDeposit.user.lastName} has requested withdrawal of fixed deposit ${deposit.depositNumber} ($${deposit.principalAmount})`,
+          type: 'WITHDRAWAL_REQUEST',
+          isRead: false
+        }
+      });
+    }
+
+    // Create notification for user
+    await prisma.notification.create({
+      data: {
+        userId,
+        title: 'Withdrawal Request Submitted',
+        message: `Your withdrawal request for fixed deposit ${deposit.depositNumber} has been submitted. Processing takes a minimum of 3 weeks.`,
+        type: 'WITHDRAWAL_REQUEST',
+        isRead: false
+      }
+    });
 
     return res.json({
       success: true,
-      message: result.isMatured 
-        ? 'Fixed deposit matured and withdrawn successfully' 
-        : 'Fixed deposit withdrawn early (principal only)',
-      data: result
+      message: 'Withdrawal request submitted successfully. Processing takes a minimum of 3 weeks.',
+      data: {
+        depositNumber: deposit.depositNumber,
+        principalAmount: deposit.principalAmount,
+        maturityAmount: deposit.maturityAmount,
+        status: 'WITHDRAWAL_PENDING',
+        withdrawalStatus: 'PENDING',
+        withdrawalRequestedAt: updatedDeposit.withdrawalRequestedAt,
+        estimatedProcessingTime: '3 weeks minimum'
+      }
     });
 
   } catch (error) {
-    console.error('Withdraw fixed deposit error:', error);
+    console.error('Withdraw request error:', error);
     return res.status(500).json({ 
-      error: error.message || 'Failed to withdraw fixed deposit' 
+      error: error.message || 'Failed to submit withdrawal request' 
     });
   }
+});
+
+/**
+ * POST /api/v1/fixed-deposits/:depositId/withdraw
+ * Legacy endpoint - redirects to new flow
+ */
+router.post('/:depositId/withdraw', verifyAuth, async (req, res) => {
+  return res.status(400).json({ 
+    error: 'Direct withdrawal is no longer supported. Please use the withdrawal request flow which requires backup code verification.',
+    redirectTo: `/fixed-deposits/${req.params.depositId}/withdraw-request`
+  });
 });
 
 export default router;

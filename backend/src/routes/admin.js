@@ -4774,7 +4774,7 @@ router.get('/fixed-deposits', verifyAuth, verifyAdmin, async (req, res) => {
 
 /**
  * POST /api/v1/mybanker/fixed-deposits/:depositId/withdraw
- * Admin withdraw a fixed deposit
+ * Admin approve and process a fixed deposit withdrawal request
  */
 router.post('/fixed-deposits/:depositId/withdraw', verifyAuth, verifyAdmin, async (req, res) => {
   try {
@@ -4783,15 +4783,16 @@ router.post('/fixed-deposits/:depositId/withdraw', verifyAuth, verifyAdmin, asyn
 
     const deposit = await prisma.fixedDeposit.findUnique({
       where: { id: depositId },
-      include: { account: true }
+      include: { account: true, user: true }
     });
 
     if (!deposit) {
       return res.status(404).json({ error: 'Fixed deposit not found' });
     }
 
-    if (deposit.status !== 'ACTIVE') {
-      return res.status(400).json({ error: 'Fixed deposit is not active' });
+    // Only allow withdrawal of WITHDRAWAL_PENDING deposits
+    if (deposit.status !== 'WITHDRAWAL_PENDING') {
+      return res.status(400).json({ error: 'This deposit does not have a pending withdrawal request' });
     }
 
     const now = new Date();
@@ -4805,6 +4806,8 @@ router.post('/fixed-deposits/:depositId/withdraw', verifyAuth, verifyAdmin, asyn
         where: { id: depositId },
         data: {
           status: 'WITHDRAWN',
+          withdrawalStatus: 'APPROVED',
+          withdrawalProcessedAt: now,
           withdrawnAmount: withdrawalAmount,
           withdrawnAt: now,
           processedBy: adminId
@@ -4824,12 +4827,23 @@ router.post('/fixed-deposits/:depositId/withdraw', verifyAuth, verifyAdmin, asyn
           accountId: deposit.accountId,
           amount: withdrawalAmount,
           type: 'CREDIT',
-          description: `Fixed Deposit Withdrawal (Admin) - ${deposit.depositNumber}`,
+          description: `Fixed Deposit Withdrawal - ${deposit.depositNumber}`,
           category: 'INVESTMENT',
           merchantName: 'Rosch Capital Bank',
           merchantCategory: 'Fixed Deposit',
           status: 'COMPLETED',
-          reference: `ADM-WD-${deposit.depositNumber}`
+          reference: `FD-WD-${deposit.depositNumber}`
+        }
+      });
+
+      // Notify user
+      await tx.notification.create({
+        data: {
+          userId: deposit.userId,
+          title: 'Fixed Deposit Withdrawal Approved',
+          message: `Your withdrawal request for fixed deposit ${deposit.depositNumber} has been approved. ${isMatured ? 'Maturity amount' : 'Principal amount'} of $${withdrawalAmount.toLocaleString()} has been credited to your account.`,
+          type: 'WITHDRAWAL_APPROVED',
+          isRead: false
         }
       });
     });
@@ -4837,14 +4851,14 @@ router.post('/fixed-deposits/:depositId/withdraw', verifyAuth, verifyAdmin, asyn
     return res.json({
       success: true,
       message: isMatured 
-        ? 'Fixed deposit matured and withdrawn successfully' 
-        : 'Fixed deposit withdrawn early (principal only)',
+        ? 'Fixed deposit withdrawal approved - maturity amount credited' 
+        : 'Fixed deposit withdrawal approved - principal amount credited (early withdrawal)',
       data: { withdrawalAmount, isMatured }
     });
 
   } catch (error) {
     console.error('Admin withdraw fixed deposit error:', error);
-    return res.status(500).json({ error: 'Failed to withdraw fixed deposit' });
+    return res.status(500).json({ error: 'Failed to process withdrawal' });
   }
 });
 

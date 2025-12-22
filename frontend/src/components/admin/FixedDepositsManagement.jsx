@@ -77,6 +77,7 @@ const FixedDepositsManagement = () => {
   const getStatusBadge = (status) => {
     const badges = {
       ACTIVE: { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
+      WITHDRAWAL_PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: AlertCircle },
       MATURED: { bg: 'bg-blue-100', text: 'text-blue-800', icon: TrendingUp },
       WITHDRAWN: { bg: 'bg-gray-100', text: 'text-gray-800', icon: XCircle },
       CANCELLED: { bg: 'bg-red-100', text: 'text-red-800', icon: AlertCircle }
@@ -185,6 +186,7 @@ const FixedDepositsManagement = () => {
           >
             <option value="ALL">All Status</option>
             <option value="ACTIVE">Active</option>
+            <option value="WITHDRAWAL_PENDING">Withdrawal Pending</option>
             <option value="MATURED">Matured</option>
             <option value="WITHDRAWN">Withdrawn</option>
             <option value="CANCELLED">Cancelled</option>
@@ -280,12 +282,12 @@ const FixedDepositsManagement = () => {
                           >
                             View
                           </button>
-                          {deposit.status === 'ACTIVE' && (
+                          {deposit.status === 'WITHDRAWAL_PENDING' && (
                             <button
                               onClick={() => handleWithdraw(deposit.id)}
                               className="text-green-400 hover:text-green-300 font-medium"
                             >
-                              Withdraw
+                              Approve
                             </button>
                           )}
                         </div>
@@ -380,13 +382,24 @@ const FixedDepositsManagement = () => {
                 )}
               </div>
 
-              {selectedDeposit.status === 'ACTIVE' && (
-                <div className="pt-4 border-t border-slate-700">
+              {selectedDeposit.status === 'WITHDRAWAL_PENDING' && (
+                <div className="pt-4 border-t border-slate-700 space-y-4">
+                  <div className="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4">
+                    <p className="text-yellow-400 font-medium text-sm">Withdrawal Request Pending</p>
+                    <p className="text-yellow-300/70 text-xs mt-1">
+                      Requested: {selectedDeposit.withdrawalRequestedAt ? formatDate(selectedDeposit.withdrawalRequestedAt) : 'N/A'}
+                    </p>
+                    {selectedDeposit.withdrawalReason && (
+                      <p className="text-slate-300 text-xs mt-2">
+                        Reason: {selectedDeposit.withdrawalReason}
+                      </p>
+                    )}
+                  </div>
                   <button
                     onClick={() => handleWithdraw(selectedDeposit.id)}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                   >
-                    Process Withdrawal
+                    Approve Withdrawal
                   </button>
                 </div>
               )}

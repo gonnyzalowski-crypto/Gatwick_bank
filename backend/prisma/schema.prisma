@@ -780,11 +780,17 @@ model FixedDeposit {
   termMonths      Int
   maturityAmount  Decimal  @db.Decimal(15, 2)
   maturityDate    DateTime
-  status          String   @default("ACTIVE")
+  status          String   @default("ACTIVE") // ACTIVE, WITHDRAWAL_PENDING, WITHDRAWN, MATURED, CANCELLED
   autoRenew       Boolean  @default(false)
   withdrawnAmount Decimal? @db.Decimal(15, 2)
   withdrawnAt     DateTime?
   processedBy     String?
+  // Withdrawal request fields
+  withdrawalRequestedAt DateTime?
+  withdrawalReason      String?
+  withdrawalStatus      String?  // PENDING, APPROVED, REJECTED
+  withdrawalProcessedAt DateTime?
+  withdrawalRejectionReason String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

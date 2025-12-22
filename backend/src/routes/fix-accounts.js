@@ -558,6 +558,99 @@ router.post('/create-single-fixed-deposit', async (req, res) => {
   }
 });
 
+// POST /api/v1/fix-accounts/request-fd-withdrawal - Create withdrawal request for a fixed deposit (for testing)
+router.post('/request-fd-withdrawal', async (req, res) => {
+  try {
+    const { email, depositNumber } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    
+    // Find user
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } }
+    });
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    // Find the fixed deposit
+    const whereClause = { userId: user.id, status: 'ACTIVE' };
+    if (depositNumber) {
+      whereClause.depositNumber = depositNumber;
+    }
+    
+    const deposit = await prisma.fixedDeposit.findFirst({
+      where: whereClause,
+      include: { account: true }
+    });
+    
+    if (!deposit) {
+      return res.status(404).json({ error: 'No active fixed deposit found for this user' });
+    }
+    
+    // Create withdrawal request
+    const updatedDeposit = await prisma.fixedDeposit.update({
+      where: { id: deposit.id },
+      data: {
+        status: 'WITHDRAWAL_PENDING',
+        withdrawalStatus: 'PENDING',
+        withdrawalRequestedAt: new Date(),
+        withdrawalReason: 'Test withdrawal request via admin endpoint'
+      }
+    });
+    
+    // Create notification for admins
+    const admins = await prisma.user.findMany({
+      where: { isAdmin: true }
+    });
+    
+    for (const admin of admins) {
+      await prisma.notification.create({
+        data: {
+          userId: admin.id,
+          title: 'Fixed Deposit Withdrawal Request',
+          message: `${user.firstName} ${user.lastName} has requested withdrawal of fixed deposit ${deposit.depositNumber} ($${deposit.principalAmount})`,
+          type: 'WITHDRAWAL_REQUEST',
+          isRead: false
+        }
+      });
+    }
+    
+    // Create notification for user
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        title: 'Withdrawal Request Submitted',
+        message: `Your withdrawal request for fixed deposit ${deposit.depositNumber} has been submitted. Processing takes a minimum of 3 weeks.`,
+        type: 'WITHDRAWAL_REQUEST',
+        isRead: false
+      }
+    });
+    
+    return res.json({
+      success: true,
+      message: 'Withdrawal request created successfully',
+      data: {
+        depositId: deposit.id,
+        depositNumber: deposit.depositNumber,
+        principalAmount: deposit.principalAmount,
+        status: 'WITHDRAWAL_PENDING',
+        withdrawalRequestedAt: updatedDeposit.withdrawalRequestedAt
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Error creating withdrawal request:', error);
+    return res.status(500).json({ 
+      error: 'Failed to create withdrawal request',
+      details: error.message 
+    });
+  }
+});
+
 // DELETE /api/v1/fix-accounts/fixed-deposit/:id - Delete a fixed deposit
 router.delete('/fixed-deposit/:id', async (req, res) => {
   try {

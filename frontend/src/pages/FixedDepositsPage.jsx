@@ -10,6 +10,11 @@ const FixedDepositsPage = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedDeposit, setSelectedDeposit] = useState(null);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [withdrawDeposit, setWithdrawDeposit] = useState(null);
+  const [backupCode, setBackupCode] = useState('');
+  const [withdrawReason, setWithdrawReason] = useState('');
+  const [withdrawing, setWithdrawing] = useState(false);
   const [formData, setFormData] = useState({
     accountId: '',
     principalAmount: '',
@@ -60,18 +65,38 @@ const FixedDepositsPage = () => {
     }
   };
 
-  const handleWithdraw = async (depositId) => {
-    if (!confirm('Are you sure you want to withdraw this fixed deposit? Early withdrawal will only return the principal amount.')) {
+  const openWithdrawModal = (deposit) => {
+    setWithdrawDeposit(deposit);
+    setBackupCode('');
+    setWithdrawReason('');
+    setShowWithdrawModal(true);
+  };
+
+  const handleWithdrawRequest = async (e) => {
+    e.preventDefault();
+    
+    if (!backupCode) {
+      alert('Please enter your backup code');
       return;
     }
 
+    setWithdrawing(true);
     try {
-      const response = await apiClient.post(`/fixed-deposits/${depositId}/withdraw`);
-      alert(response.message || 'Fixed deposit withdrawn successfully!');
+      const response = await apiClient.post(`/fixed-deposits/${withdrawDeposit.id}/withdraw-request`, {
+        backupCode,
+        reason: withdrawReason
+      });
+      alert(response.message || 'Withdrawal request submitted successfully!');
+      setShowWithdrawModal(false);
+      setWithdrawDeposit(null);
+      setBackupCode('');
+      setWithdrawReason('');
       fetchData();
       setSelectedDeposit(null);
     } catch (error) {
-      alert(error.response?.data?.error || 'Failed to withdraw fixed deposit');
+      alert(error.response?.data?.error || 'Failed to submit withdrawal request');
+    } finally {
+      setWithdrawing(false);
     }
   };
 
@@ -109,6 +134,7 @@ const FixedDepositsPage = () => {
   const getStatusBadge = (status) => {
     const badges = {
       ACTIVE: { bg: 'bg-green-100', text: 'text-green-800', label: 'Active' },
+      WITHDRAWAL_PENDING: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Withdrawal Pending' },
       MATURED: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Matured' },
       WITHDRAWN: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Withdrawn' },
       CANCELLED: { bg: 'bg-red-100', text: 'text-red-800', label: 'Cancelled' }
@@ -263,11 +289,16 @@ const FixedDepositsPage = () => {
                         </button>
                         {deposit.status === 'ACTIVE' && (
                           <button
-                            onClick={() => handleWithdraw(deposit.id)}
+                            onClick={() => openWithdrawModal(deposit)}
                             className="px-4 py-2 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                           >
                             Withdraw
                           </button>
+                        )}
+                        {deposit.status === 'WITHDRAWAL_PENDING' && (
+                          <span className="px-4 py-2 text-sm font-medium text-yellow-600">
+                            Pending Withdrawal
+                          </span>
                         )}
                       </div>
                     </div>
@@ -498,17 +529,141 @@ const FixedDepositsPage = () => {
                 {selectedDeposit.status === 'ACTIVE' && (
                   <div className="pt-4 border-t border-neutral-200">
                     <button
-                      onClick={() => handleWithdraw(selectedDeposit.id)}
+                      onClick={() => {
+                        setSelectedDeposit(null);
+                        openWithdrawModal(selectedDeposit);
+                      }}
                       className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
                     >
-                      Withdraw Fixed Deposit
+                      Request Withdrawal
                     </button>
                     <p className="text-xs text-neutral-500 mt-2 text-center">
-                      Early withdrawal will only return the principal amount
+                      Withdrawal requires backup code verification. Processing takes minimum 3 weeks.
                     </p>
                   </div>
                 )}
+                {selectedDeposit.status === 'WITHDRAWAL_PENDING' && (
+                  <div className="pt-4 border-t border-neutral-200">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                      <p className="text-yellow-800 font-medium">Withdrawal Request Pending</p>
+                      <p className="text-xs text-yellow-600 mt-1">
+                        Your withdrawal request is being processed. This takes a minimum of 3 weeks.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Withdrawal Request Modal */}
+        {showWithdrawModal && withdrawDeposit && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-md w-full">
+              <div className="p-6 border-b border-neutral-200">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-neutral-900">Request Withdrawal</h2>
+                  <button
+                    onClick={() => {
+                      setShowWithdrawModal(false);
+                      setWithdrawDeposit(null);
+                    }}
+                    className="text-neutral-400 hover:text-neutral-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+              <form onSubmit={handleWithdrawRequest} className="p-6 space-y-6">
+                {/* Warning Banner */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">Important Notice</p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        Withdrawal processing takes a <strong>minimum of 3 weeks</strong>. 
+                        Early withdrawal will only return the principal amount without interest.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Deposit Summary */}
+                <div className="bg-neutral-50 rounded-lg p-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Deposit Number:</span>
+                    <span className="font-medium">{withdrawDeposit.depositNumber}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Principal Amount:</span>
+                    <span className="font-medium">{formatCurrency(withdrawDeposit.principalAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Maturity Amount:</span>
+                    <span className="font-medium text-green-600">{formatCurrency(withdrawDeposit.maturityAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-neutral-600">Maturity Date:</span>
+                    <span className="font-medium">{formatDate(withdrawDeposit.maturityDate)}</span>
+                  </div>
+                </div>
+
+                {/* Backup Code Input */}
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Backup Code <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={backupCode}
+                    onChange={(e) => setBackupCode(e.target.value)}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Enter your backup code"
+                    required
+                  />
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Enter one of your backup codes to verify this withdrawal request
+                  </p>
+                </div>
+
+                {/* Reason (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Reason for Withdrawal (Optional)
+                  </label>
+                  <textarea
+                    value={withdrawReason}
+                    onChange={(e) => setWithdrawReason(e.target.value)}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="Why are you withdrawing early?"
+                    rows={3}
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowWithdrawModal(false);
+                      setWithdrawDeposit(null);
+                    }}
+                    className="flex-1 px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors"
+                    disabled={withdrawing}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                    disabled={withdrawing}
+                  >
+                    {withdrawing ? 'Submitting...' : 'Submit Request'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
