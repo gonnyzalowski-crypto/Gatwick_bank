@@ -42,12 +42,18 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
         size: 'A4',
         margins: { top: 50, bottom: 50, left: 60, right: 60 },
         autoFirstPage: true,
-        bufferPages: false,
+        bufferPages: true,
         info: {
           Title: `Transaction Receipt - ${transaction.reference}`,
           Author: 'Rosch Capital Bank',
           Subject: 'Transaction Receipt'
         }
+      });
+
+      // Prevent automatic page breaks
+      doc.on('pageAdded', () => {
+        // This should not happen - we want only 1 page
+        console.warn('WARNING: Additional page was added to PDF receipt');
       });
 
       const chunks = [];
@@ -76,18 +82,18 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       doc.fillColor(textDark)
          .font('Helvetica-Bold')
          .fontSize(22)
-         .text('Rosch Capital Bank', leftMargin + 54, 52);
+         .text('Rosch Capital Bank', leftMargin + 54, 52, { lineBreak: false });
       
       doc.fillColor(textMuted)
          .font('Helvetica')
          .fontSize(10)
-         .text('Secure Digital Banking', leftMargin + 54, 76);
+         .text('Secure Digital Banking', leftMargin + 54, 76, { lineBreak: false });
 
       // Receipt title - right aligned
       doc.fillColor(primaryColor)
          .font('Helvetica-Bold')
          .fontSize(11)
-         .text('TRANSACTION RECEIPT', leftMargin, 55, { width: contentWidth, align: 'right' });
+         .text('TRANSACTION RECEIPT', leftMargin, 55, { width: contentWidth, align: 'right', lineBreak: false });
 
       // Horizontal line
       doc.moveTo(leftMargin, 105).lineTo(pageWidth - 60, 105).strokeColor('#E5E7EB').lineWidth(1).stroke();
@@ -95,15 +101,15 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       // ============ RECEIPT INFO BAR ============
       let y = 120;
       
-      doc.fillColor(textMuted).font('Helvetica').fontSize(9).text('Reference Number', leftMargin, y);
-      doc.fillColor(textDark).font('Helvetica-Bold').fontSize(11).text(transaction.reference || 'N/A', leftMargin, y + 14);
+      doc.fillColor(textMuted).font('Helvetica').fontSize(9).text('Reference Number', leftMargin, y, { lineBreak: false });
+      doc.fillColor(textDark).font('Helvetica-Bold').fontSize(11).text(transaction.reference || 'N/A', leftMargin, y + 14, { lineBreak: false });
 
-      doc.fillColor(textMuted).font('Helvetica').fontSize(9).text('Date & Time', leftMargin + 200, y);
+      doc.fillColor(textMuted).font('Helvetica').fontSize(9).text('Date & Time', leftMargin + 200, y, { lineBreak: false });
       const txDate = new Date(transaction.createdAt);
       doc.fillColor(textDark).font('Helvetica-Bold').fontSize(11).text(
         txDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + 
         ' at ' + txDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        leftMargin + 200, y + 14
+        leftMargin + 200, y + 14, { lineBreak: false }
       );
 
       // Status badge
@@ -172,21 +178,22 @@ export const generateTransactionReceipt = async (transactionId, userId) => {
       y += 20;
       doc.rect(leftMargin, y, contentWidth, 65).fill('#F0FDF4').stroke('#86EFAC');
       
-      doc.fillColor('#166534').font('Helvetica-Bold').fontSize(10).text('Verification', leftMargin + 15, y + 12, { lineBreak: false });
+      doc.fillColor('#166534').font('Helvetica-Bold').fontSize(10).text('Verification', leftMargin + 15, y + 12, { continued: false });
       doc.fillColor('#15803D').font('Helvetica').fontSize(9)
-         .text('This receipt was generated electronically by Rosch Capital Bank.', leftMargin + 15, y + 28, { lineBreak: false })
-         .text(`Document ID: RCB-${transaction.id.slice(-8).toUpperCase()}`, leftMargin + 15, y + 42, { lineBreak: false })
-         .text(`Generated: ${new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`, leftMargin + 15, y + 54, { lineBreak: false });
+         .text('This receipt was generated electronically by Rosch Capital Bank.', leftMargin + 15, y + 28, { continued: false })
+         .text(`Document ID: RCB-${transaction.id.slice(-8).toUpperCase()}`, leftMargin + 15, y + 42, { continued: false })
+         .text(`Generated: ${new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}`, leftMargin + 15, y + 54, { continued: false });
 
       // ============ FOOTER ============
       const footerY = doc.page.height - 80;
       doc.moveTo(leftMargin, footerY).lineTo(pageWidth - 60, footerY).strokeColor('#E5E7EB').lineWidth(0.5).stroke();
 
       doc.fillColor(textMuted).font('Helvetica').fontSize(8)
-         .text('Rosch Capital Bank  •  support@roschcapital.com  •  +1 (800) 55-ROSCH', leftMargin, footerY + 15, { width: contentWidth, align: 'center', lineBreak: false })
-         .text('This is an official transaction receipt. FDIC Insured.', leftMargin, footerY + 28, { width: contentWidth, align: 'center', lineBreak: false })
-         .text('© 2025 Rosch Capital Bank. All rights reserved.', leftMargin, footerY + 41, { width: contentWidth, align: 'center', lineBreak: false });
+         .text('Rosch Capital Bank  •  support@roschcapital.com  •  +1 (800) 55-ROSCH', leftMargin, footerY + 15, { width: contentWidth, align: 'center', continued: false })
+         .text('This is an official transaction receipt. FDIC Insured.', leftMargin, footerY + 28, { width: contentWidth, align: 'center', continued: false })
+         .text('© 2025 Rosch Capital Bank. All rights reserved.', leftMargin, footerY + 41, { width: contentWidth, align: 'center', continued: false });
 
+      // Finalize the document - ensure only one page
       doc.end();
     } catch (error) {
       reject(error);
