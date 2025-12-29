@@ -136,14 +136,14 @@ export const checkDebitEligibility = async (req, res, next) => {
     // Check PND (can receive but not send)
     if (user.accountStatus === 'PND') {
       return res.status(403).json({
-        error: 'Debit Restricted',
+        error: 'Account Placed on PND',
         code: 'PND_RESTRICTION',
-        message: 'Debit transactions are temporarily restricted on your account. You can still receive funds. Please contact your account manager.',
+        message: 'Your account has been placed on PND (Pending - No Debit) status. All debit transactions including withdrawals and transfers are temporarily restricted. You can still receive funds. Please contact support for more information.',
         suspensionReason: user.suspensionReason || 'Account under review',
         accountStatus: 'PND',
         contactInfo: {
           phone: '+1 (800) 555-BANK',
-          email: 'accountmanager@roschcapital.com'
+          email: 'support@roschcapital.com'
         }
       });
     }

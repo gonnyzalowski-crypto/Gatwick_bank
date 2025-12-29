@@ -92,9 +92,10 @@ transfersRouter.post('/', checkDebitEligibility, async (req, res) => {
 /**
  * POST /api/v1/transfers/domestic
  * Create domestic transfer request (same as regular transfer)
+ * PND and SUSPENDED users are blocked before backup code verification
  * Requires backup code verification for security
  */
-transfersRouter.post('/domestic', async (req, res) => {
+transfersRouter.post('/domestic', checkDebitEligibility, async (req, res) => {
   try {
     const { fromAccountId, bankName, routingNumber, accountNumber, accountHolderName, amount, description, backupCode } = req.body;
     
@@ -133,9 +134,10 @@ transfersRouter.post('/domestic', async (req, res) => {
 /**
  * POST /api/v1/transfers/international
  * Create international transfer request
+ * PND and SUSPENDED users are blocked before backup code verification
  * Requires backup code verification for security
  */
-transfersRouter.post('/international', async (req, res) => {
+transfersRouter.post('/international', checkDebitEligibility, async (req, res) => {
   try {
     const { fromAccountId, bankName, swiftCode, iban, accountHolderName, amount, description, country, backupCode } = req.body;
     
