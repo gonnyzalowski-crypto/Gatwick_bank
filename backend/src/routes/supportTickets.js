@@ -321,4 +321,73 @@ router.patch('/admin/tickets/:id', verifyAuth, isAdmin, async (req, res) => {
   }
 });
 
+// PATCH /api/v1/support/admin/messages/:messageId - Edit admin message
+router.patch('/admin/messages/:messageId', verifyAuth, isAdmin, async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { message } = req.body;
+
+    if (!message || !message.trim()) {
+      return res.status(400).json({ error: 'Message content is required' });
+    }
+
+    // Verify message exists and was sent by an admin
+    const existingMessage = await prisma.supportMessage.findUnique({
+      where: { id: messageId }
+    });
+
+    if (!existingMessage) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    if (existingMessage.senderType !== 'ADMIN') {
+      return res.status(403).json({ error: 'Can only edit admin messages' });
+    }
+
+    // Update the message
+    const updatedMessage = await prisma.supportMessage.update({
+      where: { id: messageId },
+      data: { 
+        message: message.trim(),
+        updatedAt: new Date()
+      }
+    });
+
+    res.json({ success: true, message: updatedMessage });
+  } catch (error) {
+    console.error('Edit message error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DELETE /api/v1/support/admin/messages/:messageId - Delete admin message
+router.delete('/admin/messages/:messageId', verifyAuth, isAdmin, async (req, res) => {
+  try {
+    const { messageId } = req.params;
+
+    // Verify message exists and was sent by an admin
+    const existingMessage = await prisma.supportMessage.findUnique({
+      where: { id: messageId }
+    });
+
+    if (!existingMessage) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    if (existingMessage.senderType !== 'ADMIN') {
+      return res.status(403).json({ error: 'Can only delete admin messages' });
+    }
+
+    // Delete the message
+    await prisma.supportMessage.delete({
+      where: { id: messageId }
+    });
+
+    res.json({ success: true, message: 'Message deleted successfully' });
+  } catch (error) {
+    console.error('Delete message error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

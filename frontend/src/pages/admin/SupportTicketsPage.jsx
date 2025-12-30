@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, User, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { MessageSquare, Send, User, Clock, AlertCircle, CheckCircle, XCircle, Edit2, Trash2, Save, X } from 'lucide-react';
 import apiClient from '../../lib/apiClient';
 
 export const SupportTicketsPage = () => {
@@ -9,6 +9,8 @@ export const SupportTicketsPage = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editedMessageText, setEditedMessageText] = useState('');
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -75,6 +77,54 @@ export const SupportTicketsPage = () => {
       }
     } catch (error) {
       console.error('Failed to send message:', error);
+    }
+  };
+
+  const handleEditMessage = (messageId, currentText) => {
+    setEditingMessageId(messageId);
+    setEditedMessageText(currentText);
+  };
+
+  const handleSaveEdit = async (messageId) => {
+    if (!editedMessageText.trim()) return;
+
+    try {
+      const response = await apiClient.patch(`/support-tickets/admin/messages/${messageId}`, {
+        message: editedMessageText
+      });
+
+      if (response.success) {
+        setMessages(prev => prev.map(msg => 
+          msg.id === messageId ? { ...msg, message: editedMessageText, updatedAt: new Date() } : msg
+        ));
+        setEditingMessageId(null);
+        setEditedMessageText('');
+      }
+    } catch (error) {
+      console.error('Failed to edit message:', error);
+      alert('Failed to edit message');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditedMessageText('');
+  };
+
+  const handleDeleteMessage = async (messageId) => {
+    if (!confirm('Are you sure you want to delete this message? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await apiClient.delete(`/support-tickets/admin/messages/${messageId}`);
+
+      if (response.success) {
+        setMessages(prev => prev.filter(msg => msg.id !== messageId));
+      }
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      alert('Failed to delete message');
     }
   };
 
@@ -246,10 +296,63 @@ export const SupportTicketsPage = () => {
                         {msg.senderType === 'ADMIN' ? 'Support Agent' : `${selectedTicket.user.firstName} ${selectedTicket.user.lastName}`}
                       </span>
                     </div>
-                    <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                    <p className="text-xs opacity-70 mt-2">
-                      {new Date(msg.createdAt).toLocaleString()}
-                    </p>
+                    
+                    {editingMessageId === msg.id ? (
+                      <div className="space-y-2">
+                        <textarea
+                          value={editedMessageText}
+                          onChange={(e) => setEditedMessageText(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded text-white text-sm focus:ring-2 focus:ring-indigo-500"
+                          rows={3}
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleSaveEdit(msg.id)}
+                            className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded flex items-center gap-1"
+                          >
+                            <Save className="w-3 h-3" />
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-xs rounded flex items-center gap-1"
+                          >
+                            <X className="w-3 h-3" />
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-xs opacity-70">
+                            {new Date(msg.createdAt).toLocaleString()}
+                            {msg.updatedAt && new Date(msg.updatedAt).getTime() > new Date(msg.createdAt).getTime() && (
+                              <span className="ml-1">(edited)</span>
+                            )}
+                          </p>
+                          {msg.senderType === 'ADMIN' && (
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => handleEditMessage(msg.id, msg.message)}
+                                className="p-1 hover:bg-indigo-700 rounded transition"
+                                title="Edit message"
+                              >
+                                <Edit2 className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteMessage(msg.id)}
+                                className="p-1 hover:bg-red-600 rounded transition"
+                                title="Delete message"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

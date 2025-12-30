@@ -636,6 +636,7 @@ model SupportMessage {
   attachments   Json?    // Array of file paths
   isRead        Boolean  @default(false)
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   ticket        SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   
