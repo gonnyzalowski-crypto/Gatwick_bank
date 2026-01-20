@@ -16,7 +16,7 @@ const top100USBanks = [
   { bankName: 'HSBC Bank USA', routingNumber: '021001088', swiftCode: 'MRMDUS33', bankType: 'COMMERCIAL' },
   { bankName: 'Citizens Bank', routingNumber: '011500120', swiftCode: 'CTZIUS33', bankType: 'COMMERCIAL' },
   { bankName: 'KeyBank', routingNumber: '041001039', swiftCode: 'KEYBUS33', bankType: 'COMMERCIAL' },
-  { bankName: 'Truist Bank', routingNumber: '061000104', swiftCode: 'SNTRUS3A', bankType: 'COMMERCIAL' },
+  { bankName: 'Truist Bank', routingNumber: '061113415', swiftCode: 'SNTRUS3A', bankType: 'COMMERCIAL' },
   { bankName: 'M&T Bank', routingNumber: '022000046', swiftCode: 'MANTUS33', bankType: 'COMMERCIAL' },
   { bankName: 'Regions Bank', routingNumber: '062000019', swiftCode: 'AMNBUS33', bankType: 'COMMERCIAL' },
   { bankName: 'BMO Harris Bank', routingNumber: '071000288', swiftCode: 'HATRUS44', bankType: 'COMMERCIAL' },
